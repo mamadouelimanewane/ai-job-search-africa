@@ -1,0 +1,102 @@
+[
+  {
+    "id": "SN-DKR-001",
+    "title": "Développeur Full-Stack (Node.js / React)",
+    "company": "Baobab FinTech Solutions",
+    "country": "Sénégal",
+    "city": "Dakar",
+    "district": "Almadies / Ngor",
+    "contract": "CDI",
+    "salary_range": "650 000 - 900 000 FCFA net",
+    "deadline": "15 Novembre 2026",
+    "contact_email": "recrutement@baobab-fintech.sn",
+    "contact_whatsapp": "+221771234567",
+    "requirements": [
+      "BAC+4/5 en Informatique ou Génie Logiciel",
+      "Au moins 3 ans d'expérience en React.js, Node.js et PostgreSQL",
+      "Connaissance des API de paiement Mobile Money (Wave, Orange Money)",
+      "Capacité à travailler en méthodologie Agile / Scrum"
+    ],
+    "description": "Nous recrutons un Développeur Full-Stack pour concevoir et faire évoluer notre plateforme de paiements marchands en Afrique de l'Ouest. Vous interviendrez sur l'architecture backend, l'intégration des webhooks Mobile Money et l'interface utilisateur web et mobile."
+  },
+  {
+    "id": "CI-ABJ-002",
+    "title": "Responsable Logistique & Supply Chain",
+    "company": "Ivoire Transit & Distribution",
+    "country": "Côte d'Ivoire",
+    "city": "Abidjan",
+    "district": "Zone Portuaire / Treichville",
+    "contract": "CDI",
+    "salary_range": "750 000 - 1 100 000 FCFA net",
+    "deadline": "20 Novembre 2026",
+    "contact_email": "drh@ivoire-transit.ci",
+    "contact_whatsapp": "+2250708091011",
+    "requirements": [
+      "Master en Logistique, Transport ou Gestion des Opérations",
+      "Expérience minimum de 4 ans dans la distribution de gros ou transit",
+      "Maîtrise d'un ERP logistique (SAP ou Odoo) et gestion des stocks",
+      "Compétences prouvées en optimisation des tournées de livraison sur Abidjan et intérieur du pays"
+    ],
+    "description": "Dans le cadre de l'extension de notre flotte de distribution agroalimentaire à Abidjan et Bouaké, nous cherchons notre Responsable Logistique pour superviser les flux d'entrepôt, l'approvisionnement et le suivi des livraisons J+1."
+  },
+  {
+    "id": "SN-DKR-003",
+    "title": "Comptable Général & Fiscaliste",
+    "company": "Cabinet Audit & Conseils Dakar",
+    "country": "Sénégal",
+    "city": "Dakar",
+    "district": "Dakar Plateau",
+    "contract": "CDI",
+    "salary_range": "500 000 - 700 000 FCFA net",
+    "deadline": "30 Novembre 2026",
+    "contact_email": "contact@audit-conseils.sn",
+    "contact_whatsapp": "+221789876543",
+    "requirements": [
+      "Licence ou Master en Comptabilité, Contrôle & Audit (CCA / DESCOGEF)",
+      "3 ans d'expérience minimum en cabinet comptable ou entreprise commerciale",
+      "Maîtrise rigoureuse du SYSCOHADA révisé et de la fiscalité sénégalaise (VRS, TVA, BRS, IS)",
+      "Pratique des logiciels Sage Saari Comptabilité et Paie"
+    ],
+    "description": "Rattaché(e) au Directeur Associé, vous prenez en charge un portefeuille de PME clientes : tenue comptable, déclarations fiscales mensuelles à la DGID, états financiers de synthèse et préparation des audits."
+  },
+  {
+    "id": "CI-ABJ-004",
+    "title": "Chef de Produit Marketing Digital & E-commerce",
+    "company": "Kankan Digital Commerce",
+    "country": "Côte d'Ivoire",
+    "city": "Abidjan",
+    "district": "Cocody Angré",
+    "contract": "CDD (avec perspective CDI)",
+    "salary_range": "450 000 - 650 000 FCFA net",
+    "deadline": "10 Novembre 2026",
+    "contact_email": "jobs@kankan-digital.ci",
+    "contact_whatsapp": "+2250506070809",
+    "requirements": [
+      "BAC+3/5 en Marketing, Communication Digitale ou Commerce",
+      "Expérience réussie en acquisition digitale (Meta Ads, Google Ads, TikTok)",
+      "Aisance en création de contenu orienté conversion et gestion de campagnes e-commerce",
+      "Connaissance des leviers de vente par WhatsApp Business et influence locale"
+    ],
+    "description": "Kankan Digital recrute son Chef de Produit E-commerce pour piloter la croissance des ventes de notre catalogue retail sur Abidjan. Missions : optimisation des tunnels d'achat, promotions hebdomadaires et fidélisation client."
+  },
+  {
+    "id": "SN-THS-005",
+    "title": "Ingénieur Agronome / Responsable d'Exploitation",
+    "company": "Agro-Industries Niayes",
+    "country": "Sénégal",
+    "city": "Thiès",
+    "district": "Zone des Niayes",
+    "contract": "CDI",
+    "salary_range": "600 000 - 850 000 FCFA net",
+    "deadline": "25 Novembre 2026",
+    "contact_email": "recrutement@agro-niayes.sn",
+    "contact_whatsapp": "+221763334455",
+    "requirements": [
+      "Diplôme d'Ingénieur Agronome (ENSA, ISFAR ou équivalent)",
+      "Solide expérience en maraîchage intensif, irrigation goutte-à-goutte et gestion phytosanitaire",
+      "Capacité de management d'équipes de terrain (ouvriers agricoles, tractoristes)",
+      "Permis de conduire B obligatoire"
+    ],
+    "description": "Supervision complète d'un domaine maraîcher de 40 hectares approvisionnant les marchés de Dakar et Thiès. Vous pilotez les plannings de culture, le calibrage post-récolte et le respect des normes sanitaires."
+  }
+]

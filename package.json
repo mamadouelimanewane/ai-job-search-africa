@@ -1,0 +1,29 @@
+{
+  "name": "ai-job-search-africa",
+  "version": "1.0.0",
+  "description": "Assistant IA de recherche d'emploi et candidature sur-mesure (Sénégal & Côte d'Ivoire), inspiré d'AI Job Search.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "ai",
+    "job-search",
+    "recrutement",
+    "senegal",
+    "cote-divoire",
+    "afrique",
+    "wave",
+    "orange-money",
+    "claude",
+    "gemini"
+  ],
+  "author": "Mama Diop",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}

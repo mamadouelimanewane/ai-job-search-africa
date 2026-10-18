@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Job Search Africa — Copilot de Candidature Ouest-Afrique</title>
+  <meta name="description" content="Assistant IA de recherche d'emploi et candidature sur-mesure pour le Sénégal et la Côte d'Ivoire.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a4c3e">
+</head>
+<body>
+
+  <!-- Barre Supérieure -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <div class="logo-group">
+        <span class="logo-badge">AFRIQUE</span>
+        <span class="logo-title">AI Job Search <small style="font-size:0.7em; opacity:0.85;">(SunuJob / IvoireJob)</small></span>
+      </div>
+      <div class="nav-actions">
+        <div class="credit-pill" id="creditsBtn" onclick="openPaymentModal()">
+          <span>⚡</span>
+          <span id="creditsCount">Chargement...</span>
+        </div>
+        <button class="btn-recharge" onclick="openPaymentModal()">Recharger (Wave / OM)</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenu Principal -->
+  <div class="main-wrapper">
+
+    <!-- Colonne Profil Candidat Maître -->
+    <aside class="profile-card">
+      <div class="profile-avatar" id="profileInitials">IN</div>
+      <h2 class="profile-name" id="profileName">Ibrahima Ndiaye</h2>
+      <p class="profile-title" id="profileTitle">Développeur Full-Stack</p>
+      <span class="profile-badge" id="profileBadge">Profil Vérifié CAMES / UEMOA</span>
+
+      <div class="profile-meta-item">
+        <span>📍</span>
+        <span id="profileLocation">Dakar, Sénégal</span>
+      </div>
+      <div class="profile-meta-item">
+        <span>🎓</span>
+        <span id="profileEducation">Master Génie Logiciel</span>
+      </div>
+      <div class="profile-meta-item">
+        <span>💰</span>
+        <span id="profileSalary">Prétention : 750 000 FCFA</span>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Compétences Clés :</strong>
+        <div class="skills-tags" id="profileSkills"></div>
+      </div>
+
+      <!-- Sélecteur rapide de profil démo -->
+      <div class="sample-selector">
+        <label for="sampleProfileSelect">Changer de profil d'exemple :</label>
+        <select id="sampleProfileSelect" onchange="switchDemoProfile(this.value)">
+          <option value="">Sélectionner un profil...</option>
+        </select>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <button class="btn-secondary" style="width: 100%; font-size: 0.8rem;" onclick="openCustomJobModal()">
+          ➕ Coller une offre WhatsApp / FB
+        </button>
+      </div>
+    </aside>
+
+    <!-- Zone Centrale : Recherche & Offres -->
+    <main class="content-area">
+
+      <!-- Barre de recherche et filtres -->
+      <section class="search-box">
+        <div class="search-input-wrap">
+          <input type="text" id="searchInput" placeholder="Rechercher un poste, mot-clé, entreprise..." oninput="handleSearch()">
+        </div>
+        <div class="filters-wrap">
+          <select id="countryFilter" onchange="handleSearch()">
+            <option value="">Tous les pays</option>
+            <option value="Sénégal">🇸🇳 Sénégal</option>
+            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+          </select>
+          <select id="contractFilter" onchange="handleSearch()">
+            <option value="">Tous contrats</option>
+            <option value="CDI">CDI</option>
+            <option value="CDD">CDD</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Liste des offres -->
+      <section class="jobs-list" id="jobsListContainer">
+        <!-- Rendu dynamique par JavaScript -->
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL : PIPELINE MULTI-AGENTS (Agent 1 + Agent 2 Critique) -->
+  <div class="modal-overlay" id="applicationModal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--primary);" id="modalJobTitle">Candidature Sur-Mesure</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted);" id="modalJobCompany">Entreprise</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('applicationModal')">&times;</button>
+      </div>
+
+      <!-- Visualiseur de la chaîne Multi-Agents -->
+      <div class="agent-pipeline">
+        <div class="agent-box agent-box-writer">
+          <div class="agent-box-title">
+            <span>✍️</span> Agent 1 : Rédacteur Sur-Mesure ATS
+          </div>
+          <p id="agent1Status">Analyse de l'annonce et alignement des compétences clés du candidat.</p>
+        </div>
+        <div class="agent-box agent-box-critic">
+          <div class="agent-box-title">
+            <span>🧐</span> Agent 2 : Recruteur Critique (DRH Ouest-Afrique)
+          </div>
+          <p><strong>Note d'exigence :</strong> <span id="agent2Score">--</span>/10</p>
+          <p style="font-style: italic; margin-top: 4px;" id="agent2Verdict">En cours d'audit...</p>
+        </div>
+      </div>
+
+      <!-- Onglets CV / Lettre / Coach Entretien -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" id="tabCvBtn" onclick="switchTab('cv')">📄 CV Ajusté</button>
+        <button class="tab-btn" id="tabLetterBtn" onclick="switchTab('letter')">✉️ Lettre Sur-Mesure</button>
+        <button class="tab-btn" id="tabCoachBtn" onclick="switchTab('coach')">🎯 Coach Entretien</button>
+      </div>
+
+      <!-- Contenu Onglet CV -->
+      <div id="tabCvContent">
+        <div class="document-preview" id="cvPreview"></div>
+      </div>
+
+      <!-- Contenu Onglet Lettre -->
+      <div id="tabLetterContent" style="display: none;">
+        <div class="document-preview" id="letterPreview"></div>
+      </div>
+
+      <!-- Contenu Onglet Coach Entretien -->
+      <div id="tabCoachContent" style="display: none;">
+        <div id="interviewQuestionsContainer"></div>
+      </div>
+
+      <!-- Actions de Postulation Human-in-the-Loop -->
+      <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+        <button class="btn-secondary" onclick="window.print()">🖨️ Imprimer / PDF</button>
+        <button class="btn-primary btn-whatsapp" id="postulerWhatsAppBtn" onclick="sendWhatsAppApplication()">
+          💬 Postuler par WhatsApp
+        </button>
+        <button class="btn-primary btn-email" id="postulerEmailBtn" onclick="sendEmailApplication()">
+          📧 Postuler par Email
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL : RECHARGE MOBILE MONEY -->
+  <div class="modal-overlay" id="paymentModal" style="display: none;">
+    <div class="modal-content" style="max-width: 550px;">
+      <div class="modal-header">
+        <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">Recharger vos candidatures IA</h2>
+        <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+        Paiement instantané en FCFA (XOF) sans carte bancaire internationale.
+      </p>
+
+      <!-- Grille des Packs -->
+      <div class="packs-grid" id="packsContainer"></div>
+
+      <!-- Choix de la méthode -->
+      <strong style="font-size: 0.85rem; color: var(--text-muted);">Moyen de paiement :</strong>
+      <div class="payment-methods">
+        <button class="method-btn selected" id="methodWave" onclick="selectPaymentMethod('wave')">
+          🌊 Wave
+        </button>
+        <button class="method-btn" id="methodOM" onclick="selectPaymentMethod('orange_money')">
+          🟠 Orange Money
+        </button>
+        <button class="method-btn" id="methodMTN" onclick="selectPaymentMethod('mtn_momo')">
+          🟡 MTN MoMo
+        </button>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 4px;">Numéro de téléphone :</label>
+        <input type="tel" id="paymentPhone" placeholder="+221 77 000 00 00 ou +225 07 00 00 00">
+      </div>
+
+      <div style="margin-top: 18px;">
+        <button class="btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="executePayment()">
+          Confirmer le paiement Mobile Money
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL : AJOUT D'UNE OFFRE LIBRE (WhatsApp / FB) -->
+  <div class="modal-overlay" id="customJobModal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">Coller une offre libre</h2>
+        <button class="modal-close" onclick="closeModal('customJobModal')">&times;</button>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+        Vous avez vu une offre sur WhatsApp, LinkedIn ou Facebook ? Collez-la ici pour que l'IA adapte votre CV.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <input type="text" id="customJobTitle" placeholder="Intitulé du poste (ex: Comptable, Développeur...)">
+        <input type="text" id="customJobCompany" placeholder="Entreprise (ou Confidentiel)">
+        <div style="display: flex; gap: 10px;">
+          <select id="customJobCountry">
+            <option value="Sénégal">🇸🇳 Sénégal</option>
+            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+          </select>
+          <input type="text" id="customJobCity" placeholder="Ville (ex: Dakar, Abidjan)">
+        </div>
+        <textarea id="customJobDesc" rows="6" placeholder="Collez le texte brut de l'annonce ici..."></textarea>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="customJobEmail" placeholder="Email recruteur (optionnel)">
+          <input type="text" id="customJobWhatsapp" placeholder="WhatsApp recruteur (optionnel)">
+        </div>
+        <button class="btn-primary" onclick="submitCustomJob()">Enregistrer et Analyser avec l'IA</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

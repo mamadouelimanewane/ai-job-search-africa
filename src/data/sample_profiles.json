@@ -1,0 +1,67 @@
+[
+  {
+    "id": "profile-dev-dakar",
+    "name": "Ibrahima Ndiaye",
+    "title": "Développeur Web & Mobile Full-Stack",
+    "email": "ibrahima.ndiaye.dev@gmail.com",
+    "phone": "+221 77 654 32 10",
+    "city": "Dakar",
+    "district": "Mermoz / Sacré-Cœur",
+    "country": "Sénégal",
+    "education": "Master en Génie Logiciel (ESP Dakar / UCAD)",
+    "years_of_experience": 4,
+    "skills": ["JavaScript", "TypeScript", "React.js", "Node.js", "Express", "PostgreSQL", "Docker", "Git", "API Wave / Orange Money", "Agile Scrum"],
+    "languages": ["Français (Courant)", "Anglais (Professionnel)", "Wolof (Langue maternelle)"],
+    "salary_expectation": "750 000 FCFA net / mois",
+    "summary": "Développeur Full-Stack passionné avec 4 années d'expérience dans la conception d'applications web et l'intégration de solutions de paiement Mobile Money au Sénégal. Autonome, rigoureux et habitué aux environnements agiles.",
+    "experiences": [
+      {
+        "role": "Développeur Web & API",
+        "company": "Sahel Digital Studio (Dakar)",
+        "period": "2023 - Présent",
+        "achievements": [
+          "Développement d'une plateforme e-commerce générant plus de 15 000 transactions mensuelles",
+          "Intégration complète des passerelles de paiement Wave et Orange Money (webhooks et rapprochement bancaire)",
+          "Optimisation des temps de réponse de l'API de 420 ms à 95 ms grâce à Redis et indexation PostgreSQL"
+        ]
+      },
+      {
+        "role": "Développeur Frontend Junior",
+        "company": "Teranga Tech Solutions",
+        "period": "2021 - 2023",
+        "achievements": [
+          "Refonte de l'espace client en React.js et Tailwind CSS avec taux de conversion augmenté de 22%",
+          "Mise en place de tests automatisés (Jest, Cypress) réduisant les bugs de production de 35%"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "profile-logistics-abidjan",
+    "name": "Aïcha Kouamé",
+    "title": "Coordinatrice Logistique & Transport",
+    "email": "aicha.kouame.supply@gmail.com",
+    "phone": "+225 07 45 67 89 01",
+    "city": "Abidjan",
+    "district": "Cocody Deux-Plateaux",
+    "country": "Côte d'Ivoire",
+    "education": "Master en Management Logistique & Transport (INP-HB Yamoussoukro)",
+    "years_of_experience": 5,
+    "skills": ["Gestion des stocks", "ERP Odoo / SAP", "Optimisation des tournées", "Management d'entrepôt", "Négociation transporteurs", "Douanes & Transit OHADA"],
+    "languages": ["Français (Bilingue)", "Anglais (Intermédiaire)"],
+    "salary_expectation": "850 000 FCFA net / mois",
+    "summary": "Professionnelle de la chaîne logistique avec 5 ans de pratique dans la distribution de produits de grande consommation à Abidjan et à l'intérieur du pays. Expertise prouvée dans la réduction des coûts de transport et le respect des délais J+1.",
+    "experiences": [
+      {
+        "role": "Superviseur des Flux & Approvisionnements",
+        "company": "Lagune Distribution SARL (Abidjan)",
+        "period": "2022 - Présent",
+        "achievements": [
+          "Supervision d'une flotte de 18 camions et gestion d'un entrepôt central de 2 500 m²",
+          "Réduction des ruptures de stock de 14% à moins de 2% en 18 mois grâce à la mise en place d'un stock de sécurité dynamique",
+          "Diminution de 18% des coûts de carburant par la refonte du plan de tournées sur le Grand Abidjan"
+        ]
+      }
+    ]
+  }
+]
