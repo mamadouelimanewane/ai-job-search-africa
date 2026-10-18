@@ -3,240 +3,523 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Job Search Africa — Copilot de Candidature Ouest-Afrique</title>
-  <meta name="description" content="Assistant IA de recherche d'emploi et candidature sur-mesure pour le Sénégal et la Côte d'Ivoire.">
+  <title>SunuJob AI — L'Assistant IA de Candidature & Recrutement en Afrique de l'Ouest</title>
+  <meta name="description" content="Le premier assistant IA de candidature sur-mesure pour le Sénégal et la Côte d'Ivoire. CV ciblés, lettres révisées par un agent DRH critique, postulation WhatsApp et paiements Wave / Orange Money.">
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0a4c3e">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Barre Supérieure -->
-  <header class="top-nav">
+  <!-- ==================== BANDEAU D'ANNONCE HAUT ==================== -->
+  <div class="top-announcement">
+    <span>🇸🇳 <strong>Sénégal</strong> & 🇨🇮 <strong>Côte d'Ivoire</strong> : Remplissez votre profil une seule fois, l'IA adapte votre CV et prépare vos entretiens.</span>
+    <span class="announcement-pill">Paiement Wave & OM disponible</span>
+  </div>
+
+  <!-- ==================== NAVIGATION PRINCIPALE ==================== -->
+  <header class="navbar">
     <div class="nav-container">
-      <div class="logo-group">
-        <span class="logo-badge">AFRIQUE</span>
-        <span class="logo-title">AI Job Search <small style="font-size:0.7em; opacity:0.85;">(SunuJob / IvoireJob)</small></span>
-      </div>
-      <div class="nav-actions">
-        <div class="credit-pill" id="creditsBtn" onclick="openPaymentModal()">
-          <span>⚡</span>
-          <span id="creditsCount">Chargement...</span>
+      <a href="#" class="brand-logo" onclick="switchNavView('feed')">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <span class="brand-name">SunuJob <span class="highlight">AI</span></span>
+          <span class="brand-sub">Afrique de l'Ouest</span>
         </div>
-        <button class="btn-recharge" onclick="openPaymentModal()">Recharger (Wave / OM)</button>
+      </a>
+
+      <!-- Menu Navigation -->
+      <nav class="nav-menu">
+        <button class="nav-link active" id="navFeedBtn" onclick="switchNavView('feed')">
+          <span>💼</span> Offres & Matching
+        </button>
+        <button class="nav-link" id="navProfileBtn" onclick="switchNavView('profile')">
+          <span>👤</span> Mon Profil Maître
+        </button>
+        <button class="nav-link" id="navCustomJobBtn" onclick="switchNavView('custom')">
+          <span>➕</span> Coller une Offre
+        </button>
+        <button class="nav-link" id="navPricingBtn" onclick="switchNavView('pricing')">
+          <span>💳</span> Tarifs & Wave
+        </button>
+      </nav>
+
+      <!-- Actions Rapides -->
+      <div class="nav-right">
+        <div class="credit-counter" onclick="openPaymentModal()" title="Cliquer pour recharger">
+          <span class="credit-icon">⚡</span>
+          <span id="navCreditsCount">Chargement...</span>
+        </div>
+        <button class="btn-cta-nav" onclick="openPaymentModal()">
+          Recharger
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- Contenu Principal -->
-  <div class="main-wrapper">
-
-    <!-- Colonne Profil Candidat Maître -->
-    <aside class="profile-card">
-      <div class="profile-avatar" id="profileInitials">IN</div>
-      <h2 class="profile-name" id="profileName">Ibrahima Ndiaye</h2>
-      <p class="profile-title" id="profileTitle">Développeur Full-Stack</p>
-      <span class="profile-badge" id="profileBadge">Profil Vérifié CAMES / UEMOA</span>
-
-      <div class="profile-meta-item">
-        <span>📍</span>
-        <span id="profileLocation">Dakar, Sénégal</span>
+  <!-- ==================== HERO SECTION ACCUEIL ==================== -->
+  <section class="hero-section" id="heroBanner">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span>🚀 Inspiré du projet mondial AI Job Search (+51 000 ⭐)</span>
       </div>
-      <div class="profile-meta-item">
-        <span>🎓</span>
-        <span id="profileEducation">Master Génie Logiciel</span>
-      </div>
-      <div class="profile-meta-item">
-        <span>💰</span>
-        <span id="profileSalary">Prétention : 750 000 FCFA</span>
-      </div>
+      <h1 class="hero-title">
+        Décrochez votre prochain poste à <span class="text-accent">Dakar</span> & <span class="text-accent-secondary">Abidjan</span> avec l'IA.
+      </h1>
+      <p class="hero-subtitle">
+        Fini de réécrire vos CVs et lettres à la main. Renseignez votre profil une fois : notre système à <strong>Double Agent IA</strong> analyse l'offre, rédige un dossier sur-mesure et le fait auditer par un DRH virtuel exigeant avant expédition en 1 clic sur WhatsApp ou Email.
+      </p>
 
-      <div style="margin-top: 14px;">
-        <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Compétences Clés :</strong>
-        <div class="skills-tags" id="profileSkills"></div>
-      </div>
-
-      <!-- Sélecteur rapide de profil démo -->
-      <div class="sample-selector">
-        <label for="sampleProfileSelect">Changer de profil d'exemple :</label>
-        <select id="sampleProfileSelect" onchange="switchDemoProfile(this.value)">
-          <option value="">Sélectionner un profil...</option>
-        </select>
-      </div>
-
-      <div style="margin-top: 14px;">
-        <button class="btn-secondary" style="width: 100%; font-size: 0.8rem;" onclick="openCustomJobModal()">
-          ➕ Coller une offre WhatsApp / FB
-        </button>
-      </div>
-    </aside>
-
-    <!-- Zone Centrale : Recherche & Offres -->
-    <main class="content-area">
-
-      <!-- Barre de recherche et filtres -->
-      <section class="search-box">
-        <div class="search-input-wrap">
-          <input type="text" id="searchInput" placeholder="Rechercher un poste, mot-clé, entreprise..." oninput="handleSearch()">
+      <!-- Métriques de succès (inspirées de Mads Lorentzen) -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-val">69</div>
+          <div class="metric-label">Candidatures ciblées</div>
         </div>
-        <div class="filters-wrap">
-          <select id="countryFilter" onchange="handleSearch()">
-            <option value="">Tous les pays</option>
-            <option value="Sénégal">🇸🇳 Sénégal</option>
-            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-          </select>
-          <select id="contractFilter" onchange="handleSearch()">
-            <option value="">Tous contrats</option>
-            <option value="CDI">CDI</option>
-            <option value="CDD">CDD</option>
-          </select>
+        <div class="metric-card">
+          <div class="metric-val text-success">20</div>
+          <div class="metric-label">Entretiens obtenus</div>
         </div>
-      </section>
+        <div class="metric-card">
+          <div class="metric-val text-accent">0</div>
+          <div class="metric-label">Spam à l'aveugle</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val text-blue">1-Clic</div>
+          <div class="metric-label">Envoi WhatsApp / Email</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      <!-- Liste des offres -->
-      <section class="jobs-list" id="jobsListContainer">
-        <!-- Rendu dynamique par JavaScript -->
-      </section>
+  <!-- ==================== APPLICATION PRINCIPALE (ONGLETS DYNAMIQUES) ==================== -->
+  <div class="main-container">
 
-    </main>
+    <!-- ==================== VUE 1 : FEED D'OFFRES & MATCHING (PAR DÉFAUT) ==================== -->
+    <div id="viewFeed" class="app-view active">
+      
+      <div class="feed-layout">
+
+        <!-- Barre Latérale Résumé Profil -->
+        <aside class="sidebar-summary">
+          <div class="summary-card">
+            <div class="summary-header">
+              <div class="summary-avatar" id="sideAvatar">IN</div>
+              <div>
+                <h3 class="summary-name" id="sideName">Ibrahima Ndiaye</h3>
+                <p class="summary-title" id="sideTitle">Développeur Full-Stack</p>
+              </div>
+            </div>
+            
+            <div class="summary-tags">
+              <span class="badge-mini" id="sideCity">📍 Dakar, Sénégal</span>
+              <span class="badge-mini" id="sideDegree">🎓 Master ESP / UCAD</span>
+              <span class="badge-mini" id="sideSalary">💰 750 000 FCFA net</span>
+            </div>
+
+            <div class="summary-section">
+              <div class="summary-section-title">Compétences actives :</div>
+              <div class="skills-wrap" id="sideSkillsList"></div>
+            </div>
+
+            <div class="summary-actions">
+              <button class="btn-outline-sm" onclick="switchNavView('profile')">
+                ✏️ Modifier mon profil
+              </button>
+              <div class="demo-switch-box">
+                <label for="sideSampleSelect">Profil de démo :</label>
+                <select id="sideSampleSelect" onchange="switchDemoProfile(this.value)">
+                  <option value="">Changer de profil...</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Carte Recommandation / WhatsApp -->
+          <div class="whatsapp-tip-card">
+            <h4>💡 Le saviez-vous ?</h4>
+            <p>En Afrique de l'Ouest, plus de 60 % des premiers contacts de recrutement s'effectuent via WhatsApp. Notre outil génère un pitch direct calibré pour les DRH.</p>
+          </div>
+        </aside>
+
+        <!-- Colonne Principale des Offres -->
+        <div class="feed-main">
+          
+          <!-- Filtres et recherche -->
+          <div class="search-filter-card">
+            <div class="search-row">
+              <div class="search-input-field">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Intitulé de poste, compétences (ex: React, Comptabilité, Odoo)..." oninput="handleSearch()">
+              </div>
+              <div class="filter-controls">
+                <select id="countryFilter" onchange="handleSearch()">
+                  <option value="">Tous les pays</option>
+                  <option value="Sénégal">🇸🇳 Sénégal</option>
+                  <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+                </select>
+                <select id="contractFilter" onchange="handleSearch()">
+                  <option value="">Tous contrats</option>
+                  <option value="CDI">CDI</option>
+                  <option value="CDD">CDD</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="quick-chips">
+              <span class="chip-label">Suggestions rapides :</span>
+              <button class="chip" onclick="quickFilter('Dakar')">Dakar</button>
+              <button class="chip" onclick="quickFilter('Abidjan')">Abidjan</button>
+              <button class="chip" onclick="quickFilter('FinTech')">FinTech & Mobile Money</button>
+              <button class="chip" onclick="quickFilter('Logistique')">Logistique</button>
+              <button class="chip" onclick="quickFilter('Comptable')">Comptabilité</button>
+            </div>
+          </div>
+
+          <!-- Liste des opportunités d'emploi -->
+          <div class="jobs-grid" id="jobsGrid">
+            <!-- Injecté par JavaScript -->
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ==================== VUE 2 : ÉDITEUR DU PROFIL MAÎTRE ==================== -->
+    <div id="viewProfile" class="app-view" style="display: none;">
+      <div class="page-card">
+        <div class="page-card-header">
+          <div>
+            <h2 class="section-heading">Mon Profil Candidat Maître</h2>
+            <p class="section-desc">Vous ne remplissez ces informations qu'une seule fois. L'IA les exploitera pour adapter chaque candidature au millimètre.</p>
+          </div>
+          <button class="btn-primary" onclick="saveProfileChanges()">
+            💾 Enregistrer le profil
+          </button>
+        </div>
+
+        <div class="profile-form-grid">
+          <div class="form-group">
+            <label>Nom complet :</label>
+            <input type="text" id="formName" value="Ibrahima Ndiaye">
+          </div>
+          <div class="form-group">
+            <label>Titre professionnel souhaité :</label>
+            <input type="text" id="formTitle" value="Développeur Web & Mobile Full-Stack">
+          </div>
+          <div class="form-group">
+            <label>Numéro de téléphone (avec indicatif WhatsApp) :</label>
+            <input type="text" id="formPhone" value="+221 77 654 32 10">
+          </div>
+          <div class="form-group">
+            <label>Adresse email :</label>
+            <input type="email" id="formEmail" value="ibrahima.ndiaye.dev@gmail.com">
+          </div>
+          <div class="form-group">
+            <label>Pays de résidence :</label>
+            <select id="formCountry">
+              <option value="Sénégal" selected>Sénégal</option>
+              <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Ville & Quartier :</label>
+            <input type="text" id="formCity" value="Dakar, Mermoz / Sacré-Cœur">
+          </div>
+          <div class="form-group">
+            <label>Niveau de diplôme le plus élevé (CAMES / National) :</label>
+            <input type="text" id="formEducation" value="Master en Génie Logiciel (ESP Dakar / UCAD)">
+          </div>
+          <div class="form-group">
+            <label>Années d'expérience professionnelle :</label>
+            <input type="number" id="formYearsExp" value="4">
+          </div>
+          <div class="form-group">
+            <label>Prétentions salariales mensuelles nettes en FCFA :</label>
+            <input type="text" id="formSalary" value="750 000 FCFA net / mois">
+          </div>
+          <div class="form-group">
+            <label>Langues maîtrisées :</label>
+            <input type="text" id="formLanguages" value="Français (Courant), Anglais (Professionnel), Wolof">
+          </div>
+          <div class="form-group full-width">
+            <label>Compétences clés (séparées par des virgules) :</label>
+            <textarea id="formSkills" rows="3">JavaScript, TypeScript, React.js, Node.js, Express, PostgreSQL, Docker, Git, API Wave, API Orange Money, Agile Scrum</textarea>
+          </div>
+          <div class="form-group full-width">
+            <label>Pitch d'accroche / Résumé de carrière :</label>
+            <textarea id="formSummary" rows="4">Développeur Full-Stack passionné avec 4 années d'expérience dans la conception d'applications web et l'intégration de solutions de paiement Mobile Money au Sénégal. Autonome, rigoureux et orienté résultats.</textarea>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; text-align: right;">
+          <button class="btn-primary" onclick="saveProfileChanges()">
+            💾 Enregistrer et mettre à jour les candidatures
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== VUE 3 : AJOUT D'UNE OFFRE LIBRE ==================== -->
+    <div id="viewCustom" class="app-view" style="display: none;">
+      <div class="page-card max-width-700">
+        <h2 class="section-heading">Coller une offre libre (WhatsApp, LinkedIn, Facebook)</h2>
+        <p class="section-desc">Vous avez repéré une offre dans un groupe de discussion ou sur les réseaux sociaux ? Collez-la ici et notre double agent IA rédigera un dossier percutant adapté.</p>
+
+        <div class="custom-job-form">
+          <div class="form-group">
+            <label>Intitulé du poste : *</label>
+            <input type="text" id="cJobTitle" placeholder="Ex: Comptable Junior, Responsable Commercial...">
+          </div>
+          <div class="form-group">
+            <label>Nom de l'entreprise ou cabinet :</label>
+            <input type="text" id="cJobCompany" placeholder="Ex: Groupe Commercial Dakar, ou Confidentiel">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Pays :</label>
+              <select id="cJobCountry">
+                <option value="Sénégal" selected>🇸🇳 Sénégal</option>
+                <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Ville / Quartier :</label>
+              <input type="text" id="cJobCity" placeholder="Ex: Dakar Plateau ou Abidjan Cocody">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Texte complet de l'offre d'emploi : *</label>
+            <textarea id="cJobDescription" rows="8" placeholder="Collez ici le descriptif, les missions, les exigences et le profil recherché..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email du recruteur (si mentionné) :</label>
+              <input type="email" id="cJobEmail" placeholder="recrutement@domaine.com">
+            </div>
+            <div class="form-group">
+              <label>Numéro WhatsApp du recruteur (si mentionné) :</label>
+              <input type="tel" id="cJobWhatsapp" placeholder="+221 77... ou +225 07...">
+            </div>
+          </div>
+
+          <button class="btn-primary btn-lg" onclick="handleCustomJobSubmit()">
+            🚀 Enregistrer & Générer la Candidature Sur-Mesure
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== VUE 4 : TARIFS & PAIEMENTS WAVE / ORANGE MONEY ==================== -->
+    <div id="viewPricing" class="app-view" style="display: none;">
+      <div class="page-card text-center">
+        <h2 class="section-heading">Tarifs Clairs & Paiement en FCFA (XOF)</h2>
+        <p class="section-desc">Pas besoin de carte bancaire internationale en dollars. Rechargez instantanément avec vos comptes Mobile Money locaux.</p>
+
+        <div class="pricing-cards-container" id="pricingCards">
+          <!-- Injecté par JavaScript -->
+        </div>
+
+        <div class="payment-guarantee-banner">
+          <div class="guarantee-item">
+            <span class="icon">🌊</span>
+            <strong>Wave</strong>
+            <p>Validation par QR Code ou push mobile en 3 secondes.</p>
+          </div>
+          <div class="guarantee-item">
+            <span class="icon">🟠</span>
+            <strong>Orange Money</strong>
+            <p>Disponible au Sénégal et en Côte d'Ivoire.</p>
+          </div>
+          <div class="guarantee-item">
+            <span class="icon">🟡</span>
+            <strong>MTN MoMo</strong>
+            <p>Idéal pour la Côte d'Ivoire.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- MODAL : PIPELINE MULTI-AGENTS (Agent 1 + Agent 2 Critique) -->
-  <div class="modal-overlay" id="applicationModal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
+  <!-- ==================== MODAL CANDIDATURE MULTI-AGENTS (LE STUDIO) ==================== -->
+  <div class="modal-backdrop" id="studioModal" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-bar">
         <div>
-          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--primary);" id="modalJobTitle">Candidature Sur-Mesure</h2>
-          <p style="font-size: 0.85rem; color: var(--text-muted);" id="modalJobCompany">Entreprise</p>
+          <span class="modal-tag">Studio de Candidature IA</span>
+          <h2 class="modal-job-heading" id="studioJobHeading">Développeur Full-Stack</h2>
+          <p class="modal-subheading" id="studioJobSub">Baobab FinTech Solutions — Dakar, Sénégal</p>
         </div>
-        <button class="modal-close" onclick="closeModal('applicationModal')">&times;</button>
+        <button class="btn-modal-close" onclick="closeStudioModal()">&times;</button>
       </div>
 
-      <!-- Visualiseur de la chaîne Multi-Agents -->
-      <div class="agent-pipeline">
-        <div class="agent-box agent-box-writer">
-          <div class="agent-box-title">
-            <span>✍️</span> Agent 1 : Rédacteur Sur-Mesure ATS
+      <!-- VISUALISEUR DU SYSTÈME À DOUBLE AGENT -->
+      <div class="dual-agent-monitor">
+        <div class="agent-card agent-writer">
+          <div class="agent-header">
+            <div class="agent-icon-wrap">✍️</div>
+            <div>
+              <div class="agent-name">Agent 1 : Rédacteur ATS</div>
+              <div class="agent-role">Adaptation du CV & Lettre à l'offre</div>
+            </div>
           </div>
-          <p id="agent1Status">Analyse de l'annonce et alignement des compétences clés du candidat.</p>
+          <p class="agent-status-text" id="mAgent1Text">
+            Analyse des mots-clés, valorisation des réalisations probantes et élimination des éléments hors-sujet.
+          </p>
         </div>
-        <div class="agent-box agent-box-critic">
-          <div class="agent-box-title">
-            <span>🧐</span> Agent 2 : Recruteur Critique (DRH Ouest-Afrique)
+
+        <div class="agent-card agent-critic">
+          <div class="agent-header">
+            <div class="agent-icon-wrap">🧐</div>
+            <div>
+              <div class="agent-name">Agent 2 : Recruteur Critique DRH</div>
+              <div class="agent-role">Audit rigoureux Ouest-Afrique</div>
+            </div>
+            <div class="critic-score-pill" id="mCriticScorePill">
+              <span id="mCriticScore">9.2</span>/10
+            </div>
           </div>
-          <p><strong>Note d'exigence :</strong> <span id="agent2Score">--</span>/10</p>
-          <p style="font-style: italic; margin-top: 4px;" id="agent2Verdict">En cours d'audit...</p>
+          <p class="agent-status-text" id="mAgent2Text">
+            <em>« Candidature solide : les réalisations chiffrées sont en place, le statut local est validé. »</em>
+          </p>
         </div>
       </div>
 
-      <!-- Onglets CV / Lettre / Coach Entretien -->
-      <div class="tabs-nav">
-        <button class="tab-btn active" id="tabCvBtn" onclick="switchTab('cv')">📄 CV Ajusté</button>
-        <button class="tab-btn" id="tabLetterBtn" onclick="switchTab('letter')">✉️ Lettre Sur-Mesure</button>
-        <button class="tab-btn" id="tabCoachBtn" onclick="switchTab('coach')">🎯 Coach Entretien</button>
+      <!-- Onglets Studio -->
+      <div class="studio-tabs">
+        <button class="studio-tab-btn active" id="tabBtnCv" onclick="setStudioTab('cv')">
+          📄 CV Optimisé
+        </button>
+        <button class="studio-tab-btn" id="tabBtnLetter" onclick="setStudioTab('letter')">
+          ✉️ Lettre de Motivation
+        </button>
+        <button class="studio-tab-btn" id="tabBtnCoach" onclick="setStudioTab('coach')">
+          🎯 Coach d'Entretien
+        </button>
       </div>
 
-      <!-- Contenu Onglet CV -->
-      <div id="tabCvContent">
-        <div class="document-preview" id="cvPreview"></div>
+      <!-- Contenu Onglet 1 : CV -->
+      <div id="studioTabCv" class="studio-tab-pane active">
+        <div class="cv-render-paper" id="cvRenderPaper"></div>
       </div>
 
-      <!-- Contenu Onglet Lettre -->
-      <div id="tabLetterContent" style="display: none;">
-        <div class="document-preview" id="letterPreview"></div>
+      <!-- Contenu Onglet 2 : Lettre -->
+      <div id="studioTabLetter" class="studio-tab-pane" style="display: none;">
+        <div class="letter-render-paper" id="letterRenderPaper"></div>
       </div>
 
-      <!-- Contenu Onglet Coach Entretien -->
-      <div id="tabCoachContent" style="display: none;">
-        <div id="interviewQuestionsContainer"></div>
+      <!-- Contenu Onglet 3 : Coach Entretien -->
+      <div id="studioTabCoach" class="studio-tab-pane" style="display: none;">
+        <div class="coach-questions-list" id="coachQuestionsList"></div>
       </div>
 
-      <!-- Actions de Postulation Human-in-the-Loop -->
-      <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-        <button class="btn-secondary" onclick="window.print()">🖨️ Imprimer / PDF</button>
-        <button class="btn-primary btn-whatsapp" id="postulerWhatsAppBtn" onclick="sendWhatsAppApplication()">
+      <!-- Barre d'Action Postulation Human-in-the-Loop -->
+      <div class="studio-footer-actions">
+        <button class="btn-action-neutral" onclick="copyDocumentText()">
+          📋 Copier le texte
+        </button>
+        <button class="btn-action-neutral" onclick="window.print()">
+          🖨️ Télécharger PDF
+        </button>
+        <button class="btn-action-whatsapp" id="btnApplyWhatsapp" onclick="triggerWhatsAppApply()">
           💬 Postuler par WhatsApp
         </button>
-        <button class="btn-primary btn-email" id="postulerEmailBtn" onclick="sendEmailApplication()">
+        <button class="btn-action-email" id="btnApplyEmail" onclick="triggerEmailApply()">
           📧 Postuler par Email
         </button>
       </div>
+
     </div>
   </div>
 
-  <!-- MODAL : RECHARGE MOBILE MONEY -->
-  <div class="modal-overlay" id="paymentModal" style="display: none;">
-    <div class="modal-content" style="max-width: 550px;">
-      <div class="modal-header">
-        <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">Recharger vos candidatures IA</h2>
-        <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+  <!-- ==================== MODAL PAIEMENT MOBILE MONEY ==================== -->
+  <div class="modal-backdrop" id="payModal" style="display: none;">
+    <div class="modal-window max-width-500">
+      <div class="modal-bar">
+        <div>
+          <span class="modal-tag">Paiement Sécurisé en FCFA</span>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">Recharger vos candidatures</h3>
+        </div>
+        <button class="btn-modal-close" onclick="closePayModal()">&times;</button>
       </div>
 
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
-        Paiement instantané en FCFA (XOF) sans carte bancaire internationale.
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">
+        Choisissez votre pack et réglez instantanément par Mobile Money :
       </p>
 
-      <!-- Grille des Packs -->
-      <div class="packs-grid" id="packsContainer"></div>
+      <div class="mini-packs-list" id="miniPacksList"></div>
 
-      <!-- Choix de la méthode -->
-      <strong style="font-size: 0.85rem; color: var(--text-muted);">Moyen de paiement :</strong>
-      <div class="payment-methods">
-        <button class="method-btn selected" id="methodWave" onclick="selectPaymentMethod('wave')">
-          🌊 Wave
-        </button>
-        <button class="method-btn" id="methodOM" onclick="selectPaymentMethod('orange_money')">
-          🟠 Orange Money
-        </button>
-        <button class="method-btn" id="methodMTN" onclick="selectPaymentMethod('mtn_momo')">
-          🟡 MTN MoMo
-        </button>
+      <div style="margin: 16px 0;">
+        <label style="font-size:0.85rem; font-weight:700; color:var(--text-main); display:block; margin-bottom:6px;">
+          Opérateur de paiement :
+        </label>
+        <div class="operator-selector">
+          <button class="op-btn active" id="opWave" onclick="setOperator('wave')">
+            🌊 Wave
+          </button>
+          <button class="op-btn" id="opOM" onclick="setOperator('orange_money')">
+            🟠 Orange Money
+          </button>
+          <button class="op-btn" id="opMTN" onclick="setOperator('mtn_momo')">
+            🟡 MTN MoMo
+          </button>
+        </div>
       </div>
 
-      <div style="margin-top: 12px;">
-        <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 4px;">Numéro de téléphone :</label>
-        <input type="tel" id="paymentPhone" placeholder="+221 77 000 00 00 ou +225 07 00 00 00">
+      <div style="margin-bottom: 20px;">
+        <label style="font-size:0.85rem; font-weight:700; color:var(--text-main); display:block; margin-bottom:6px;">
+          Numéro de téléphone :
+        </label>
+        <input type="tel" id="payPhoneNumber" placeholder="+221 77 123 45 67 ou +225 07 12 34 56">
       </div>
 
-      <div style="margin-top: 18px;">
-        <button class="btn-primary" style="width: 100%; justify-content: center; padding: 12px;" onclick="executePayment()">
-          Confirmer le paiement Mobile Money
-        </button>
-      </div>
+      <button class="btn-primary btn-lg" style="width: 100%;" onclick="confirmMobileMoneyPayment()">
+        Confirmer le paiement Mobile Money
+      </button>
     </div>
   </div>
 
-  <!-- MODAL : AJOUT D'UNE OFFRE LIBRE (WhatsApp / FB) -->
-  <div class="modal-overlay" id="customJobModal" style="display: none;">
-    <div class="modal-content" style="max-width: 600px;">
-      <div class="modal-header">
-        <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">Coller une offre libre</h2>
-        <button class="modal-close" onclick="closeModal('customJobModal')">&times;</button>
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <div class="brand-logo footer-logo">
+          <div class="brand-icon">⚡</div>
+          <div class="brand-text">
+            <span class="brand-name">SunuJob <span class="highlight">AI</span></span>
+          </div>
+        </div>
+        <p class="footer-text">
+          L'intelligence artificielle au service de l'insertion et de la progression professionnelle au Sénégal, en Côte d'Ivoire et dans toute la zone UEMOA.
+        </p>
       </div>
-
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
-        Vous avez vu une offre sur WhatsApp, LinkedIn ou Facebook ? Collez-la ici pour que l'IA adapte votre CV.
-      </p>
-
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <input type="text" id="customJobTitle" placeholder="Intitulé du poste (ex: Comptable, Développeur...)">
-        <input type="text" id="customJobCompany" placeholder="Entreprise (ou Confidentiel)">
-        <div style="display: flex; gap: 10px;">
-          <select id="customJobCountry">
-            <option value="Sénégal">🇸🇳 Sénégal</option>
-            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-          </select>
-          <input type="text" id="customJobCity" placeholder="Ville (ex: Dakar, Abidjan)">
-        </div>
-        <textarea id="customJobDesc" rows="6" placeholder="Collez le texte brut de l'annonce ici..."></textarea>
-        <div style="display: flex; gap: 10px;">
-          <input type="text" id="customJobEmail" placeholder="Email recruteur (optionnel)">
-          <input type="text" id="customJobWhatsapp" placeholder="WhatsApp recruteur (optionnel)">
-        </div>
-        <button class="btn-primary" onclick="submitCustomJob()">Enregistrer et Analyser avec l'IA</button>
+      <div class="footer-col">
+        <h4>Zones Couvertes</h4>
+        <ul>
+          <li>🇸🇳 Dakar, Thiès, Saint-Louis</li>
+          <li>🇨🇮 Abidjan, Bouaké, San Pedro</li>
+          <li>Zone UEMOA / OHADA</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Paiements Inclusifs</h4>
+        <ul>
+          <li>Wave Sénégal & Côte d'Ivoire</li>
+          <li>Orange Money SN & CI</li>
+          <li>MTN MoMo & Moov Money</li>
+        </ul>
       </div>
     </div>
-  </div>
+    <div class="footer-bottom">
+      <p>© 2026 SunuJob AI (ai-job-search-africa) — Développé pour les talents d'Afrique de l'Ouest. Inspiré d'AI Job Search.</p>
+    </div>
+  </footer>
 
   <script src="app.js"></script>
 </body>

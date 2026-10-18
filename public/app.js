@@ -1,72 +1,164 @@
-// Application Client pour AI Job Search Africa
+/**
+ * Application Client — SunuJob AI (ai-job-search-africa)
+ * Interface complète avec gestion des vues, multi-agents, matching et Mobile Money
+ */
 
-let currentProfile = null;
-let currentJobs = [];
-let currentSelectedJob = null;
-let currentGeneratedData = null;
-let selectedPaymentPackId = 'pack_starter';
-let selectedPaymentMethod = 'wave';
+let state = {
+  currentProfile: null,
+  sampleProfiles: [],
+  jobs: [],
+  credits: null,
+  packs: [],
+  selectedJob: null,
+  currentGeneration: null,
+  activeStudioTab: 'cv',
+  selectedPackId: 'pack_starter',
+  selectedOperator: 'wave'
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadProfile();
-  await loadSampleProfilesList();
-  await loadCredits();
-  await loadJobs();
+  await initApp();
 
-  // Register service worker if available
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration error:', err));
+    navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW register error', e));
   }
 });
 
+async function initApp() {
+  await Promise.all([
+    fetchProfile(),
+    fetchSampleProfiles(),
+    fetchCredits(),
+    fetchJobs()
+  ]);
+}
+
+// ==================== NAVIGATION ENTRE LES VUES ==================== //
+
+function switchNavView(view) {
+  // Masquer toutes les vues
+  document.getElementById('viewFeed').style.display = view === 'feed' ? 'block' : 'none';
+  document.getElementById('viewProfile').style.display = view === 'profile' ? 'block' : 'none';
+  document.getElementById('viewCustom').style.display = view === 'custom' ? 'block' : 'none';
+  document.getElementById('viewPricing').style.display = view === 'pricing' ? 'block' : 'none';
+
+  // Mettre à jour les boutons navbar
+  document.getElementById('navFeedBtn').classList.toggle('active', view === 'feed');
+  document.getElementById('navProfileBtn').classList.toggle('active', view === 'profile');
+  document.getElementById('navCustomJobBtn').classList.toggle('active', view === 'custom');
+  document.getElementById('navPricingBtn').classList.toggle('active', view === 'pricing');
+
+  // Ajuster la visibilité du banner héro
+  const heroBanner = document.getElementById('heroBanner');
+  if (view === 'feed') {
+    heroBanner.style.display = 'block';
+  } else {
+    heroBanner.style.display = 'none';
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ==================== GESTION DU PROFIL ==================== //
 
-async function loadProfile() {
+async function fetchProfile() {
   try {
     const res = await fetch('/api/profile');
     const data = await res.json();
     if (data.success && data.profile) {
-      currentProfile = data.profile;
-      renderProfile(data.profile);
+      state.currentProfile = data.profile;
+      renderSidebarProfile(data.profile);
+      populateProfileForm(data.profile);
     }
   } catch (err) {
-    console.error('Erreur chargement profil:', err);
+    console.error('Erreur fetchProfile:', err);
   }
 }
 
-function renderProfile(profile) {
-  document.getElementById('profileName').textContent = profile.name || 'Candidat';
-  document.getElementById('profileTitle').textContent = profile.title || 'Professionnel';
-  document.getElementById('profileInitials').textContent = (profile.name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2);
-  document.getElementById('profileLocation').textContent = `${profile.district ? profile.district + ', ' : ''}${profile.city || ''}, ${profile.country || ''}`;
-  document.getElementById('profileEducation').textContent = profile.education || 'Diplôme non précisé';
-  document.getElementById('profileSalary').textContent = `Prétention : ${profile.salary_expectation || 'À négocier'}`;
+function renderSidebarProfile(p) {
+  document.getElementById('sideName').textContent = p.name || 'Candidat';
+  document.getElementById('sideTitle').textContent = p.title || 'Professionnel';
+  document.getElementById('sideAvatar').textContent = (p.name || 'C').split(' ').map(n => n[0]).join('').substring(0, 2);
+  document.getElementById('sideCity').textContent = `📍 ${p.district ? p.district + ', ' : ''}${p.city || ''}`;
+  document.getElementById('sideDegree').textContent = `🎓 ${p.education || 'Diplôme'}`;
+  document.getElementById('sideSalary').textContent = `💰 ${p.salary_expectation || 'À négocier'}`;
 
-  const skillsContainer = document.getElementById('profileSkills');
-  skillsContainer.innerHTML = '';
-  (profile.skills || []).forEach(skill => {
-    const tag = document.createElement('span');
-    tag.className = 'skill-tag';
-    tag.textContent = skill;
-    skillsContainer.appendChild(tag);
+  const skillsBox = document.getElementById('sideSkillsList');
+  skillsBox.innerHTML = '';
+  (p.skills || []).slice(0, 8).forEach(skill => {
+    const s = document.createElement('span');
+    s.className = 'skill-chip';
+    s.textContent = skill;
+    skillsBox.appendChild(s);
   });
 }
 
-async function loadSampleProfilesList() {
+function populateProfileForm(p) {
+  document.getElementById('formName').value = p.name || '';
+  document.getElementById('formTitle').value = p.title || '';
+  document.getElementById('formPhone').value = p.phone || '';
+  document.getElementById('formEmail').value = p.email || '';
+  document.getElementById('formCountry').value = p.country || 'Sénégal';
+  document.getElementById('formCity').value = `${p.district ? p.district + ', ' : ''}${p.city || ''}`;
+  document.getElementById('formEducation').value = p.education || '';
+  document.getElementById('formYearsExp').value = p.years_of_experience || 3;
+  document.getElementById('formSalary').value = p.salary_expectation || '';
+  document.getElementById('formLanguages').value = (p.languages || []).join(', ');
+  document.getElementById('formSkills').value = (p.skills || []).join(', ');
+  document.getElementById('formSummary').value = p.summary || '';
+}
+
+async function saveProfileChanges() {
+  const updated = {
+    name: document.getElementById('formName').value.trim(),
+    title: document.getElementById('formTitle').value.trim(),
+    phone: document.getElementById('formPhone').value.trim(),
+    email: document.getElementById('formEmail').value.trim(),
+    country: document.getElementById('formCountry').value,
+    city: document.getElementById('formCity').value.trim(),
+    education: document.getElementById('formEducation').value.trim(),
+    years_of_experience: parseInt(document.getElementById('formYearsExp').value) || 0,
+    salary_expectation: document.getElementById('formSalary').value.trim(),
+    languages: document.getElementById('formLanguages').value.split(',').map(s => s.trim()).filter(Boolean),
+    skills: document.getElementById('formSkills').value.split(',').map(s => s.trim()).filter(Boolean),
+    summary: document.getElementById('formSummary').value.trim(),
+    experiences: (state.currentProfile && state.currentProfile.experiences) || []
+  };
+
+  try {
+    const res = await fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated)
+    });
+    const data = await res.json();
+    if (data.success) {
+      state.currentProfile = data.profile;
+      renderSidebarProfile(data.profile);
+      alert('✅ Profil candidat mis à jour avec succès !');
+      switchNavView('feed');
+    }
+  } catch (err) {
+    alert('Erreur lors de la sauvegarde du profil.');
+  }
+}
+
+async function fetchSampleProfiles() {
   try {
     const res = await fetch('/api/profile/samples');
     const data = await res.json();
-    if (data.success && data.samples) {
-      const select = document.getElementById('sampleProfileSelect');
-      data.samples.forEach(sample => {
+    if (data.success) {
+      state.sampleProfiles = data.samples;
+      const select = document.getElementById('sideSampleSelect');
+      data.samples.forEach(s => {
         const opt = document.createElement('option');
-        opt.value = sample.id;
-        opt.textContent = `${sample.name} (${sample.title} - ${sample.city})`;
+        opt.value = s.id;
+        opt.textContent = `${s.name} (${s.title} - ${s.city})`;
         select.appendChild(opt);
       });
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 }
 
@@ -80,73 +172,115 @@ async function switchDemoProfile(sampleId) {
     });
     const data = await res.json();
     if (data.success) {
-      currentProfile = data.profile;
-      renderProfile(data.profile);
-      await loadJobs(); // Rafraîchir les scores
+      state.currentProfile = data.profile;
+      renderSidebarProfile(data.profile);
+      populateProfileForm(data.profile);
+      await fetchJobs(); // Recalculer les scores
     }
-  } catch (e) {
-    alert('Erreur lors du changement de profil.');
+  } catch (err) {
+    alert('Erreur lors du chargement du profil exemple.');
   }
 }
 
-// ==================== GESTION DES CREDITS ==================== //
+// ==================== GESTION DES CREDITS & TARIFS ==================== //
 
-async function loadCredits() {
+async function fetchCredits() {
   try {
     const res = await fetch('/api/credits');
     const data = await res.json();
     if (data.success) {
-      const credits = data.credits;
-      const countEl = document.getElementById('creditsCount');
-      if (credits.total_available > 0) {
-        countEl.textContent = `${credits.total_available} candidature${credits.total_available > 1 ? 's' : ''} restante${credits.total_available > 1 ? 's' : ''}`;
+      state.credits = data.credits;
+      state.packs = data.packs;
+
+      const navEl = document.getElementById('navCreditsCount');
+      if (data.credits.total_available > 0) {
+        navEl.textContent = `${data.credits.total_available} crédit${data.credits.total_available > 1 ? 's' : ''}`;
       } else {
-        countEl.textContent = `0 crédit - Recharger`;
+        navEl.textContent = `0 crédit`;
       }
-      renderPacks(data.packs);
+
+      renderPricingView(data.packs);
+      renderMiniPacks(data.packs);
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 }
 
-function renderPacks(packs) {
-  const container = document.getElementById('packsContainer');
+function renderPricingView(packs) {
+  const container = document.getElementById('pricingCards');
   container.innerHTML = '';
-  (packs || []).forEach((pack, index) => {
+
+  packs.forEach((pack, idx) => {
+    const isPro = pack.id === 'pack_intensif';
     const card = document.createElement('div');
-    card.className = `pack-card ${pack.id === selectedPaymentPackId ? 'selected' : ''}`;
-    card.onclick = () => {
-      selectedPaymentPackId = pack.id;
-      document.querySelectorAll('.pack-card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-    };
+    card.className = `price-box ${isPro ? 'featured' : ''}`;
     card.innerHTML = `
-      <strong style="font-size:1.05rem;">${pack.name}</strong>
-      <div class="pack-price">${pack.price_fcfa.toLocaleString()} FCFA</div>
-      <p style="font-size:0.8rem; color:var(--text-muted);">${pack.description}</p>
+      ${isPro ? '<span class="featured-ribbon">⭐ Plus Populaire</span>' : ''}
+      <h3 class="price-box-title">${pack.name}</h3>
+      <div class="price-amount">${pack.price_fcfa.toLocaleString()} FCFA</div>
+      <p class="price-desc">${pack.description}</p>
+      <ul class="price-features-list">
+        <li><strong>${pack.applications_count} candidatures</strong> sur-mesure</li>
+        <li>Double agent (Rédacteur ATS + DRH Critique)</li>
+        <li>Format PDF propre & téléchargeable</li>
+        <li>${pack.bonus_coach ? '<strong>Coach d\'entretien IA inclus</strong>' : 'Accès aux questions types'}</li>
+        <li>Paiement Wave, Orange Money ou MTN MoMo</li>
+      </ul>
+      <button class="btn-primary" style="width:100%; justify-content:center; margin-top:auto;" onclick="openPaymentForPack('${pack.id}')">
+        Recharger via Wave / OM
+      </button>
     `;
     container.appendChild(card);
   });
 }
 
-// ==================== GESTION DES OFFRES ==================== //
+function renderMiniPacks(packs) {
+  const container = document.getElementById('miniPacksList');
+  container.innerHTML = '';
 
-async function loadJobs(query = '', country = '', contract = '') {
+  packs.forEach(pack => {
+    const item = document.createElement('div');
+    item.className = `mini-pack-item ${pack.id === state.selectedPackId ? 'active' : ''}`;
+    item.onclick = () => {
+      state.selectedPackId = pack.id;
+      document.querySelectorAll('.mini-pack-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    };
+    item.innerHTML = `
+      <div>
+        <strong>${pack.name}</strong> (${pack.applications_count} candidatures)
+        <div style="font-size:0.75rem; color:var(--text-muted);">${pack.description}</div>
+      </div>
+      <strong style="color:var(--primary); font-size:1.05rem;">${pack.price_fcfa.toLocaleString()} FCFA</strong>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function openPaymentForPack(packId) {
+  state.selectedPackId = packId;
+  renderMiniPacks(state.packs);
+  openPayModal();
+}
+
+// ==================== FEED DES OFFRES ==================== //
+
+async function fetchJobs(q = '', country = '', contract = '') {
   try {
     const url = new URL('/api/jobs', window.location.origin);
-    if (query) url.searchParams.set('q', query);
+    if (q) url.searchParams.set('q', q);
     if (country) url.searchParams.set('country', country);
     if (contract) url.searchParams.set('contract', contract);
 
     const res = await fetch(url);
     const data = await res.json();
     if (data.success) {
-      currentJobs = data.jobs;
-      renderJobs(data.jobs);
+      state.jobs = data.jobs;
+      renderJobsGrid(data.jobs);
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 }
 
@@ -154,50 +288,60 @@ function handleSearch() {
   const q = document.getElementById('searchInput').value;
   const country = document.getElementById('countryFilter').value;
   const contract = document.getElementById('contractFilter').value;
-  loadJobs(q, country, contract);
+  fetchJobs(q, country, contract);
 }
 
-function renderJobs(jobs) {
-  const container = document.getElementById('jobsListContainer');
+function quickFilter(term) {
+  document.getElementById('searchInput').value = term;
+  handleSearch();
+}
+
+function renderJobsGrid(jobs) {
+  const container = document.getElementById('jobsGrid');
   container.innerHTML = '';
 
   if (jobs.length === 0) {
-    container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">Aucune offre d'emploi trouvée pour vos critères.</div>`;
+    container.innerHTML = `
+      <div style="text-align:center; padding:48px; background:white; border-radius:16px; border:1px solid var(--border);">
+        <p style="font-size:1.1rem; font-weight:700; color:var(--text-main);">Aucune offre d'emploi ne correspond à vos filtres.</p>
+        <p style="color:var(--text-muted); font-size:0.88rem; margin-top:6px;">Essayez d'élargir votre recherche ou collez directement une offre libre.</p>
+      </div>
+    `;
     return;
   }
 
   jobs.forEach(job => {
+    const isSn = job.country.toLowerCase().includes('sénégal');
+    const flag = isSn ? '🇸🇳' : '🇨🇮';
+    const badgeClass = isSn ? 'badge-sn' : 'badge-ci';
+
     const card = document.createElement('article');
     card.className = 'job-card';
-
-    const isSn = job.country.toLowerCase().includes('sénégal');
-    const countryTagClass = isSn ? 'tag-country-sn' : 'tag-country-ci';
-    const flag = isSn ? '🇸🇳' : '🇨🇮';
-
     card.innerHTML = `
-      <div class="job-header">
+      <div class="job-top-bar">
         <div>
-          <h3 class="job-title">${job.title}</h3>
-          <p class="job-company">${job.company} — <span style="color:#2563eb;">${job.district || job.city}</span></p>
+          <h3 class="job-main-title">${job.title}</h3>
+          <div class="job-company-line">${job.company} — <span class="job-location-link">📍 ${job.district || job.city}</span></div>
         </div>
-        <span class="tag-badge ${countryTagClass}">${flag} ${job.country}</span>
+        <span class="country-flag-badge ${badgeClass}">${flag} ${job.country}</span>
       </div>
 
-      <div class="job-tags">
-        <span class="tag-badge tag-contract">${job.contract}</span>
-        <span class="tag-badge tag-salary">💰 ${job.salary_range}</span>
-        <span class="tag-badge" style="background:#f1f5f9;">⏳ Échéance : ${job.deadline}</span>
+      <div class="job-meta-pills">
+        <span class="meta-pill pill-contract">📄 ${job.contract}</span>
+        <span class="meta-pill pill-salary">💰 ${job.salary_range}</span>
+        <span class="meta-pill pill-deadline">⏳ Clôture : ${job.deadline}</span>
       </div>
 
-      <p class="job-desc">${job.description}</p>
+      <p class="job-summary-text">${job.description}</p>
 
-      <div id="matchBox-${job.id}" class="matching-result-box" style="display:none;"></div>
+      <!-- Tiroir de matching calculé -->
+      <div id="drawer-${job.id}" class="match-drawer" style="display:none;"></div>
 
-      <div class="job-actions">
-        <button class="btn-secondary" onclick="runMatching('${job.id}')">
-          ⚡ Tester Compatibilité IA
+      <div class="job-cta-bar">
+        <button class="btn-secondary" onclick="scanMatching('${job.id}')">
+          ⚡ Scanner Compatibilité IA
         </button>
-        <button class="btn-primary" onclick="launchDualAgentApplication('${job.id}')">
+        <button class="btn-primary" onclick="openStudioForJob('${job.id}')">
           🚀 Générer Candidature Sur-Mesure
         </button>
       </div>
@@ -207,12 +351,12 @@ function renderJobs(jobs) {
   });
 }
 
-// ==================== MATCHING & SCORING ==================== //
+// ==================== SCANNER DE MATCHING IA ==================== //
 
-async function runMatching(jobId) {
-  const matchBox = document.getElementById(`matchBox-${jobId}`);
-  matchBox.style.display = 'block';
-  matchBox.innerHTML = `<em>Calcul du score de compatibilité par l'IA...</em>`;
+async function scanMatching(jobId) {
+  const drawer = document.getElementById(`drawer-${jobId}`);
+  drawer.style.display = 'block';
+  drawer.innerHTML = `<em>Analyse sémantique par l'IA en cours...</em>`;
 
   try {
     const res = await fetch('/api/match', {
@@ -223,46 +367,49 @@ async function runMatching(jobId) {
     const data = await res.json();
     if (data.success) {
       const m = data.match;
-      let scoreColor = '#10b981';
-      if (m.score < 60) scoreColor = '#f59e0b';
+      let gaugeClass = 'gauge-high';
+      if (m.score < 60) gaugeClass = 'gauge-low';
+      else if (m.score < 80) gaugeClass = 'gauge-medium';
 
-      matchBox.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <div class="score-badge" style="color:${scoreColor};">
-            <span>🎯 Adéquation Profil : ${m.score}%</span>
+      drawer.innerHTML = `
+        <div class="match-header-row">
+          <div class="match-gauge ${gaugeClass}">
+            <span>🎯 Score d'Adéquation : ${m.score} %</span>
           </div>
-          <span style="font-size:0.75rem; color:var(--text-muted);">${m.location_match ? '✅ Ville identique' : 'ℹ️ Mobilité requise'}</span>
+          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">
+            ${m.location_match ? '✅ Même ville' : 'ℹ️ Mobilité à préciser'}
+          </span>
         </div>
-        <p style="font-size:0.85rem; font-weight:600; margin-bottom:6px;">${m.verdict}</p>
-        <div style="font-size:0.8rem; color:#475569;">
-          <strong>Points forts :</strong> ${m.matching_skills.join(', ') || 'Bases acquises'}<br>
+        <p style="font-weight:700; font-size:0.85rem; margin-bottom:6px; color:#1e293b;">${m.verdict}</p>
+        <div class="match-details-text">
+          <strong>Points forts du candidat :</strong> ${m.matching_skills.join(', ') || 'Bases solides'}<br>
           ${m.missing_skills.length ? `<strong>Compétences à valoriser dans la lettre :</strong> ${m.missing_skills.join(', ')}` : ''}
         </div>
       `;
     }
-  } catch (e) {
-    matchBox.innerHTML = `<span style="color:red;">Erreur lors du calcul de compatibilité.</span>`;
+  } catch (err) {
+    drawer.innerHTML = `<span style="color:red;">Erreur lors du calcul d'adéquation.</span>`;
   }
 }
 
-// ==================== MULTI-AGENTS CANDIDATURE ==================== //
+// ==================== STUDIO MULTI-AGENTS ==================== //
 
-async function launchDualAgentApplication(jobId) {
-  const job = currentJobs.find(j => j.id === jobId);
+async function openStudioForJob(jobId) {
+  const job = state.jobs.find(j => j.id === jobId);
   if (!job) return;
 
-  currentSelectedJob = job;
-  document.getElementById('modalJobTitle').textContent = `Candidature : ${job.title}`;
-  document.getElementById('modalJobCompany').textContent = `${job.company} — ${job.city}, ${job.country}`;
-  
-  // Reset affichages modal
-  document.getElementById('agent1Status').textContent = "Agent 1 : Analyse de l'offre et alignement des compétences...";
-  document.getElementById('agent2Score').textContent = "...";
-  document.getElementById('agent2Verdict').textContent = "Agent 2 : En attente du premier jet...";
-  document.getElementById('cvPreview').textContent = "Génération du CV par l'Agent 1 en cours...";
-  document.getElementById('letterPreview').textContent = "Rédaction de la lettre en cours...";
-  
-  openModal('applicationModal');
+  state.selectedJob = job;
+  document.getElementById('studioJobHeading').textContent = job.title;
+  document.getElementById('studioJobSub').textContent = `${job.company} — ${job.city}, ${job.country}`;
+
+  // Réinitialiser les moniteurs
+  document.getElementById('mAgent1Text').textContent = "Agent 1 : Analyse des compétences clés et alignement sur l'offre...";
+  document.getElementById('mCriticScore').textContent = "...";
+  document.getElementById('mAgent2Text').textContent = "Agent 2 : En attente du premier jet pour critique...";
+  document.getElementById('cvRenderPaper').textContent = "Génération du CV sur-mesure en cours...";
+  document.getElementById('letterRenderPaper').textContent = "Rédaction de la lettre ciblée en cours...";
+
+  document.getElementById('studioModal').style.display = 'flex';
 
   try {
     const res = await fetch('/api/generate-application', {
@@ -274,60 +421,66 @@ async function launchDualAgentApplication(jobId) {
 
     if (!data.success) {
       if (data.error === 'CREDITS_EXHAUSTED') {
-        closeModal('applicationModal');
-        openPaymentModal();
+        closeStudioModal();
+        openPayModal();
         alert(data.message);
         return;
       }
-      alert('Erreur lors de la génération : ' + (data.error || 'Veuillez réessayer'));
+      alert('Erreur : ' + data.error);
       return;
     }
 
-    currentGeneratedData = data.result;
-    await loadCredits(); // Mettre à jour solde
+    state.currentGeneration = data.result;
+    await fetchCredits(); // Actualiser solde
 
-    // Affichage des résultats du système à double agent
+    // Mettre à jour le visualiseur du double agent
     const review = data.result.pipeline_execution.agent_2_review;
-    document.getElementById('agent1Status').textContent = "Agent 1 : Dossier rédigé et perfectionné selon les remarques du DRH.";
-    document.getElementById('agent2Score').textContent = review.score_critique;
-    document.getElementById('agent2Verdict').textContent = `"${review.verdict_drh}" — ${review.mention}`;
+    document.getElementById('mAgent1Text').textContent = "Agent 1 : Dossier révisé et optimisé suite aux remarques du recruteur.";
+    document.getElementById('mCriticScore').textContent = review.score_critique;
+    document.getElementById('mAgent2Text').innerHTML = `<em>« ${review.verdict_drh} »</em> — <strong>${review.mention}</strong>`;
 
-    // Rendu CV
+    // Affichage du CV
     const cv = data.result.final_output.tailored_cv;
-    document.getElementById('cvPreview').innerHTML = `
-      <div style="border-bottom: 2px solid var(--primary); padding-bottom: 12px; margin-bottom: 14px;">
-        <h2 style="font-size: 1.4rem; color: var(--primary); font-weight:800;">${cv.header.name}</h2>
-        <div style="font-weight:700; color:#374151; font-size:1.05rem;">${cv.header.targeted_title}</div>
-        <div style="font-size:0.85rem; color:var(--text-muted);">${cv.header.location} | ${cv.header.contact}</div>
+    document.getElementById('cvRenderPaper').innerHTML = `
+      <div style="border-bottom: 2px solid var(--primary); padding-bottom: 12px; margin-bottom: 16px;">
+        <h1 style="font-size: 1.6rem; color: var(--primary); font-weight:800; font-family:'Space Grotesk',sans-serif;">${cv.header.name}</h1>
+        <div style="font-size: 1.1rem; font-weight:700; color:#334155;">${cv.header.targeted_title}</div>
+        <div style="font-size: 0.85rem; color:var(--text-muted); margin-top:2px;">📍 ${cv.header.location} | 📞 ${cv.header.contact}</div>
       </div>
 
-      <div style="background:#e6f4ea; padding:8px 12px; border-radius:6px; font-size:0.85rem; color:var(--primary); font-weight:600; margin-bottom:14px;">
+      <div style="background:#ecfdf5; border-left:4px solid var(--success); padding:8px 12px; font-size:0.82rem; font-weight:700; color:var(--primary); margin-bottom:16px;">
         🛡️ ${cv.verif_drh_badge}
       </div>
 
-      <p style="font-size:0.9rem; margin-bottom:14px; font-style:italic;">${cv.profile_pitch}</p>
-
-      <strong style="color:var(--primary-dark); font-size:0.9rem; text-transform:uppercase;">Expériences Ciblées pour ce Poste :</strong>
-      <div style="margin: 10px 0 16px 0;">
-        ${(cv.targeted_experiences || []).map(exp => `
-          <div style="margin-bottom:12px;">
-            <div style="font-weight:700;">${exp.role} — <span style="color:var(--text-muted);">${exp.company}</span> <small>(${exp.period})</small></div>
-            <ul style="margin-left: 20px; font-size:0.85rem; margin-top:4px;">
-              ${exp.key_achievements.map(a => `<li>${a}</li>`).join('')}
-            </ul>
-          </div>
-        `).join('')}
+      <div style="font-size: 0.92rem; font-style: italic; color:#1e293b; margin-bottom: 18px; line-height:1.6;">
+        ${cv.profile_pitch}
       </div>
 
-      <strong style="color:var(--primary-dark); font-size:0.9rem; text-transform:uppercase;">Formation & Diplômes :</strong>
-      <p style="font-size:0.85rem; margin-top:4px;">${cv.education}</p>
+      <div style="margin-bottom: 18px;">
+        <strong style="color:var(--primary-dark); font-size:0.88rem; text-transform:uppercase; letter-spacing:0.5px;">Expériences Professionnelles Spécifiques :</strong>
+        <div style="margin-top:10px;">
+          ${(cv.targeted_experiences || []).map(exp => `
+            <div style="margin-bottom: 14px;">
+              <div style="font-weight:800; font-size:0.95rem;">${exp.role} — <span style="color:var(--text-muted); font-weight:600;">${exp.company}</span> <small style="color:#64748b;">(${exp.period})</small></div>
+              <ul style="margin-left: 20px; font-size: 0.88rem; margin-top: 4px; color:#334155;">
+                ${exp.key_achievements.map(a => `<li>${a}</li>`).join('')}
+              </ul>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div>
+        <strong style="color:var(--primary-dark); font-size:0.88rem; text-transform:uppercase; letter-spacing:0.5px;">Diplômes & Formations :</strong>
+        <p style="font-size:0.88rem; color:#334155; margin-top:4px;">${cv.education}</p>
+      </div>
     `;
 
-    // Rendu Lettre
-    document.getElementById('letterPreview').textContent = data.result.final_output.tailored_cover_letter;
+    // Affichage Lettre
+    document.getElementById('letterRenderPaper').textContent = data.result.final_output.tailored_cover_letter;
 
-    // Charger les questions d'entretien
-    loadInterviewPrep(jobId);
+    // Charger questions coach
+    loadCoachQuestions(jobId);
 
   } catch (err) {
     console.error(err);
@@ -335,7 +488,7 @@ async function launchDualAgentApplication(jobId) {
   }
 }
 
-async function loadInterviewPrep(jobId) {
+async function loadCoachQuestions(jobId) {
   try {
     const res = await fetch('/api/interview-prep', {
       method: 'POST',
@@ -344,75 +497,100 @@ async function loadInterviewPrep(jobId) {
     });
     const data = await res.json();
     if (data.success && data.prep) {
-      const container = document.getElementById('interviewQuestionsContainer');
+      const container = document.getElementById('coachQuestionsList');
       container.innerHTML = `
-        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:14px;">
-          L'IA a sélectionné 5 questions décisives spécifiques à ${data.prep.company} et au contexte de ${data.prep.location} :
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">
+          5 questions clés sélectionnées pour <strong>${data.prep.company}</strong> à ${data.prep.location} :
         </p>
       `;
 
       data.prep.questions.forEach((q, idx) => {
-        const qBox = document.createElement('div');
-        qBox.style = "background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:12px;";
-        qBox.innerHTML = `
-          <strong style="color:var(--primary); font-size:0.95rem;">Q${idx + 1} (${q.category}) :</strong>
-          <p style="font-weight:700; margin:4px 0 8px 0;">${q.question}</p>
-          <div style="background:#fffbeb; border-left:3px solid #f59e0b; padding:6px 10px; font-size:0.8rem; margin-bottom:6px;">
-            💡 <strong>Conseil Stratégique :</strong> ${q.strategic_tip}
-          </div>
-          <div style="background:#f1f5f9; padding:8px; border-radius:6px; font-size:0.85rem;">
-            🎯 <strong>Modèle de réponse conseillé :</strong> "${q.sample_answer}"
-          </div>
+        const item = document.createElement('div');
+        item.className = 'coach-q-card';
+        item.innerHTML = `
+          <div class="coach-q-category">Q${idx + 1} • ${q.category}</div>
+          <div class="coach-q-title">${q.question}</div>
+          <div class="coach-q-tip">💡 <strong>Conseil Stratégique :</strong> ${q.strategic_tip}</div>
+          <div class="coach-q-answer">🎯 <strong>Modèle de réponse conseillé :</strong> "${q.sample_answer}"</div>
         `;
-        container.appendChild(qBox);
+        container.appendChild(item);
       });
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 }
 
-// ==================== ACTIONS HUMAN-IN-THE-LOOP ==================== //
+function setStudioTab(tab) {
+  state.activeStudioTab = tab;
+  document.getElementById('tabBtnCv').classList.toggle('active', tab === 'cv');
+  document.getElementById('tabBtnLetter').classList.toggle('active', tab === 'letter');
+  document.getElementById('tabBtnCoach').classList.toggle('active', tab === 'coach');
 
-function sendWhatsAppApplication() {
-  if (!currentSelectedJob || !currentGeneratedData) return;
-  const phone = (currentSelectedJob.contact_whatsapp || '').replace(/[^0-9]/g, '');
-  const pitch = encodeURIComponent(currentGeneratedData.final_output.whatsapp_pitch);
-  
-  if (phone) {
-    window.open(`https://wa.me/${phone}?text=${pitch}`, '_blank');
+  document.getElementById('studioTabCv').style.display = tab === 'cv' ? 'block' : 'none';
+  document.getElementById('studioTabLetter').style.display = tab === 'letter' ? 'block' : 'none';
+  document.getElementById('studioTabCoach').style.display = tab === 'coach' ? 'block' : 'none';
+}
+
+function closeStudioModal() {
+  document.getElementById('studioModal').style.display = 'none';
+}
+
+// ==================== ACTIONS 1-CLIC HUMAN-IN-THE-LOOP ==================== //
+
+function triggerWhatsAppApply() {
+  if (!state.selectedJob || !state.currentGeneration) return;
+  const rawPhone = (state.selectedJob.contact_whatsapp || '').replace(/[^0-9]/g, '');
+  const pitch = encodeURIComponent(state.currentGeneration.final_output.whatsapp_pitch);
+
+  if (rawPhone) {
+    window.open(`https://wa.me/${rawPhone}?text=${pitch}`, '_blank');
   } else {
-    // Si aucun numéro WhatsApp spécifié dans l'offre, ouvrir WhatsApp Web pour partage libre
     window.open(`https://wa.me/?text=${pitch}`, '_blank');
   }
 }
 
-function sendEmailApplication() {
-  if (!currentSelectedJob || !currentGeneratedData) return;
-  const email = currentSelectedJob.contact_email || '';
-  const subject = encodeURIComponent(currentGeneratedData.final_output.suggested_email_subject);
-  const body = encodeURIComponent(currentGeneratedData.final_output.tailored_cover_letter);
+function triggerEmailApply() {
+  if (!state.selectedJob || !state.currentGeneration) return;
+  const email = state.selectedJob.contact_email || '';
+  const subject = encodeURIComponent(state.currentGeneration.final_output.suggested_email_subject);
+  const body = encodeURIComponent(state.currentGeneration.final_output.tailored_cover_letter);
 
   window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 }
 
-// ==================== AJOUT D'UNE OFFRE LIBRE ==================== //
+function copyDocumentText() {
+  if (!state.currentGeneration) return;
+  let text = '';
+  if (state.activeStudioTab === 'letter') {
+    text = state.currentGeneration.final_output.tailored_cover_letter;
+  } else {
+    const cv = state.currentGeneration.final_output.tailored_cv;
+    text = `${cv.header.name}\n${cv.header.targeted_title}\n${cv.header.location} | ${cv.header.contact}\n\n${cv.profile_pitch}\n\nEXPERIENCES :\n` +
+      cv.targeted_experiences.map(e => `${e.role} - ${e.company} (${e.period})\n` + e.key_achievements.map(a => `• ${a}`).join('\n')).join('\n\n') +
+      `\n\nFORMATION :\n${cv.education}`;
+  }
 
-function openCustomJobModal() {
-  openModal('customJobModal');
+  navigator.clipboard.writeText(text).then(() => {
+    alert('📋 Texte copié dans le presse-papier !');
+  }).catch(() => {
+    alert('Veuillez copier manuellement le texte sélectionné.');
+  });
 }
 
-async function submitCustomJob() {
-  const title = document.getElementById('customJobTitle').value.trim();
-  const company = document.getElementById('customJobCompany').value.trim();
-  const country = document.getElementById('customJobCountry').value;
-  const city = document.getElementById('customJobCity').value.trim();
-  const description = document.getElementById('customJobDesc').value.trim();
-  const contact_email = document.getElementById('customJobEmail').value.trim();
-  const contact_whatsapp = document.getElementById('customJobWhatsapp').value.trim();
+// ==================== AJOUT D'UNE OFFRE LIBRE ==================== //
+
+async function handleCustomJobSubmit() {
+  const title = document.getElementById('cJobTitle').value.trim();
+  const company = document.getElementById('cJobCompany').value.trim();
+  const country = document.getElementById('cJobCountry').value;
+  const city = document.getElementById('cJobCity').value.trim();
+  const description = document.getElementById('cJobDescription').value.trim();
+  const contact_email = document.getElementById('cJobEmail').value.trim();
+  const contact_whatsapp = document.getElementById('cJobWhatsapp').value.trim();
 
   if (!title || !description) {
-    alert("Veuillez renseigner au moins l'intitulé et le texte de l'annonce.");
+    alert('Veuillez renseigner au moins le titre du poste et le texte de l\'offre.');
     return;
   }
 
@@ -426,34 +604,41 @@ async function submitCustomJob() {
     });
     const data = await res.json();
     if (data.success) {
-      closeModal('customJobModal');
-      await loadJobs();
-      // Lancer directement le matching
-      runMatching(data.job.id);
+      alert('🎉 Offre enregistrée ! Redirection vers le studio de candidature...');
+      await fetchJobs();
+      switchNavView('feed');
+      openStudioForJob(data.job.id);
     }
-  } catch (e) {
-    alert("Erreur lors de l'enregistrement de l'offre.");
+  } catch (err) {
+    alert('Erreur lors de l\'enregistrement de l\'offre.');
   }
 }
 
-// ==================== PAIEMENT MOBILE MONEY ==================== //
+// ==================== MODAL PAIEMENT MOBILE MONEY ==================== //
 
 function openPaymentModal() {
-  openModal('paymentModal');
+  openPayModal();
 }
 
-function selectPaymentMethod(method) {
-  selectedPaymentMethod = method;
-  document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
-  if (method === 'wave') document.getElementById('methodWave').classList.add('selected');
-  if (method === 'orange_money') document.getElementById('methodOM').classList.add('selected');
-  if (method === 'mtn_momo') document.getElementById('methodMTN').classList.add('selected');
+function openPayModal() {
+  document.getElementById('payModal').style.display = 'flex';
 }
 
-async function executePayment() {
-  const phone = document.getElementById('paymentPhone').value.trim();
+function closePayModal() {
+  document.getElementById('payModal').style.display = 'none';
+}
+
+function setOperator(op) {
+  state.selectedOperator = op;
+  document.getElementById('opWave').classList.toggle('active', op === 'wave');
+  document.getElementById('opOM').classList.toggle('active', op === 'orange_money');
+  document.getElementById('opMTN').classList.toggle('active', op === 'mtn_momo');
+}
+
+async function confirmMobileMoneyPayment() {
+  const phone = document.getElementById('payPhoneNumber').value.trim();
   if (!phone) {
-    alert("Veuillez entrer votre numéro de téléphone Mobile Money.");
+    alert('Veuillez saisir votre numéro Mobile Money.');
     return;
   }
 
@@ -462,40 +647,20 @@ async function executePayment() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        packId: selectedPaymentPackId,
-        method: selectedPaymentMethod,
+        packId: state.selectedPackId,
+        method: state.selectedOperator,
         phone: phone
       })
     });
     const data = await res.json();
     if (data.success) {
-      alert(`Paiement de ${data.transaction.amount_fcfa} FCFA validé avec succès par ${data.transaction.method.toUpperCase()} !\nNouveau solde : ${data.new_balance} candidatures.`);
-      closeModal('paymentModal');
-      await loadCredits();
+      alert(`✅ Paiement Mobile Money validé avec succès (${data.transaction.amount_fcfa.toLocaleString()} FCFA via ${data.transaction.method.toUpperCase()}).\nVotre nouveau solde est de : ${data.new_balance} candidatures.`);
+      closePayModal();
+      await fetchCredits();
     } else {
-      alert("Échec du paiement : " + data.error);
+      alert('Erreur paiement : ' + data.error);
     }
-  } catch (e) {
-    alert("Erreur réseau lors de la transaction.");
+  } catch (err) {
+    alert('Erreur réseau lors de la transaction.');
   }
-}
-
-// ==================== UTILS & ONGLETS ==================== //
-
-function switchTab(tab) {
-  document.getElementById('tabCvBtn').classList.toggle('active', tab === 'cv');
-  document.getElementById('tabLetterBtn').classList.toggle('active', tab === 'letter');
-  document.getElementById('tabCoachBtn').classList.toggle('active', tab === 'coach');
-
-  document.getElementById('tabCvContent').style.display = tab === 'cv' ? 'block' : 'none';
-  document.getElementById('tabLetterContent').style.display = tab === 'letter' ? 'block' : 'none';
-  document.getElementById('tabCoachContent').style.display = tab === 'coach' ? 'block' : 'none';
-}
-
-function openModal(id) {
-  document.getElementById(id).style.display = 'flex';
-}
-
-function closeModal(id) {
-  document.getElementById(id).style.display = 'none';
 }
