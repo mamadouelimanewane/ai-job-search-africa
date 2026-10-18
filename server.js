@@ -11,6 +11,7 @@ const matchingEngine = require('./src/core/matching');
 const dualAgentEngine = require('./src/core/dual_agent');
 const interviewCoach = require('./src/core/interview_coach');
 const paymentManager = require('./src/core/payments');
+const webScanner = require('./src/core/web_scanner');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -148,6 +149,33 @@ app.post('/api/payments/checkout', (req, res) => {
 
   const outcome = paymentManager.processPayment(packId, method, phone);
   res.json(outcome);
+});
+
+// =================== ROUTES AGRÉGATEUR & SCANNER WEB =================== //
+
+app.get('/api/aggregator/sites', (req, res) => {
+  const sites = webScanner.getMonitoredSources();
+  res.json({ success: true, count: sites.length, sites });
+});
+
+app.post('/api/aggregator/scan', async (req, res) => {
+  const { query, country, deepScan } = req.body;
+  try {
+    const scanResult = await webScanner.performLiveWebCrawl({ query, country, deepScan });
+    res.json(scanResult);
+  } catch (err) {
+    console.error('Erreur scan web temps réel:', err);
+    res.status(500).json({ success: false, error: 'Erreur lors du balayage du web' });
+  }
+});
+
+app.post('/api/aggregator/add-site', (req, res) => {
+  const { name, url, country, city, type } = req.body;
+  if (!name || !url) {
+    return res.status(400).json({ success: false, error: 'Nom et URL obligatoires' });
+  }
+  const newSite = webScanner.addNewSource({ name, url, country, city, type });
+  res.json({ success: true, site: newSite });
 });
 
 // Lancement du serveur

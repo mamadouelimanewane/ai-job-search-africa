@@ -7,6 +7,7 @@ let state = {
   currentProfile: null,
   sampleProfiles: [],
   jobs: [],
+  sources: [],
   credits: null,
   packs: [],
   selectedJob: null,
@@ -29,7 +30,8 @@ async function initApp() {
     fetchProfile(),
     fetchSampleProfiles(),
     fetchCredits(),
-    fetchJobs()
+    fetchJobs(),
+    fetchSources()
   ]);
 }
 
@@ -41,12 +43,16 @@ function switchNavView(view) {
   document.getElementById('viewProfile').style.display = view === 'profile' ? 'block' : 'none';
   document.getElementById('viewCustom').style.display = view === 'custom' ? 'block' : 'none';
   document.getElementById('viewPricing').style.display = view === 'pricing' ? 'block' : 'none';
+  const aggView = document.getElementById('viewAggregator');
+  if (aggView) aggView.style.display = view === 'aggregator' ? 'block' : 'none';
 
   // Mettre à jour les boutons navbar
   document.getElementById('navFeedBtn').classList.toggle('active', view === 'feed');
   document.getElementById('navProfileBtn').classList.toggle('active', view === 'profile');
   document.getElementById('navCustomJobBtn').classList.toggle('active', view === 'custom');
   document.getElementById('navPricingBtn').classList.toggle('active', view === 'pricing');
+  const navAggBtn = document.getElementById('navAggregatorBtn');
+  if (navAggBtn) navAggBtn.classList.toggle('active', view === 'aggregator');
 
   // Ajuster la visibilité du banner héro
   const heroBanner = document.getElementById('heroBanner');
@@ -662,5 +668,175 @@ async function confirmMobileMoneyPayment() {
     }
   } catch (err) {
     alert('Erreur réseau lors de la transaction.');
+  }
+}
+
+// ==================== AGRÉGATEUR RADAR WEB ==================== //
+
+async function fetchSources() {
+  try {
+    const res = await fetch('/api/aggregator/sites');
+    const data = await res.json();
+    const sources = data.sites || data.sources || [];
+    state.sources = sources;
+    renderSourcesGrid(sources);
+    const badge = document.getElementById('sourcesCountBadge');
+    if (badge) badge.textContent = sources.length + ' sources actives';
+  } catch (err) {
+    console.warn('Erreur chargement sources:', err);
+  }
+}
+
+function renderSourcesGrid(sources) {
+  const container = document.getElementById('sourcesGridContainer');
+  if (!container) return;
+
+  if (!sources || sources.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">
+        <div style="font-size:2.5rem;">🌐</div>
+        <p>Aucune source trouvée. Modifiez le filtre ou lancez un scan.</p>
+      </div>`;
+    return;
+  }
+
+  const flagMap = {
+    SN:'🇸🇳', CI:'🇨🇮', BJ:'🇧🇯', TG:'🇹🇬',
+    ML:'🇲🇱', BF:'🇧🇫', GN:'🇬🇳', NE:'🇳🇪',
+    GH:'🇬🇭', NG:'🇳🇬', MR:'🇲🇷', ALL:'🌍'
+  };
+
+  container.innerHTML = sources.map(src => {
+    const flag = flagMap[src.country] || '🌍';
+    const statusClass = src.status === 'active' ? 'status-active' : 'status-inactive';
+    const statusLabel = src.status === 'active' ? '✅ Actif' : '⚠️ Inactif';
+    const typeLabel = src.type === 'job_board' ? 'Job Board'
+      : src.type === 'company' ? 'Entreprise' : 'Gouvernement';
+    return `
+      <div class="source-card">
+        <div class="source-card-header">
+          <span class="source-flag">${flag}</span>
+          <span class="source-status-badge ${statusClass}">${statusLabel}</span>
+        </div>
+        <div class="source-card-body">
+          <h4 class="source-name">${src.name}</h4>
+          <p class="source-country">${src.city || ''} — ${src.country}</p>
+          <span class="source-type-badge">${typeLabel}</span>
+        </div>
+        <div class="source-card-footer">
+          <a href="${src.url}" target="_blank" rel="noopener" class="source-link-btn">🔗 Visiter</a>
+          <span class="source-jobs-count">${src.last_scan_count || 0} offres</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filterSourcesByCountry(country) {
+  if (!state.sources) return;
+  const list = (!country || country === 'ALL')
+    ? state.sources
+    : state.sources.filter(s => s.country === country);
+  renderSourcesGrid(list);
+}
+
+async function triggerLiveWebScan() {
+  const query   = (document.getElementById('scanQueryInput')?.value || '').trim();
+  const country = document.getElementById('scanCountrySelect')?.value || 'ALL';
+  const logEl   = document.getElementById('scanLogContent');
+  const reportBanner = document.getElementById('scanReportBanner');
+  const btn     = document.getElementById('startScanBtn');
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Scan en cours…'; }
+  if (logEl) { logEl.innerHTML = ''; logEl.parentElement?.classList.remove('hidden'); }
+  if (reportBanner) reportBanner.classList.add('hidden');
+
+  const addLog = (msg, type = 'info') => {
+    if (!logEl) return;
+    const colors = { info:'#64b5f6', success:'#81c784', warn:'#ffb74d', error:'#e57373' };
+    const line = document.createElement('div');
+    line.style.color = colors[type] || '#ccc';
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  };
+
+  addLog('🚀 Initialisation du radar web ouest-africain…');
+  addLog(`🔍 Requête : "${query || 'toutes offres'}" — Pays : ${country}`);
+
+  try {
+    addLog('📡 Connexion aux sources répertoriées…');
+    const res = await fetch('/api/aggregator/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, country })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      const found = data.new_offers_ingested ?? data.new_jobs_found ?? 0;
+      const scanned = data.sources_scanned ?? 0;
+      addLog(`✅ Scan terminé ! ${found} nouvelles offres détectées.`, 'success');
+      addLog(`📊 Sources scannées : ${scanned} | Durée : ${data.execution_time_ms || data.duration_ms || 0}ms`);
+      if (data.scan_logs) data.scan_logs.forEach(l => addLog(l));
+
+      if (reportBanner) {
+        reportBanner.classList.remove('hidden');
+        reportBanner.innerHTML = `
+          <div style="background:rgba(76,175,80,0.15);border:1px solid #4caf50;border-radius:12px;padding:20px;margin-top:16px;">
+            <h4 style="color:#81c784;margin:0 0 8px;">✅ Scan terminé avec succès</h4>
+            <p style="margin:4px 0;">📌 <strong>${found}</strong> nouvelles offres ajoutées au feed</p>
+            <p style="margin:4px 0;">🌐 <strong>${scanned}</strong> sources analysées</p>
+            <p style="margin:4px 0;font-size:0.85rem;color:#aaa;">Dernière analyse : ${new Date().toLocaleString('fr-FR')}</p>
+          </div>`;
+      }
+      await fetchJobs();
+      await fetchSources();
+    } else {
+      addLog('❌ Erreur scan : ' + (data.error || 'inconnue'), 'error');
+    }
+  } catch (err) {
+    addLog('❌ Erreur réseau : ' + err.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🛰️ Lancer le Scan'; }
+  }
+}
+
+function openAddSourceModal() {
+  document.getElementById('addSourceModal')?.classList.remove('hidden');
+}
+
+function closeAddSourceModal() {
+  document.getElementById('addSourceModal')?.classList.add('hidden');
+  ['newSiteName','newSiteUrl','newSiteCountry','newSiteCity','newSiteType']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+
+async function submitNewSource() {
+  const name    = document.getElementById('newSiteName')?.value.trim();
+  const url     = document.getElementById('newSiteUrl')?.value.trim();
+  const country = document.getElementById('newSiteCountry')?.value;
+  const city    = document.getElementById('newSiteCity')?.value.trim();
+  const type    = document.getElementById('newSiteType')?.value || 'job_board';
+
+  if (!name || !url || !country) {
+    alert('Veuillez remplir au moins le nom, l\'URL et le pays.');
+    return;
+  }
+  try {
+    const res = await fetch('/api/aggregator/add-site', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, url, country, city, type })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`✅ Source "${name}" ajoutée avec succès !`);
+      closeAddSourceModal();
+      await fetchSources();
+    } else {
+      alert('Erreur : ' + (data.error || 'impossible d\'ajouter la source.'));
+    }
+  } catch (err) {
+    alert('Erreur réseau. Veuillez réessayer.');
   }
 }
