@@ -69,6 +69,24 @@
         <button class="nav-link" id="navInterviewBtn" onclick="switchNavView('interview')">
           <span>🎭</span> Entretien IA
         </button>
+        <button class="nav-link" id="navPayrollBtn" onclick="switchNavView('payroll')">
+          <span>💼</span> Paie & Contrats UEMOA
+        </button>
+        <button class="nav-link" id="navTalentPoolBtn" onclick="switchNavView('talentpool')">
+          <span>🎯</span> Talent Pool
+        </button>
+        <button class="nav-link" id="navRemoteBtn" onclick="switchNavView('remote')">
+          <span>🌍</span> Télétravail & Pige
+        </button>
+        <button class="nav-link" id="navRoadmapBtn" onclick="switchNavView('roadmap')">
+          <span>🧭</span> Mentor Carrière
+        </button>
+        <button class="nav-link" id="navB2BBtn" onclick="switchNavView('b2b')">
+          <span>👔</span> Espace DRH
+        </button>
+        <button class="nav-link" id="navQuizBtn" onclick="switchNavView('quiz')">
+          <span>👥</span> QCM Concours
+        </button>
       </nav>
 
       <!-- Actions Rapides -->
@@ -77,6 +95,9 @@
           <span class="credit-icon">⚡</span>
           <span id="navCreditsCount">Chargement...</span>
         </div>
+        <a href="/u/ibrahima-ndiaye" target="_blank" class="chip" style="color: #fbbf24; border-color: rgba(245, 158, 11, 0.4); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+          🌐 Mon Mini-Site Pro
+        </a>
         <button class="btn-cta-nav" onclick="openPaymentModal()">
           Recharger
         </button>
@@ -429,6 +450,36 @@
         </div>
       </div>
 
+      <!-- ==================== COFFRE-FORT NUMÉRIQUE & DIPLÔMES VÉRIFIÉS ==================== -->
+      <div class="page-card" style="margin-top: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <span class="hero-badge" style="background: rgba(16, 185, 129, 0.2); color: #86efac;">📜 Anti-Fraude & Cryptographie</span>
+            <h3 class="section-heading" style="font-size: 1.3rem; margin-top: 6px;">Coffre-Fort Numérique de Diplômes & Certifications</h3>
+            <p class="section-desc">Générez une empreinte cryptographique SHA-256 infalsifiable pour vos diplômes universitaires.</p>
+          </div>
+          <button class="btn-primary" onclick="openRegisterDiplomaModal()">
+            ➕ Enregistrer un Diplôme
+          </button>
+        </div>
+        <div id="credentialVaultList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      </div>
+
+      <!-- ==================== VIDÉO PITCH 30 SECONDES ==================== -->
+      <div class="page-card" style="margin-top: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <span class="hero-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">🎬 Vidéo Pitch Express</span>
+            <h3 class="section-heading" style="font-size: 1.3rem; margin-top: 6px;">Script de Vidéo Pitch 30s (WhatsApp & Profil)</h3>
+            <p class="section-desc">Script percutant en 5 phrases chronométré pour 30 secondes, prêt à tourner sur smartphone.</p>
+          </div>
+          <button class="btn-primary" onclick="generateVideoScriptUI()">
+            ⚡ Générer mon Script Vidéo IA
+          </button>
+        </div>
+        <div id="videoPitchOutput"></div>
+      </div>
+
     </div>
 
     <!-- ==================== VUE 3 : AJOUT D'UNE OFFRE LIBRE ==================== -->
@@ -497,6 +548,16 @@
               <input type="tel" id="cJobWhatsapp" placeholder="+221 77... ou +225 07...">
             </div>
           </div>
+
+          <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+            <button type="button" class="btn-secondary" onclick="runScamAuditCustomJob()" style="display: flex; align-items: center; gap: 6px; font-weight: 700;">
+              🛡️ Auditer cette offre (Bouclier Anti-Arnaque IA)
+            </button>
+            <button type="button" class="btn-secondary" onclick="reportCurrentJobScam()" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4); font-size: 0.8rem;">
+              🚩 Signaler comme arnaque
+            </button>
+          </div>
+          <div id="scamAuditResultBox" style="display: none; margin-bottom: 16px;"></div>
 
           <button class="btn-primary btn-lg" onclick="handleCustomJobSubmit()">
             🚀 Enregistrer & Générer la Candidature Sur-Mesure
@@ -1151,6 +1212,226 @@
         </div>
 
         <div id="salaryNegotiationResult"></div>
+      </div>
+    <!-- ==================== VUE 13 : FICHE DE PAIE & CONTRATS UEMOA ==================== -->
+    <div id="viewPayroll" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">💼 Droit du Travail & Fiscalité UEMOA</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Simulateur de Fiche de Paie & Contrats de Travail
+        </h2>
+        <p style="color: #a7f3d0; font-size: 0.95rem; max-width: 780px;">
+          Calcul certifié conforme aux barèmes fiscaux officiels du Sénégal (DGID / IPRES / CSS / TRIMF) et de la Côte d'Ivoire (DGI / CNPS / CMU / IS / CN / IGR).
+        </p>
+      </div>
+
+      <div class="page-card" style="margin-bottom: 24px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: flex-end;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Pays du contrat :</label>
+            <select id="payrollCountrySelect" onchange="runPayrollCalculation()" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
+              <option value="Sénégal" selected>🇸🇳 Sénégal (IPRES & Impôt sur Revenu)</option>
+              <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire (CNPS & CMU & IS/CN)</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Type de calcul :</label>
+            <select id="payrollCalcType" onchange="runPayrollCalculation()" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
+              <option value="gross_to_net" selected>Partir du BRUT ➔ Calculer le NET</option>
+              <option value="net_to_gross">Partir du NET souhaité ➔ Déduire le BRUT</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;" id="payrollSalaryLabel">Salaire Brut (FCFA) :</label>
+            <input type="number" id="payrollSalaryInput" value="1000000" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem; font-weight: 700;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Parts Fiscales (Famille) :</label>
+            <select id="payrollPartsSelect" onchange="runPayrollCalculation()" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
+              <option value="1">1 part (Célibataire)</option>
+              <option value="1.5" selected>1.5 parts (Marié(e) sans enfant)</option>
+              <option value="2">2 parts (Marié(e) + 1 enfant)</option>
+              <option value="2.5">2.5 parts (Marié(e) + 2 enfants)</option>
+              <option value="3">3 parts (Marié(e) + 3 enfants)</option>
+            </select>
+          </div>
+          <button class="btn-primary" onclick="runPayrollCalculation()" style="padding: 10px 18px; font-weight: 700;">
+            ⚡ Calculer la Fiche
+          </button>
+        </div>
+      </div>
+
+      <!-- Résultat Bulletin de Paie -->
+      <div id="payrollResultContainer"></div>
+
+      <!-- Générateur de Contrat de Travail Légal -->
+      <div class="page-card" style="margin-top: 24px;">
+        <h3 class="section-heading" style="font-size: 1.2rem;">📜 Générateur de Modèle de Contrat Légal UEMOA</h3>
+        <p class="section-desc">Générez un contrat de travail type prêt à être signé et conforme au Code du Travail sénégalais ou ivoirien.</p>
+        <div style="display: flex; gap: 10px; margin: 12px 0;">
+          <button class="btn-secondary" onclick="generateWorkContractUI('CDI')">📝 Générer Contrat CDI</button>
+          <button class="btn-secondary" onclick="generateWorkContractUI('CDD')">📝 Générer Contrat CDD</button>
+        </div>
+        <div id="contractPreviewContainer"></div>
+      </div>
+    </div>
+
+    <!-- ==================== VUE 14 : MATCHING INVERSÉ & TALENT POOL ==================== -->
+    <div id="viewTalentpool" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🎯 Reverse Recruiting & Chasseurs</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Talent Pool — Les "Cartes d'Or" SunuJob AI
+        </h2>
+        <p style="color: #c7d2fe; font-size: 0.95rem; max-width: 780px;">
+          Les candidats ne postulent plus dans le vide : les entreprises et cabinets de chasse parcourent les profils d'élite anonymisés et envoient des invitations directes d'entretien.
+        </p>
+      </div>
+
+      <div class="page-card" style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <select id="filterTalentSector" onchange="loadTalentPoolUI()" style="padding: 10px 14px; border-radius: 8px; font-weight: 600;">
+            <option value="Tous">Tous secteurs</option>
+            <option value="Tech & Digital">Tech & Digital</option>
+            <option value="Commerce & Ventes">Commerce & Ventes</option>
+            <option value="Finance & Banque">Finance & Banque</option>
+          </select>
+          <select id="filterTalentCountry" onchange="loadTalentPoolUI()" style="padding: 10px 14px; border-radius: 8px; font-weight: 600;">
+            <option value="Tous">Tous pays</option>
+            <option value="Sénégal">🇸🇳 Sénégal</option>
+            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+            <option value="Bénin / Togo">🇧🇯 Bénin / 🇹🇬 Togo</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="talentPoolGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px;">
+        <!-- Rempli par JavaScript -->
+      </div>
+    </div>
+
+    <!-- ==================== VUE 15 : TÉLÉTRAVAIL INTERNATIONAL & PIGE ==================== -->
+    <div id="viewRemote" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(16, 185, 129, 0.25); color: #86efac;">🌍 Devises ➔ Wave & Mobile Money</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Télétravail International & Facturation Export
+        </h2>
+        <p style="color: #cbd5e1; font-size: 0.95rem; max-width: 780px;">
+          Travaillez depuis Dakar ou Abidjan pour des clients en France, Belgique ou Canada. Rémunérations en Euros ou Dollars avec conversion automatique et factures export conformes OHADA.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; flex-wrap: wrap;">
+        <!-- Offres Full Remote -->
+        <div>
+          <h3 class="section-heading" style="font-size: 1.2rem; margin-bottom: 14px;">📡 Opportunités 100% Télétravail Ouvertes à l'AOF</h3>
+          <div id="remoteJobsContainer" style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Rempli par JavaScript -->
+          </div>
+        </div>
+
+        <!-- Générateur de Facture Internationale -->
+        <div class="page-card" style="height: fit-content;">
+          <h4 style="color: var(--accent); margin-bottom: 12px; font-size: 1.05rem;">📄 Générateur de Facture Export Conforme OHADA</h4>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem;">
+            <input type="text" id="invClientName" placeholder="Nom du Client (ex: Studio Web Paris)" value="Studio Web Paris SAS" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);">
+            <input type="text" id="invService" placeholder="Prestation (ex: Développement Next.js)" value="Développement Frontend Next.js & Intégration API" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);">
+            <div style="display: flex; gap: 8px;">
+              <input type="number" id="invAmount" value="2800" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); font-weight: 700;">
+              <select id="invCurrency" style="padding: 8px 12px; border-radius: 6px; font-weight: 700;">
+                <option value="EUR">€ EUR</option>
+                <option value="USD">$ USD</option>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="generateInternationalInvoiceUI()" style="margin-top: 6px;">
+              ⚡ Générer la Facture Export
+            </button>
+          </div>
+          <div id="invoiceOutputBox" style="margin-top: 14px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== VUE 16 : MENTOR CARRIÈRE & TRAJECTOIRE 3 ANS ==================== -->
+    <div id="viewRoadmap" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🧭 Trajectoire & Accélération Salariale</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Mentor Carrière IA — Plan d'Action 36 Mois
+        </h2>
+        <p style="color: #bfdbfe; font-size: 0.95rem; max-width: 780px;">
+          Définissez votre salaire cible (ex: passer de 400 000 FCFA à 1 500 000 FCFA). L'IA calcule votre feuille de route Année par Année : compétences manquantes, certifications à obtenir et entreprises cibles.
+        </p>
+      </div>
+
+      <div class="page-card" style="margin-bottom: 24px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: flex-end;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Poste actuel :</label>
+            <input type="text" id="roadmapCurRole" value="Développeur Web Confirmé" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Salaire actuel net (FCFA) :</label>
+            <input type="number" id="roadmapCurSalary" value="550000" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-weight: 700;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Poste visé à 3 ans :</label>
+            <input type="text" id="roadmapTargetRole" value="Lead Architecte Cloud / CTO" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Salaire cible net (FCFA) :</label>
+            <input type="number" id="roadmapTargetSalary" value="1600000" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-weight: 700;">
+          </div>
+          <button class="btn-primary" onclick="generateCareerRoadmapUI()" style="padding: 10px 18px; font-weight: 700;">
+            🚀 Générer mon Plan 3 Ans
+          </button>
+        </div>
+      </div>
+
+      <div id="roadmapResultContainer"></div>
+    </div>
+
+    <!-- ==================== VUE 17 : ESPACE DRH & SHORTLIST IA 10S ==================== -->
+    <div id="viewB2b" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(59, 130, 246, 0.25); color: #93c5fd;">👔 Solution Entreprises & Cabinets</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Portail Recruteur B2B — Shortlist IA en 10 Secondes
+        </h2>
+        <p style="color: #cbd5e1; font-size: 0.95rem; max-width: 780px;">
+          Vous avez 300 CVs reçus en vrac ? Décrivez votre besoin ou collez une offre : l'algorithme classe immédiatement les 5 profils les plus compatibles avec rapport d'adéquation et convocation WhatsApp groupée.
+        </p>
+      </div>
+
+      <div class="page-card" style="margin-bottom: 24px;">
+        <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+          <input type="text" id="b2bJobTitle" placeholder="Intitulé du poste recherché (ex: Lead DevOps, Commercial B2B, Comptable)..." value="Développeur Cloud DevOps" style="flex: 1; min-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.95rem;">
+          <button class="btn-primary" onclick="runB2BShortlistUI()" style="padding: 12px 22px; font-weight: 800; background: var(--accent); color: #1e1e1e;">
+            ⚡ Filtrer & Générer la Shortlist IA
+          </button>
+        </div>
+      </div>
+
+      <div id="b2bShortlistContainer"></div>
+    </div>
+
+    <!-- ==================== VUE 18 : QCM & PRÉPARATION CONCOURS ==================== -->
+    <div id="viewQuiz" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #701a75 0%, #86198f 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">👥 Entraînement Quotidien</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Cohortes de Préparation aux Concours — QCM Quotidien
+        </h2>
+        <p style="color: #f5d0fe; font-size: 0.95rem; max-width: 780px;">
+          Entraînez-vous chaque jour aux épreuves d'admissibilité (ENA, Douanes, BCEAO, Finances Publiques UEMOA) et mesurez votre progression face aux autres candidats de la promotion.
+        </p>
+      </div>
+
+      <div class="page-card">
+        <div id="dailyQuizContainer">
+          <!-- Rempli par JavaScript -->
+        </div>
       </div>
     </div>
 

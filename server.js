@@ -21,6 +21,17 @@ const referralNetwork = require('./src/core/referral_network');
 const whatsappBot = require('./src/core/whatsapp_bot');
 const interviewSimulator = require('./src/core/interview_simulator');
 const smsHandler = require('./src/core/sms_handler');
+// Modules Phase 2 Game-Changer
+const scamDetector = require('./src/core/scam_detector');
+const payrollCalculator = require('./src/core/payroll_calculator');
+const talentPool = require('./src/core/talent_pool');
+const portfolioGenerator = require('./src/core/portfolio_generator');
+const remoteHub = require('./src/core/remote_hub');
+const b2bRecruiter = require('./src/core/b2b_recruiter');
+const credentialVault = require('./src/core/credential_vault');
+const careerRoadmap = require('./src/core/career_roadmap');
+const videoPitch = require('./src/core/video_pitch');
+const concoursPrep = require('./src/core/concours_prep');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -428,6 +439,137 @@ app.post('/api/ai/parse-voice-profile', (req, res) => {
   if (!transcript) return res.status(400).json({ success: false, error: 'Transcription manquante' });
   const parsed = aiAnalyzer.parseVoiceProfile(transcript);
   res.json({ success: true, ...parsed });
+});
+
+// =================== ROUTES PHASE 2 GAME-CHANGER =================== //
+
+// --- 1. BOUCLIER ANTI-ARNAQUE ---
+app.post('/api/scam/audit', (req, res) => {
+  const result = scamDetector.auditJobOfferForScam(req.body.job);
+  res.json({ success: true, audit: result });
+});
+
+app.post('/api/scam/report', (req, res) => {
+  const report = scamDetector.reportScamOffer(req.body);
+  res.json({ success: true, report });
+});
+
+app.get('/api/scam/recent', (req, res) => {
+  res.json({ success: true, reports: scamDetector.getRecentScamReports() });
+});
+
+// --- 2. FICHE DE PAIE & CONTRATS UEMOA ---
+app.post('/api/payroll/calculate', (req, res) => {
+  const { gross, country, isCadre, partsFiscales } = req.body;
+  const result = country === "Côte d'Ivoire"
+    ? payrollCalculator.calculatePayrollCoteIvoire(gross, { partsFiscales })
+    : payrollCalculator.calculatePayrollSenegal(gross, { isCadre, partsFiscales });
+  res.json({ success: true, payroll: result });
+});
+
+app.post('/api/payroll/gross-from-net', (req, res) => {
+  const { netDesired, country, isCadre } = req.body;
+  const result = payrollCalculator.calculateGrossFromNet(netDesired, country, isCadre);
+  res.json({ success: true, payroll: result });
+});
+
+app.post('/api/payroll/contract', (req, res) => {
+  const contract = payrollCalculator.generateLegalWorkContract(req.body);
+  res.json({ success: true, contract });
+});
+
+// --- 3. MATCHING INVERSÉ & TALENT POOL ---
+app.get('/api/talent-pool', (req, res) => {
+  const { sector, country, min_exp } = req.query;
+  const profiles = talentPool.getTalentPoolProfiles({ sector, country, min_exp });
+  res.json({ success: true, count: profiles.length, profiles });
+});
+
+app.post('/api/talent-pool/unlock', (req, res) => {
+  const { profileId, recruiter } = req.body;
+  const outcome = talentPool.requestUnlockProfile(profileId, recruiter);
+  res.json(outcome);
+});
+
+// --- 4. MINI-SITE PRO PUBLIC (/u/:slug) ---
+app.get('/u/:slug', (req, res) => {
+  const profile = profileManager.getProfile();
+  const referrals = referralNetwork.getAllReferrals();
+  const html = portfolioGenerator.renderPublicPortfolioHTML(profile, referrals);
+  res.send(html);
+});
+
+// --- 5. TÉLÉTRAVAIL INTERNATIONAL & FACTURATION ---
+app.get('/api/remote/jobs', (req, res) => {
+  res.json({ success: true, jobs: remoteHub.getRemoteJobs() });
+});
+
+app.post('/api/remote/invoice', (req, res) => {
+  const invoice = remoteHub.generateInternationalInvoice(req.body);
+  res.json({ success: true, invoice });
+});
+
+// --- 6. PORTAIL RECRUTEUR B2B (SHORTLIST IA 10S) ---
+app.post('/api/b2b/shortlist', (req, res) => {
+  const shortlist = b2bRecruiter.generateAIShortlist(req.body);
+  res.json({ success: true, ...shortlist });
+});
+
+// --- 7. COFFRE-FORT NUMÉRIQUE & DIPLÔMES VÉRIFIÉS ---
+app.get('/api/credentials', (req, res) => {
+  const creds = credentialVault.getCandidateCredentials(req.query.candidate);
+  res.json({ success: true, credentials: creds });
+});
+
+app.post('/api/credentials/register', (req, res) => {
+  const registered = credentialVault.registerNewCredential(req.body);
+  res.json({ success: true, credential: registered });
+});
+
+app.get('/verify/:id', (req, res) => {
+  const outcome = credentialVault.verifyCredentialByHashOrId(req.params.id);
+  if (!outcome.valid) {
+    return res.status(404).send(`<h1>Authenticité Non Reconnue</h1><p>${outcome.message}</p>`);
+  }
+  const c = outcome.credential;
+  res.send(`<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><title>Vérification Officielle Diplôme | SunuJob AI</title>
+<style>body{font-family:sans-serif;background:#091310;color:#f8fafc;display:flex;justify-content:center;padding:40px 16px;}
+.box{background:#11221c;border:2px solid #10b981;border-radius:16px;padding:32px;max-width:600px;width:100%;text-align:center;}
+.seal{font-size:3rem;margin-bottom:12px;}h1{color:#10b981;font-size:1.5rem;margin-bottom:14px;}
+.hash{word-break:break-all;font-family:monospace;background:rgba(0,0,0,0.4);padding:10px;border-radius:8px;font-size:0.8rem;color:#86efac;margin:16px 0;}
+</style></head>
+<body><div class="box"><div class="seal">🛡️</div><h1>Diplôme Certifié Authentique</h1>
+<p style="font-size:1.1rem;font-weight:700;margin-bottom:6px;">${c.title}</p>
+<p style="color:#fbbf24;margin-bottom:12px;">Délivré à : <strong>${c.candidate_name}</strong> par <strong>${c.institution}</strong> (${c.graduation_year})</p>
+<div class="hash">Hash SHA-256 : ${c.verification_hash}</div>
+<p style="font-size:0.85rem;color:#94a3b8;">${c.verified_by} · Horodatage : ${c.verified_at}</p>
+<p style="margin-top:20px;"><a href="/" style="color:#10b981;text-decoration:none;font-weight:700;">← Retour à SunuJob AI</a></p>
+</div></body></html>`);
+});
+
+// --- 8. MENTOR CARRIÈRE IA (ROADMAP 3 ANS) ---
+app.post('/api/career/roadmap', (req, res) => {
+  const { currentRole, currentSalary, targetRole, targetSalary, sector, city } = req.body;
+  const roadmap = careerRoadmap.generateCareerRoadmap(currentRole, currentSalary, targetRole, targetSalary, sector, city);
+  res.json({ success: true, ...roadmap });
+});
+
+// --- 9. VIDÉO PITCH 30S ---
+app.post('/api/video-pitch/generate', (req, res) => {
+  const profile = req.body.profile || profileManager.getProfile();
+  const script = videoPitch.generate30SecVideoScript(profile);
+  res.json({ success: true, ...script });
+});
+
+// --- 10. PRÉPARATION CONCOURS (QCM QUOTIDIEN) ---
+app.get('/api/concours-prep/quiz', (req, res) => {
+  res.json({ success: true, quiz: concoursPrep.getDailyQuiz() });
+});
+
+app.post('/api/concours-prep/submit', (req, res) => {
+  const evaluation = concoursPrep.evaluateQuizSubmission(req.body.answers || {});
+  res.json({ success: true, evaluation });
 });
 
 // Lancement du serveur

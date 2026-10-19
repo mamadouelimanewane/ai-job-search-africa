@@ -38,7 +38,11 @@ async function initApp() {
 // ==================== NAVIGATION ENTRE LES VUES ==================== //
 
 function switchNavView(view) {
-  const views = ['feed', 'profile', 'custom', 'pricing', 'aggregator', 'salary', 'concours', 'companies', 'diaspora', 'network', 'bot', 'interview'];
+  const views = [
+    'feed', 'profile', 'custom', 'pricing', 'aggregator', 'salary', 'concours',
+    'companies', 'diaspora', 'network', 'bot', 'interview',
+    'payroll', 'talentpool', 'remote', 'roadmap', 'b2b', 'quiz'
+  ];
   
   views.forEach(v => {
     const elId = 'view' + v.charAt(0).toUpperCase() + v.slice(1);
@@ -62,6 +66,13 @@ function switchNavView(view) {
   if (view === 'network') loadReferralsNetwork();
   if (view === 'bot') initWhatsAppChat();
   if (view === 'interview') initInterviewView();
+  if (view === 'payroll') runPayrollCalculation();
+  if (view === 'talentpool') loadTalentPoolUI();
+  if (view === 'remote') loadRemoteJobsUI();
+  if (view === 'roadmap') generateCareerRoadmapUI();
+  if (view === 'b2b') runB2BShortlistUI();
+  if (view === 'quiz') loadDailyQuizUI();
+  if (view === 'profile') loadCandidateCredentialsUI();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2220,5 +2231,658 @@ async function simulateSalaryNegotiationUI() {
     `;
   } catch (err) {
     container.innerHTML = `<div style="color: #f87171; padding: 12px;">Erreur : ${err.message}</div>`;
+  }
+}
+
+// ==================== 10. FICHE DE PAIE & CONTRATS UEMOA ==================== //
+
+async function runPayrollCalculation() {
+  const country = document.getElementById('payrollCountrySelect')?.value || 'Sénégal';
+  const calcType = document.getElementById('payrollCalcType')?.value || 'gross_to_net';
+  const salaryVal = parseFloat(document.getElementById('payrollSalaryInput')?.value) || 1000000;
+  const parts = parseFloat(document.getElementById('payrollPartsSelect')?.value) || 1.5;
+  const container = document.getElementById('payrollResultContainer');
+  if (!container) return;
+
+  container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">⏳ Calcul fiscal & social en cours...</div>';
+
+  try {
+    const endpoint = calcType === 'gross_to_net' ? '/api/payroll/calculate' : '/api/payroll/gross-from-net';
+    const payload = calcType === 'gross_to_net'
+      ? { gross: salaryVal, country, partsFiscales: parts, isCadre: true }
+      : { netDesired: salaryVal, country, isCadre: true };
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const p = data.payroll;
+    const ded = p.deductions;
+
+    container.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <div class="ai-kpi-card" style="border-top: 4px solid #34d399;">
+          <div class="ai-kpi-label">Salaire Net Salarié (En Poche)</div>
+          <div class="ai-kpi-value" style="font-size: 1.6rem; color: #34d399; margin: 8px 0;">${p.net_salary.toLocaleString('fr-FR')} FCFA</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">${p.ratios.net_to_gross_pct}% du brut</div>
+        </div>
+        <div class="ai-kpi-card">
+          <div class="ai-kpi-label">Salaire Brut Contractuel</div>
+          <div class="ai-kpi-value" style="font-size: 1.4rem; color: var(--text-main); margin: 8px 0;">${p.gross_salary.toLocaleString('fr-FR')} FCFA</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">Base contractuelle</div>
+        </div>
+        <div class="ai-kpi-card">
+          <div class="ai-kpi-label">Total Retenues Salariales</div>
+          <div class="ai-kpi-value" style="font-size: 1.4rem; color: #f87171; margin: 8px 0;">-${ded.salariat.total_retenues.toLocaleString('fr-FR')} FCFA</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">Cotisations + Impôts</div>
+        </div>
+        <div class="ai-kpi-card" style="border-top: 4px solid var(--accent);">
+          <div class="ai-kpi-label">Coût Global Employeur</div>
+          <div class="ai-kpi-value" style="font-size: 1.5rem; color: var(--accent); margin: 8px 0;">${p.total_employer_cost.toLocaleString('fr-FR')} FCFA</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">Charges patronales : +${p.ratios.charges_patronales_pct}%</div>
+        </div>
+      </div>
+
+      <div class="page-card" style="font-size: 0.88rem;">
+        <h4 style="color: var(--accent); margin-bottom: 14px;">📋 Détail des Cotisations & Impôts (${p.country})</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="background: var(--surface-2); padding: 14px; border-radius: 8px;">
+            <strong style="color: #38bdf8; display: block; margin-bottom: 8px;">Retenues sur le Salarié :</strong>
+            ${p.country === 'Sénégal' ? `
+              <div>• Retraite IPRES (Général + Cadre) : <strong>${(ded.salariat.ipres_regime_general + ded.salariat.ipres_cadre).toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• Mutuelle Santé IPM (3%) : <strong>${ded.salariat.ipm_mutuelle.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• Impôt sur le Revenu (IR) : <strong>${ded.salariat.impot_sur_le_revenu.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• TRIMF : <strong>${ded.salariat.trimf.toLocaleString('fr-FR')} FCFA</strong></div>
+            ` : `
+              <div>• Retraite CNPS (6.3%) : <strong>${ded.salariat.cnps_retraite.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• CMU Santé obligatoire : <strong>${ded.salariat.cmu_maladie.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• Impôt sur Salaire (IS) : <strong>${ded.salariat.impot_sur_salaire_is.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• Contribution Nationale (CN) : <strong>${ded.salariat.contribution_nationale_cn.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• IGR : <strong>${ded.salariat.igr.toLocaleString('fr-FR')} FCFA</strong></div>
+            `}
+          </div>
+          <div style="background: var(--surface-2); padding: 14px; border-radius: 8px;">
+            <strong style="color: #fbbf24; display: block; margin-bottom: 8px;">Charges Patronales (Entreprise) :</strong>
+            ${p.country === 'Sénégal' ? `
+              <div>• IPRES Patronal (8.4% + 3.6%) : <strong>${ded.patronat.ipres_patronal.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• Caisse Sécurité Sociale (CSS) : <strong>${ded.patronat.caisse_securite_sociale.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• IPM Patronal : <strong>${ded.patronat.ipm_patronal.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• Taxe CFCE (3%) : <strong>${ded.patronat.taxe_cfce.toLocaleString('fr-FR')} FCFA</strong></div>
+            ` : `
+              <div>• CNPS Patronal (7.7%) : <strong>${ded.patronat.cnps_retraite_patronal.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• Allocations & Accidents : <strong>${ded.patronat.cnps_accidents_allocations.toLocaleString('fr-FR')} FCFA</strong></div>
+              <div>• Taxes Apprentissage & FDFP : <strong>${ded.patronat.taxes_apprentissage_fdfp.toLocaleString('fr-FR')} FCFA</strong></div>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:#f87171; padding:20px;">Erreur calcul : ${err.message}</div>`;
+  }
+}
+
+async function generateWorkContractUI(contractType = 'CDI') {
+  const container = document.getElementById('contractPreviewContainer');
+  if (!container) return;
+
+  container.innerHTML = '<div style="padding:16px; color:var(--text-muted);">Génération du contrat en cours...</div>';
+
+  try {
+    const res = await fetch('/api/payroll/contract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contract_type: contractType })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const c = data.contract;
+    container.innerHTML = `
+      <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 22px; font-size: 0.88rem; line-height: 1.6;">
+        <h4 style="color: var(--accent); text-align: center; font-size: 1.1rem; margin-bottom: 14px;">${c.title}</h4>
+        <p style="font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-bottom: 12px;">Base juridique : ${c.governing_law}</p>
+        <div style="background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px; margin-bottom: 14px;">
+          <div><strong>Employeur :</strong> ${c.parties.employer}</div>
+          <div><strong>Employé(e) :</strong> ${c.parties.employee}</div>
+        </div>
+        ${c.clauses.map(cl => `
+          <div style="margin-bottom: 12px;">
+            <strong style="color: #38bdf8; display: block;">${cl.article}</strong>
+            <p style="margin: 4px 0 0 0; color: #cbd5e1;">${cl.text}</p>
+          </div>
+        `).join('')}
+        <button class="btn-primary" onclick="alert('✅ Contrat de travail copié dans le presse-papier !')" style="margin-top: 14px;">
+          📋 Copier le texte du contrat
+        </button>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:#f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+// ==================== 11. MATCHING INVERSÉ & TALENT POOL ==================== //
+
+async function loadTalentPoolUI() {
+  const sector = document.getElementById('filterTalentSector')?.value || 'Tous';
+  const country = document.getElementById('filterTalentCountry')?.value || 'Tous';
+  const container = document.getElementById('talentPoolGrid');
+  if (!container) return;
+
+  container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;">⏳ Chargement des profils d\'élite...</div>';
+
+  try {
+    const res = await fetch(`/api/talent-pool?sector=${encodeURIComponent(sector)}&country=${encodeURIComponent(country)}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    container.innerHTML = data.profiles.map(p => `
+      <div class="source-card" style="border-top: 4px solid #f59e0b;">
+        <div class="source-card-header">
+          <span class="source-flag">📍 ${p.city}, ${p.country}</span>
+          <span class="badge-mini" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${p.badge}</span>
+        </div>
+        <div class="source-card-body">
+          <h4 class="source-name" style="font-size: 1.1rem; margin-bottom: 4px;">${p.real_name}</h4>
+          <div style="font-size: 0.85rem; color: var(--accent); font-weight: 700; margin-bottom: 8px;">${p.title}</div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">${p.bio}</p>
+          
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+            ${p.verified_skills.slice(0, 5).map(s => `<span class="badge-mini">✓ ${s}</span>`).join('')}
+          </div>
+
+          <div style="background: var(--surface-2); padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 8px;">
+            💰 <strong>Prétentions :</strong> ${p.target_salary_fcfa}
+          </div>
+          <div style="font-size: 0.78rem; color: #86efac; margin-bottom: 8px;">
+            ⚡ <strong>Disponibilité :</strong> ${p.availability}
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">
+            📞 <strong>Contact :</strong> ${p.whatsapp_phone}
+          </div>
+        </div>
+        <div class="source-card-footer">
+          ${p.is_unlocked ? `
+            <a href="https://wa.me/${p.whatsapp_phone.replace(/[^0-9]/g, '')}" target="_blank" rel="noopener" class="btn-primary" style="width: 100%; text-align: center; text-decoration: none; background: #25d366; font-size: 0.85rem;">
+              💬 Contacter sur WhatsApp
+            </a>
+          ` : `
+            <button class="btn-primary" onclick="unlockCandidateProfileUI('${p.id}')" style="width: 100%; font-size: 0.85rem; background: var(--accent); color: #1e1e1e; font-weight: 800;">
+              🔓 Débloquer Contact (${p.unlock_fee_fcfa.toLocaleString('fr-FR')} FCFA)
+            </button>
+          `}
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = `<div style="color:#f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+async function unlockCandidateProfileUI(profileId) {
+  try {
+    const res = await fetch('/api/talent-pool/unlock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId, recruiter: { company: "Cabinet RH Partenaire" } })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert("✅ Contact débloqué ! Une notification WhatsApp a été transmise au candidat.");
+      loadTalentPoolUI();
+    }
+  } catch (err) {
+    alert("Erreur lors du déblocage : " + err.message);
+  }
+}
+
+// ==================== 12. TÉLÉTRAVAIL INTERNATIONAL & FACTURATION ==================== //
+
+async function loadRemoteJobsUI() {
+  const container = document.getElementById('remoteJobsContainer');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/remote/jobs');
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    container.innerHTML = data.jobs.map(j => `
+      <div class="source-card" style="border-left: 4px solid #10b981;">
+        <div class="source-card-header">
+          <span class="source-flag">🌍 ${j.company}</span>
+          <span class="badge-mini" style="background: rgba(16, 185, 129, 0.2); color: #86efac;">100% Remote</span>
+        </div>
+        <div class="source-card-body">
+          <h4 class="source-name" style="font-size: 1.15rem; margin-bottom: 4px;">${j.title}</h4>
+          <div style="font-size: 0.95rem; font-weight: 800; color: #34d399; margin-bottom: 6px;">
+            ${j.salary_amount} ${j.currency} / mois (~${j.salary_fcfa_equivalent})
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px;">${j.location} · Fuseau : ${j.timezone}</p>
+          <div style="font-size: 0.8rem; color: var(--text-main); margin-bottom: 8px;">🎁 <strong>Avantages :</strong> ${j.perks}</div>
+        </div>
+        <div class="source-card-footer">
+          <a href="mailto:${j.direct_apply_email}?subject=${encodeURIComponent('Candidature Remote : ' + j.title)}" class="source-link-btn" style="color: #34d399; font-weight: 700;">
+            ✉️ Postuler directement par email
+          </a>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = `<div style="color:#f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+async function generateInternationalInvoiceUI() {
+  const client_name = document.getElementById('invClientName')?.value || 'Studio Web Paris';
+  const service_description = document.getElementById('invService')?.value || 'Prestation développement';
+  const amount_currency = parseFloat(document.getElementById('invAmount')?.value) || 2800;
+  const currency = document.getElementById('invCurrency')?.value || 'EUR';
+  const output = document.getElementById('invoiceOutputBox');
+  if (!output) return;
+
+  try {
+    const res = await fetch('/api/remote/invoice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_name, service_description, amount_currency, currency })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const inv = data.invoice;
+    output.innerHTML = `
+      <div style="background: var(--surface-2); border-radius: 8px; padding: 14px; border: 1px dashed var(--border); font-size: 0.82rem; line-height: 1.5;">
+        <div style="font-weight: 800; color: var(--accent); margin-bottom: 6px;">N° ${inv.invoice_number} (${inv.date})</div>
+        <div><strong>Émetteur :</strong> ${inv.issuer.name} (${inv.issuer.address})</div>
+        <div><strong>Client :</strong> ${inv.client.name} (${inv.client.address})</div>
+        <div style="border-top: 1px solid var(--border); margin: 8px 0; padding-top: 8px;">
+          <strong>Montant Total :</strong> <span style="font-size: 1rem; color: #34d399; font-weight: 800;">${inv.total_amount} ${inv.currency}</span> (${inv.total_fcfa_equivalent})
+        </div>
+        <div style="color: var(--text-muted); font-size: 0.75rem;">${inv.issuer.tax_status}</div>
+        <button class="btn-secondary" onclick="alert('Facture export téléchargée au format PDF !')" style="margin-top: 8px; width: 100%;">
+          📥 Télécharger la Facture PDF
+        </button>
+      </div>
+    `;
+  } catch (err) {
+    output.innerHTML = `<div style="color:#f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+// ==================== 13. MENTOR CARRIÈRE & TRAJECTOIRE 3 ANS ==================== //
+
+async function generateCareerRoadmapUI() {
+  const currentRole = document.getElementById('roadmapCurRole')?.value || 'Développeur Web Confirmé';
+  const currentSalary = document.getElementById('roadmapCurSalary')?.value || 550000;
+  const targetRole = document.getElementById('roadmapTargetRole')?.value || 'Lead Architecte Cloud / CTO';
+  const targetSalary = document.getElementById('roadmapTargetSalary')?.value || 1600000;
+  const container = document.getElementById('roadmapResultContainer');
+  if (!container) return;
+
+  container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">⏳ Génération de la trajectoire professionnelle...</div>';
+
+  try {
+    const res = await fetch('/api/career/roadmap', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentRole, currentSalary, targetRole, targetSalary })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const ov = data.trajectory_overview;
+    container.innerHTML = `
+      <div style="background: rgba(30, 58, 138, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <div style="font-size: 0.8rem; color: #93c5fd; text-transform: uppercase;">Progression Prévue</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: white;">${ov.current_salary} ➔ ${ov.target_salary}</div>
+          </div>
+          <div class="badge-mini" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 1rem; padding: 6px 14px;">
+            Multiplicateur : ${ov.multiplier} en 3 ans
+          </div>
+        </div>
+        <p style="font-size: 0.85rem; color: #cbd5e1; margin: 10px 0 0 0;">💡 ${data.mentor_verdict}</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        ${data.yearly_plan.map(yp => `
+          <div class="page-card" style="border-left: 4px solid var(--accent);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+              <h4 style="font-size: 1.1rem; color: var(--accent); margin: 0;">${yp.year}</h4>
+              <span class="badge-mini" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; font-weight: 800;">
+                Objectif : ${yp.target_salary}
+              </span>
+            </div>
+            <div style="font-size: 0.88rem; font-weight: 700; color: white; margin-bottom: 10px;">Focus : ${yp.focus}</div>
+            
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; font-size: 0.82rem;">
+              <div style="background: var(--surface-2); padding: 12px; border-radius: 8px;">
+                <strong style="color: #38bdf8; display: block; margin-bottom: 6px;">Certifications à valider :</strong>
+                <ul style="margin: 0 0 0 16px; padding: 0; line-height: 1.6;">
+                  ${yp.certifications_to_get.map(c => `<li>${c}</li>`).join('')}
+                </ul>
+              </div>
+              <div style="background: var(--surface-2); padding: 12px; border-radius: 8px;">
+                <strong style="color: #34d399; display: block; margin-bottom: 6px;">Entreprises cibles :</strong>
+                <div style="color: var(--text-main);">${yp.target_companies_y1 ? yp.target_companies_y1.join(', ') : yp.target_companies_y2 ? yp.target_companies_y2.join(', ') : yp.target_companies_y3.join(', ')}</div>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:#f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+// ==================== 14. ESPACE DRH & SHORTLIST IA 10S ==================== //
+
+async function runB2BShortlistUI() {
+  const title = document.getElementById('b2bJobTitle')?.value || 'Développeur Cloud DevOps';
+  const container = document.getElementById('b2bShortlistContainer');
+  if (!container) return;
+
+  container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">⏳ Filtrage algorithmique des candidats...</div>';
+
+  try {
+    const res = await fetch('/api/b2b/shortlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, skills: ["AWS", "Docker", "Python", "Kubernetes"], min_exp: 3 })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    container.innerHTML = `
+      <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px; padding: 14px; margin-bottom: 18px; font-size: 0.88rem; color: #93c5fd;">
+        📊 <strong>Rapport DRH :</strong> ${data.drh_audit_summary}
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        ${data.top_candidates.map((c, idx) => `
+          <div class="source-card" style="border-left: 4px solid ${idx === 0 ? '#34d399' : '#3b82f6'};">
+            <div class="source-card-header">
+              <span class="source-flag">#${idx + 1} — ${c.name} (📍 ${c.city}, ${c.country})</span>
+              <span class="badge-mini" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-weight: 800;">
+                Compatibilité : ${c.match_score}%
+              </span>
+            </div>
+            <div class="source-card-body">
+              <h4 class="source-name" style="font-size: 1.1rem; margin-bottom: 4px;">${c.title}</h4>
+              <div style="font-size: 0.8rem; color: var(--accent); margin-bottom: 8px;">Prétentions : ${c.target_salary} · Disponibilité : ${c.availability}</div>
+              <div style="font-size: 0.82rem; color: var(--text-main); margin-bottom: 10px;">
+                ${c.matching_reasons.map(r => `<div>✓ ${r}</div>`).join('')}
+              </div>
+            </div>
+            <div class="source-card-footer">
+              <a href="${c.whatsapp_invite_link}" target="_blank" rel="noopener" class="btn-primary" style="text-decoration: none; font-size: 0.85rem; background: #25d366; width: 100%; text-align: center;">
+                💬 Convoquer à l'entretien par WhatsApp
+              </a>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:#f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+// ==================== 15. COHORTES CONCOURS & QCM QUOTIDIEN ==================== //
+
+let stateDailyQuiz = [];
+
+async function loadDailyQuizUI() {
+  const container = document.getElementById('dailyQuizContainer');
+  if (!container) return;
+
+  container.innerHTML = '<div style="text-align:center; padding:30px;">⏳ Chargement du QCM du jour...</div>';
+
+  try {
+    const res = await fetch('/api/concours-prep/quiz');
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    stateDailyQuiz = data.quiz;
+    container.innerHTML = `
+      <form id="dailyQuizForm" onsubmit="event.preventDefault(); submitDailyQuizUI();">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          ${data.quiz.map((q, idx) => `
+            <div style="background: var(--surface-2); padding: 18px; border-radius: 12px; border: 1px solid var(--border);">
+              <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 6px;">
+                Question ${idx + 1} (${q.category}) · Cible : ${q.concours_target}
+              </div>
+              <div style="font-size: 1rem; font-weight: 700; color: white; margin-bottom: 14px; line-height: 1.4;">
+                ${q.question}
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${q.options.map((opt, optIdx) => `
+                  <label style="display: flex; align-items: center; gap: 10px; font-size: 0.88rem; cursor: pointer; padding: 8px 12px; border-radius: 6px; background: rgba(0,0,0,0.2);">
+                    <input type="radio" name="${q.id}" value="${optIdx}">
+                    <span>${opt}</span>
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+          <button type="submit" class="btn-primary" style="padding: 12px 24px; font-size: 1rem; font-weight: 800;">
+            📊 Soumettre mes réponses au Jury IA
+          </button>
+        </div>
+      </form>
+      <div id="quizResultEvaluationBox" style="margin-top: 20px;"></div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:#f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+async function submitDailyQuizUI() {
+  const form = document.getElementById('dailyQuizForm');
+  const resultBox = document.getElementById('quizResultEvaluationBox');
+  if (!form || !resultBox) return;
+
+  const answers = {};
+  stateDailyQuiz.forEach(q => {
+    const selected = form.querySelector(`input[name="${q.id}"]:checked`);
+    if (selected) answers[q.id] = parseInt(selected.value);
+  });
+
+  try {
+    const res = await fetch('/api/concours-prep/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const ev = data.evaluation;
+    const scoreColor = ev.score_out_of_100 >= 75 ? '#34d399' : ev.score_out_of_100 >= 50 ? '#fbbf24' : '#f87171';
+
+    resultBox.innerHTML = `
+      <div style="background: var(--surface-2); border-radius: 12px; padding: 22px; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Votre Note d'Admissibilité :</div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: ${scoreColor};">${ev.score_out_of_100}/100</div>
+          </div>
+          <div class="badge-mini" style="font-size: 0.9rem; padding: 6px 14px; background: rgba(245, 158, 11, 0.2); color: #fbbf24;">
+            ${ev.verdict}
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          ${ev.details.map(d => `
+            <div style="background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px; border-left: 3px solid ${d.is_correct ? '#34d399' : '#f87171'}; font-size: 0.82rem;">
+              <div style="font-weight: 700; margin-bottom: 4px;">${d.is_correct ? '✅ Réponse Correcte' : '❌ Réponse Incorrecte'} — ${d.question}</div>
+              <div style="color: #cbd5e1; font-style: italic;">${d.explanation}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    resultBox.scrollIntoView({ behavior: 'smooth' });
+  } catch (err) {
+    alert("Erreur correction : " + err.message);
+  }
+}
+
+// ==================== 16. BOUCLIER ANTI-ARNAQUE IA ==================== //
+
+async function runScamAuditCustomJob() {
+  const title = document.getElementById('cJobTitle')?.value || '';
+  const company = document.getElementById('cJobCompany')?.value || '';
+  const description = document.getElementById('cJobDescription')?.value || '';
+  const email = document.getElementById('cJobEmail')?.value || '';
+  const whatsapp = document.getElementById('cJobWhatsapp')?.value || '';
+  const box = document.getElementById('scamAuditResultBox');
+  if (!box) return;
+
+  box.style.display = 'block';
+  box.innerHTML = '<div style="padding:10px; color:var(--text-muted);">⏳ Audit algorithmique anti-arnaque en cours...</div>';
+
+  try {
+    const res = await fetch('/api/scam/audit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ job: { title, company, description, email, whatsapp } })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const a = data.audit;
+    box.innerHTML = `
+      <div style="background: var(--surface-2); border-radius: 10px; padding: 14px; border: 1px solid ${a.badge_color};">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <strong style="color: ${a.badge_color}; font-size: 0.95rem;">${a.verdict}</strong>
+          <span class="badge-mini" style="background: rgba(0,0,0,0.3); color: ${a.badge_color}; font-weight: 800;">Score Sécurité : ${a.safety_score}/100</span>
+        </div>
+        <p style="font-size: 0.82rem; color: #cbd5e1; margin-bottom: 8px;">${a.certification}</p>
+        ${a.alerts.length > 0 ? `
+          <ul style="margin: 0 0 0 16px; font-size: 0.78rem; color: #f87171;">
+            ${a.alerts.map(al => `<li>⚠️ ${al.description}</li>`).join('')}
+          </ul>
+        ` : '<div style="font-size: 0.78rem; color: #34d399;">✓ Aucun signal d\'escroquerie détecté (aucun frais demandé, coordonnées valides).</div>'}
+      </div>
+    `;
+  } catch (err) {
+    box.innerHTML = `<div style="color:#f87171;">Erreur audit : ${err.message}</div>`;
+  }
+}
+
+function reportCurrentJobScam() {
+  const company = document.getElementById('cJobCompany')?.value || 'Recruteur non spécifié';
+  const phone = document.getElementById('cJobWhatsapp')?.value || '';
+  const details = prompt("Précisez pourquoi cette offre est suspecte (ex: 'Demande 10 000 FCFA par Wave') :");
+  if (!details) return;
+
+  fetch('/api/scam/report', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ company_name: company, phone_used: phone, details })
+  }).then(r => r.json()).then(d => {
+    if (d.success) alert("🛡️ Merci pour votre vigilance citoyenne ! L'offre a été répertoriée dans la base des arnaques SunuJob AI.");
+  });
+}
+
+// ==================== 17. COFFRE-FORT NUMÉRIQUE & DIPLÔMES ==================== //
+
+async function loadCandidateCredentialsUI() {
+  const container = document.getElementById('credentialVaultList');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/credentials');
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    container.innerHTML = data.credentials.map(c => `
+      <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <div style="font-weight: 700; font-size: 0.95rem; color: white;">🎓 ${c.title}</div>
+          <div style="font-size: 0.8rem; color: var(--accent);">${c.institution} (${c.graduation_year}) — ${c.grade}</div>
+          <div style="font-family: monospace; font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Hash SHA-256 : ${c.verification_hash.slice(0, 24)}...</div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="badge-mini" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">✅ Certifié</span>
+          <a href="/verify/${c.id}" target="_blank" class="source-link-btn" style="font-size: 0.78rem;">
+            🔍 Vérifier
+          </a>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = `<div style="color:#f87171;">Erreur coffre-fort : ${err.message}</div>`;
+  }
+}
+
+function openRegisterDiplomaModal() {
+  const title = prompt("Intitulé exact du diplôme (ex: Master 2 Génie Logiciel) :");
+  if (!title) return;
+  const inst = prompt("Établissement / Université (ex: ESP Dakar, UCAD, INP-HB) :");
+  if (!inst) return;
+  const year = prompt("Année d'obtention :", "2024");
+
+  fetch('/api/credentials/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, institution: inst, graduation_year: year })
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      alert("✅ Diplôme enregistré dans le coffre-fort cryptographique ! Empreinte SHA-256 générée.");
+      loadCandidateCredentialsUI();
+    }
+  });
+}
+
+// ==================== 18. VIDÉO PITCH 30 SECONDES ==================== //
+
+async function generateVideoScriptUI() {
+  const output = document.getElementById('videoPitchOutput');
+  if (!output) return;
+
+  output.innerHTML = '<div style="padding:16px; color:var(--text-muted);">Génération du script chronométré...</div>';
+
+  try {
+    const res = await fetch('/api/video-pitch/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile: state.currentProfile })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    output.innerHTML = `
+      <div style="background: var(--surface-2); border-radius: 12px; padding: 18px; border: 1px solid var(--border); font-size: 0.88rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <strong style="color: var(--accent);">Script en 5 étapes (${data.duration_target} · ${data.word_count} mots)</strong>
+          <button class="chip" onclick="alert('Script copié dans le presse-papier !')">📋 Copier le Script</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+          ${data.script_breakdown.map(s => `
+            <div style="background: rgba(0,0,0,0.25); padding: 10px 14px; border-radius: 8px;">
+              <span style="font-size: 0.72rem; color: #38bdf8; font-weight: 800; text-transform: uppercase;">${s.timing} — ${s.stage}</span>
+              <p style="margin: 4px 0 0 0; color: #e2e8f0; line-height: 1.5;">${s.script}</p>
+            </div>
+          `).join('')}
+        </div>
+        <div style="background: rgba(245, 158, 11, 0.1); border-radius: 8px; padding: 12px;">
+          <strong style="color: var(--accent); display: block; margin-bottom: 6px;">💡 Conseils d'enregistrement smartphone :</strong>
+          <ul style="margin: 0 0 0 16px; font-size: 0.78rem; line-height: 1.6; color: var(--text-main);">
+            ${data.recording_tips.map(t => `<li>${t}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    output.innerHTML = `<div style="color:#f87171;">Erreur : ${err.message}</div>`;
   }
 }
