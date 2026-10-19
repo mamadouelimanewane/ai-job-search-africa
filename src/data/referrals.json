@@ -1,0 +1,124 @@
+{
+  "referrals": [
+    {
+      "id": "REF-2026-001",
+      "referrer_id": "user-amadou-sow",
+      "referrer_name": "Amadou Sow",
+      "referrer_title": "Lead Architect & CTO",
+      "referrer_company": "Sahel Digital Studio",
+      "referrer_city": "Dakar",
+      "referrer_country": "Sénégal",
+      "candidate_id": "profile-dev-dakar",
+      "candidate_name": "Ibrahima Ndiaye",
+      "job_id": "SN-DKR-001",
+      "relationship": "Ancien Manager direct (2 ans de collaboration)",
+      "rating": 5,
+      "message": "Ibrahima est l'un des ingénieurs les plus rigoureux et orientés impact avec qui j'ai eu l'opportunité de collaborer à Dakar. Il a notamment pris en charge l'intégration complète des passerelles Mobile Money (Wave et Orange Money) avec un taux de disponibilité de 99.9%. Autonome, excellent communicant et toujours force de proposition.",
+      "skills_endorsed": ["Node.js", "React.js", "API Wave / Orange Money", "Architecture Backend", "PostgreSQL"],
+      "status": "verified",
+      "created_at": "2026-10-15T09:30:00.000Z"
+    },
+    {
+      "id": "REF-2026-002",
+      "referrer_id": "user-fatou-diop",
+      "referrer_name": "Fatou Kiné Diop",
+      "referrer_title": "Directrice des Ressources Humaines",
+      "referrer_company": "Teranga Tech Group",
+      "referrer_city": "Dakar",
+      "referrer_country": "Sénégal",
+      "candidate_id": "profile-dev-dakar",
+      "candidate_name": "Ibrahima Ndiaye",
+      "job_id": "SN-DKR-001",
+      "relationship": "Superviseur RH & Culture Entreprise",
+      "rating": 5,
+      "message": "Je recommande chaleureusement Ibrahima pour sa ponctualité, sa bienveillance envers les juniors et sa grande fiabilité opérationnelle. C'est un profil clé qui apporte calme et professionnalisme aux équipes sous tension.",
+      "skills_endorsed": ["Agile Scrum", "Esprit d'équipe", "Communication", "Leadership technique"],
+      "status": "verified",
+      "created_at": "2026-10-16T14:15:00.000Z"
+    },
+    {
+      "id": "REF-2026-003",
+      "referrer_id": "user-jean-marc-koffi",
+      "referrer_name": "Jean-Marc Koffi",
+      "referrer_title": "Directeur Régional des Opérations Logistiques",
+      "referrer_company": "Lagune Distribution SARL",
+      "referrer_city": "Abidjan",
+      "referrer_country": "Côte d'Ivoire",
+      "candidate_id": "profile-logistics-abidjan",
+      "candidate_name": "Aïcha Kouamé",
+      "job_id": "CI-ABJ-002",
+      "relationship": "Directeur de pôle & Supérieur hiérarchique",
+      "rating": 5,
+      "message": "Aïcha a transformé notre chaîne logistique à Abidjan et sur l'axe du corridor Abidjan-Ouagadougou. Grâce à sa maîtrise de l'ERP Odoo et son sens de la négociation transporteurs, nos coûts d'acheminement ont baissé de 18% tout en garantissant des livraisons J+1 sans faille.",
+      "skills_endorsed": ["Gestion de stocks", "ERP Odoo / SAP", "Négociation transporteurs", "Douane OHADA"],
+      "status": "verified",
+      "created_at": "2026-10-14T11:00:00.000Z"
+    }
+  ],
+  "connections": {
+    "profile-dev-dakar": [
+      {
+        "id": "conn-001",
+        "name": "Amadou Sow",
+        "title": "Lead Architect & CTO",
+        "company": "Sahel Digital Studio",
+        "city": "Dakar",
+        "country": "Sénégal",
+        "relationship": "Ancien Manager",
+        "email": "amadou.sow@saheldigital.sn",
+        "phone": "+221 77 123 45 67",
+        "linkedin": "https://linkedin.com/in/amadou-sow-tech"
+      },
+      {
+        "id": "conn-002",
+        "name": "Fatou Kiné Diop",
+        "title": "DRH",
+        "company": "Teranga Tech Group",
+        "city": "Dakar",
+        "country": "Sénégal",
+        "relationship": "Ancienne DRH",
+        "email": "fatou.diop@terangatech.sn",
+        "phone": "+221 78 987 65 43",
+        "linkedin": "https://linkedin.com/in/fatou-kine-diop"
+      },
+      {
+        "id": "conn-003",
+        "name": "Moussa Fall",
+        "title": "Responsable Recrutement Tech",
+        "company": "Baobab FinTech Solutions",
+        "city": "Dakar",
+        "country": "Sénégal",
+        "relationship": "Recruteur Réseau",
+        "email": "moussa.fall@baobab-fintech.sn",
+        "phone": "+221 76 543 21 09",
+        "linkedin": "https://linkedin.com/in/moussa-fall-rh"
+      }
+    ],
+    "profile-logistics-abidjan": [
+      {
+        "id": "conn-004",
+        "name": "Jean-Marc Koffi",
+        "title": "Directeur Opérations",
+        "company": "Lagune Distribution SARL",
+        "city": "Abidjan",
+        "country": "Côte d'Ivoire",
+        "relationship": "Directeur Hiérarchique",
+        "email": "jm.koffi@lagune-distrib.ci",
+        "phone": "+225 07 12 34 56 78",
+        "linkedin": "https://linkedin.com/in/jean-marc-koffi"
+      },
+      {
+        "id": "conn-005",
+        "name": "Mariam Touré",
+        "title": "Responsable Achats & Transit",
+        "company": "Ivoire Transit",
+        "city": "Abidjan",
+        "country": "Côte d'Ivoire",
+        "relationship": "Partenaire Métier",
+        "email": "m.toure@ivoire-transit.ci",
+        "phone": "+225 05 98 76 54 32",
+        "linkedin": "https://linkedin.com/in/mariam-toure-supply"
+      }
+    ]
+  }
+}

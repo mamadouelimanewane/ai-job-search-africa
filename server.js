@@ -13,6 +13,14 @@ const interviewCoach = require('./src/core/interview_coach');
 const paymentManager = require('./src/core/payments');
 const webScanner = require('./src/core/web_scanner');
 const aiAnalyzer = require('./src/core/ai_analyzer');
+const salaryBenchmark = require('./src/core/salary_benchmark');
+const concoursTracker = require('./src/core/concours_tracker');
+const companyIntelligence = require('./src/core/company_intelligence');
+const diasporaMode = require('./src/core/diaspora_mode');
+const referralNetwork = require('./src/core/referral_network');
+const whatsappBot = require('./src/core/whatsapp_bot');
+const interviewSimulator = require('./src/core/interview_simulator');
+const smsHandler = require('./src/core/sms_handler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -269,6 +277,141 @@ app.get('/api/ai/next-actions', (req, res) => {
   const profile  = profileManager.getProfile();
   const actions  = aiAnalyzer.suggestNextActions(profile);
   res.json({ success: true, actions });
+});
+
+// =================== ROUTES GAME-CHANGER =================== //
+
+// --- 1. BAROMÈTRE SALAIRES FCFA ---
+app.get('/api/salary/sectors', (req, res) => {
+  res.json({ success: true, sectors: salaryBenchmark.getAllSectors() });
+});
+
+app.get('/api/salary/benchmark', (req, res) => {
+  const { sector, level, city } = req.query;
+  const benchmark = salaryBenchmark.getSalaryBenchmark(sector, level, city);
+  res.json({ success: true, benchmark });
+});
+
+app.get('/api/salary/overview', (req, res) => {
+  res.json({ success: true, overview: salaryBenchmark.getMarketOverview() });
+});
+
+app.post('/api/salary/convert-euro', (req, res) => {
+  const { amount_eur, city } = req.body;
+  const result = salaryBenchmark.convertSalaryEuroToFCFA(parseFloat(amount_eur) || 2500, city);
+  res.json({ success: true, conversion: result });
+});
+
+// --- 2. CONCOURS & FONCTION PUBLIQUE ---
+app.get('/api/concours', (req, res) => {
+  const { country, sector, status } = req.query;
+  const list = concoursTracker.getActiveCompetitions({ country, sector, status });
+  res.json({ success: true, count: list.length, concours: list });
+});
+
+app.get('/api/concours/stats', (req, res) => {
+  res.json({ success: true, stats: concoursTracker.getStats() });
+});
+
+app.get('/api/concours/search', (req, res) => {
+  const { q } = req.query;
+  res.json({ success: true, concours: concoursTracker.searchConcours(q) });
+});
+
+// --- 3. INTELLIGENCE ENTREPRISES ---
+app.get('/api/companies', (req, res) => {
+  const { country, sector, diasporaOnly } = req.query;
+  const list = companyIntelligence.getCompanies({ country, sector, diasporaOnly: diasporaOnly === 'true' });
+  res.json({ success: true, count: list.length, companies: list });
+});
+
+app.get('/api/companies/:id', (req, res) => {
+  const company = companyIntelligence.getCompanyById(req.params.id);
+  if (!company) return res.status(404).json({ success: false, error: 'Entreprise introuvable' });
+  const reviews = companyIntelligence.getReviews(req.params.id);
+  res.json({ success: true, company, reviews });
+});
+
+app.post('/api/companies/:id/reviews', (req, res) => {
+  const newRev = companyIntelligence.addReview(req.params.id, req.body);
+  res.json({ success: true, review: newRev });
+});
+
+// --- 4. MODE DIASPORA RETURN ---
+app.post('/api/diaspora/convert-salary', (req, res) => {
+  const { amount, currency, source_city, target_city } = req.body;
+  const result = diasporaMode.convertSalaryToAOF(parseFloat(amount) || 3000, currency, source_city, target_city);
+  res.json({ success: true, result });
+});
+
+app.post('/api/diaspora/adapt-cv', (req, res) => {
+  const profile = req.body.profile || profileManager.getProfile();
+  const adaptation = diasporaMode.adaptCVForAOF(profile);
+  res.json({ success: true, adaptation });
+});
+
+app.get('/api/diaspora/guide', (req, res) => {
+  const { country } = req.query;
+  res.json({ success: true, guide: diasporaMode.getDiasporaGuide(country) });
+});
+
+// --- 5. PISTON DIGITAL (RÉSEAU DE COOPTATION) ---
+app.get('/api/referrals', (req, res) => {
+  const score = referralNetwork.getReferralScore(req.query.candidate || "Ibrahima Ndiaye");
+  res.json({ success: true, ...score });
+});
+
+app.post('/api/referrals', (req, res) => {
+  const newRef = referralNetwork.addReferral(req.body);
+  res.json({ success: true, referral: newRef });
+});
+
+// --- 6. WHATSAPP BOT IA ---
+app.post('/api/whatsapp/simulate', (req, res) => {
+  const { message, from } = req.body;
+  const profile = profileManager.getProfile();
+  const outcome = whatsappBot.processIncomingMessage(from || "+221770000000", message, profile);
+  res.json({ success: true, reply: outcome });
+});
+
+app.get('/api/whatsapp/demo-thread', (req, res) => {
+  res.json({ success: true, thread: whatsappBot.simulateBotConversation() });
+});
+
+// --- 7. SIMULATEUR D'ENTRETIEN IA ---
+app.get('/api/interview/personas', (req, res) => {
+  res.json({ success: true, personas: interviewSimulator.getPersonas() });
+});
+
+app.post('/api/interview/start', (req, res) => {
+  const { personaId, jobTitle } = req.body;
+  const profile = profileManager.getProfile();
+  const session = interviewSimulator.startSession(personaId, profile, jobTitle);
+  res.json({ success: true, session });
+});
+
+app.post('/api/interview/evaluate', (req, res) => {
+  const { question, answer } = req.body;
+  const evalResult = interviewSimulator.evaluateAnswer(question, answer);
+  res.json({ success: true, evaluation: evalResult });
+});
+
+app.post('/api/interview/salary-negotiation', (req, res) => {
+  const { desiredSalary, marketRange } = req.body;
+  const profile = profileManager.getProfile();
+  const sim = interviewSimulator.simulateSalaryNegotiation(desiredSalary, marketRange, profile);
+  res.json({ success: true, negotiation: sim });
+});
+
+// --- 8. MODE SMS INCLUSION ---
+app.post('/api/sms/simulate', (req, res) => {
+  const { body, from } = req.body;
+  const reply = smsHandler.processIncomingSMS(from || "+221771234567", body);
+  res.json({ success: true, ...reply });
+});
+
+app.get('/api/sms/help', (req, res) => {
+  res.json({ success: true, ...smsHandler.getHelpText() });
 });
 
 // Lancement du serveur

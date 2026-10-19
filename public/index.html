@@ -46,7 +46,25 @@
           <span>💳</span> Tarifs & Wave
         </button>
         <button class="nav-link" id="navAggregatorBtn" onclick="switchNavView('aggregator')">
-          <span>🌐</span> Radar & Sites Emploi
+          <span>🌐</span> Radar Web
+        </button>
+        <button class="nav-link" id="navSalaryBtn" onclick="switchNavView('salary')">
+          <span>💰</span> Salaires FCFA
+        </button>
+        <button class="nav-link" id="navConcoursBtn" onclick="switchNavView('concours')">
+          <span>📢</span> Concours Publics
+        </button>
+        <button class="nav-link" id="navCompaniesBtn" onclick="switchNavView('companies')">
+          <span>🏢</span> Entreprises
+        </button>
+        <button class="nav-link" id="navDiasporaBtn" onclick="switchNavView('diaspora')">
+          <span>🌍</span> Mode Diaspora
+        </button>
+        <button class="nav-link" id="navNetworkBtn" onclick="switchNavView('network')">
+          <span>🤝</span> Piston Digital
+        </button>
+        <button class="nav-link" id="navBotBtn" onclick="switchNavView('bot')">
+          <span>🟢</span> WhatsApp & SMS
         </button>
       </nav>
 
@@ -626,7 +644,338 @@
 
     </div>
 
+    <!-- ==================== VUE 6 : BAROMÈTRE SALAIRES FCFA ==================== -->
+    <div id="viewSalary" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #07332a 0%, #0a4c3e 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">💰 Baromètre en Temps Réel</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Baromètre des Salaires FCFA — Afrique de l'Ouest
+        </h2>
+        <p style="color: #d1fae5; font-size: 0.95rem; max-width: 780px;">
+          Données réelles des grilles salariales pratiquées au Sénégal, en Côte d'Ivoire, au Bénin, au Togo, au Mali et au Burkina Faso. Salaires nets mensuels en Francs CFA (XOF).
+        </p>
+      </div>
+
+      <!-- Sélecteur interactif -->
+      <div class="page-card" style="margin-bottom: 24px;">
+        <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+          <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Secteur d'activité :</label>
+            <select id="salarySectorSelect" onchange="loadSalaryBenchmark()" style="width: 100%; padding: 10px 14px; border-radius: 8px; font-weight: 600;">
+              <option value="Tech & Digital">Tech & Digital</option>
+              <option value="Finance & Banque">Finance & Banque</option>
+              <option value="Énergie & Mines">Énergie & Mines</option>
+              <option value="Logistique & Transit">Logistique & Transit</option>
+              <option value="Commerce & Ventes">Commerce & Ventes</option>
+              <option value="RH & Management">RH & Management</option>
+            </select>
+          </div>
+          <div style="flex: 1; min-width: 180px;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Niveau d'expérience :</label>
+            <select id="salaryLevelSelect" onchange="loadSalaryBenchmark()" style="width: 100%; padding: 10px 14px; border-radius: 8px; font-weight: 600;">
+              <option value="Junior (0-2 ans)">Junior (0-2 ans)</option>
+              <option value="Confirmé (3-5 ans)" selected>Confirmé (3-5 ans)</option>
+              <option value="Senior (6+ ans)">Senior (6+ ans)</option>
+            </select>
+          </div>
+          <div style="flex: 1; min-width: 160px;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Ville de référence :</label>
+            <select id="salaryCitySelect" onchange="loadSalaryBenchmark()" style="width: 100%; padding: 10px 14px; border-radius: 8px; font-weight: 600;">
+              <option value="Dakar">🇸🇳 Dakar</option>
+              <option value="Abidjan">🇨🇮 Abidjan</option>
+              <option value="Cotonou">🇧🇯 Cotonou</option>
+              <option value="Lomé">🇹🇬 Lomé</option>
+              <option value="Bamako">🇲🇱 Bamako</option>
+              <option value="Ouagadougou">🇧🇫 Ouagadougou</option>
+            </select>
+          </div>
+          <button class="btn-primary" onclick="loadSalaryBenchmark()" style="margin-top: 22px;">
+            🔄 Actualiser
+          </button>
+        </div>
+      </div>
+
+      <!-- Résultat Benchmark -->
+      <div id="salaryBenchmarkResult">
+        <!-- Rempli par JavaScript -->
+      </div>
+    </div>
+
+    <!-- ==================== VUE 7 : RADAR CONCOURS FONCTION PUBLIQUE ==================== -->
+    <div id="viewConcours" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🏛️ Concours & Postes Publics</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Radar Concours de la Fonction Publique
+        </h2>
+        <p style="color: #bfdbfe; font-size: 0.95rem; max-width: 780px;">
+          Suivi 24/7 des concours officiels d'entrée dans les grandes écoles (ENA, Douanes, Police, Magistrature, FASTEF, INFAS) et institutions internationales (BCEAO, BAD).
+        </p>
+      </div>
+
+      <!-- Filtres et stats -->
+      <div class="page-card" style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 16px;">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <select id="filterConcoursCountry" onchange="loadConcoursList()" style="padding: 8px 12px; border-radius: 8px; font-weight: 600;">
+              <option value="Tous">🌍 Tous les pays</option>
+              <option value="Sénégal">🇸🇳 Sénégal</option>
+              <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+              <option value="Sous-Région UEMOA">🏛️ Institutions Régionales</option>
+              <option value="Bénin">🇧🇯 Bénin</option>
+              <option value="Togo">🇹🇬 Togo</option>
+            </select>
+            <input type="text" id="searchConcoursInput" placeholder="Rechercher un concours (ex: Douanes, ENA, BCEAO)..." oninput="searchConcoursUI()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); min-width: 250px;">
+          </div>
+          <div id="concoursStatsCounter" style="font-size: 0.88rem; font-weight: 700; color: var(--accent);">
+            Chargement...
+          </div>
+        </div>
+
+        <div id="concoursGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+          <!-- Rempli par JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== VUE 8 : INTELLIGENCE ENTREPRISES ==================== -->
+    <div id="viewCompanies" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #374151 0%, #1f2937 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🏢 Fiches Entreprises & Avis</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Intelligence Entreprises & Culture RH
+        </h2>
+        <p style="color: #e5e7eb; font-size: 0.95rem; max-width: 780px;">
+          Ce que les recruteurs ne vous disent pas : salaires réels pratiqués, étapes d'entretien, avis d'employés et conseils d'initiés pour réussir votre candidature.
+        </p>
+      </div>
+
+      <div class="page-card" style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+          <input type="text" id="searchCompanyInput" placeholder="Rechercher une entreprise (ex: Wave, Sonatel, Orange, NSIA)..." oninput="searchCompaniesUI()" style="flex: 1; min-width: 240px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border);">
+          <select id="filterCompanyCountry" onchange="loadCompaniesList()" style="padding: 10px 14px; border-radius: 8px; font-weight: 600;">
+            <option value="Tous">Tous pays</option>
+            <option value="Sénégal">🇸🇳 Sénégal</option>
+            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+          </select>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">
+            <input type="checkbox" id="filterDiasporaFriendly" onchange="loadCompaniesList()">
+            🌍 Ouvertes à la Diaspora
+          </label>
+        </div>
+      </div>
+
+      <div id="companiesGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px;">
+        <!-- Rempli par JavaScript -->
+      </div>
+    </div>
+
+    <!-- ==================== VUE 9 : MODE DIASPORA RETURN ==================== -->
+    <div id="viewDiaspora" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🌍 Passerelle Diaspora ➔ Afrique</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Mode Diaspora Return & Mobilité Internationale
+        </h2>
+        <p style="color: #c7d2fe; font-size: 0.95rem; max-width: 780px;">
+          Vous travaillez en France, au Canada, aux USA ou en Europe ? Adaptez votre profil aux standards ouest-africains, convertissez votre salaire avec le différentiel de pouvoir d'achat et accédez aux entreprises qui valorisent votre profil.
+        </p>
+      </div>
+
+      <!-- Convertisseur de Pouvoir d'Achat -->
+      <div class="page-card" style="margin-bottom: 24px;">
+        <h3 class="section-heading" style="font-size: 1.3rem;">💱 Convertisseur de Salaire & Pouvoir d'Achat</h3>
+        <p class="section-desc">Calculez ce que votre salaire actuel vaut réellement à Dakar ou Abidjan (coût des loyers, parité de pouvoir d'achat).</p>
+        
+        <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 16px;">
+          <div style="flex: 1; min-width: 160px;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Salaire net mensuel actuel :</label>
+            <input type="number" id="diasporaAmountInput" value="3000" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem; font-weight: 700;">
+          </div>
+          <div style="flex: 1; min-width: 120px;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Devise :</label>
+            <select id="diasporaCurrencySelect" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
+              <option value="EUR" selected>€ Euros (EUR)</option>
+              <option value="USD">$ Dollars US (USD)</option>
+              <option value="CAD">$ Dollars Can (CAD)</option>
+              <option value="GBP">£ Livres (GBP)</option>
+            </select>
+          </div>
+          <div style="flex: 1; min-width: 140px;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Ville d'origine :</label>
+            <select id="diasporaSourceCity" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
+              <option value="Paris" selected>Paris</option>
+              <option value="Lyon">Lyon</option>
+              <option value="Montréal">Montréal</option>
+              <option value="Bruxelles">Bruxelles</option>
+              <option value="New York">New York</option>
+              <option value="Londres">Londres</option>
+            </select>
+          </div>
+          <div style="flex: 1; min-width: 140px;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Ville de destination :</label>
+            <select id="diasporaTargetCity" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
+              <option value="Dakar" selected>🇸🇳 Dakar</option>
+              <option value="Abidjan">🇨🇮 Abidjan</option>
+              <option value="Cotonou">🇧🇯 Cotonou</option>
+              <option value="Lomé">🇹🇬 Lomé</option>
+            </select>
+          </div>
+          <button class="btn-primary" onclick="convertDiasporaSalary()" style="margin-top: 22px;">
+            ⚡ Calculer l'équivalent
+          </button>
+        </div>
+
+        <div id="diasporaConversionResult" style="margin-top: 20px;">
+          <!-- Injecté par JavaScript -->
+        </div>
+      </div>
+
+      <!-- Adaptation Automatique du CV -->
+      <div class="page-card" style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <h3 class="section-heading" style="font-size: 1.3rem;">📄 Traducteur de Profil pour l'Afrique de l'Ouest</h3>
+            <p class="section-desc">Adapte vos intitulés de postes, équivalences de diplômes (CAMES/BAC+5) et ajoute la mention de disponibilité pour retour.</p>
+          </div>
+          <button class="btn-primary" onclick="adaptProfileForDiaspora()">
+            ✨ Adapter mon profil pour l'AOF
+          </button>
+        </div>
+        <div id="diasporaAdaptationResult"></div>
+      </div>
+
+      <!-- Guide Pratique d'Installation -->
+      <div class="page-card">
+        <h3 class="section-heading" style="font-size: 1.3rem;">📍 Guide Pratique d'Installation & Fiscalité</h3>
+        <div style="display: flex; gap: 10px; margin: 12px 0 20px;">
+          <button class="btn-secondary" onclick="loadDiasporaGuide('Sénégal')">🇸🇳 Guide Sénégal</button>
+          <button class="btn-secondary" onclick="loadDiasporaGuide('Côte d\'Ivoire')">🇨🇮 Guide Côte d'Ivoire</button>
+        </div>
+        <div id="diasporaGuideContent"></div>
+      </div>
+    </div>
+
+    <!-- ==================== VUE 10 : PISTON DIGITAL (RÉSEAU DE COOPTATION) ==================== -->
+    <div id="viewNetwork" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #064e3b 0%, #047857 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🤝 Réseau & Cooptation</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Le "Piston Digital" — Recommandations Vérifiées
+        </h2>
+        <p style="color: #a7f3d0; font-size: 0.95rem; max-width: 780px;">
+          En Afrique de l'Ouest, la confiance et la recommandation d'un pair multiplient par 5 les chances d'entretien. Centralisez vos soutiens professionnels et intégrez-les à vos candidatures en 1 clic.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; flex-wrap: wrap;">
+        <!-- Score de réputation -->
+        <div class="page-card" style="height: fit-content;">
+          <h3 style="font-size: 1.1rem; margin-bottom: 12px;">🏆 Votre Score de Cooptation</h3>
+          <div style="text-align: center; padding: 20px 0;">
+            <div id="referralScoreNum" style="font-size: 3.5rem; font-weight: 800; color: var(--accent);">
+              --
+            </div>
+            <div id="referralBadgeText" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-top: 4px;">
+              Chargement...
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 8px;">
+              Basé sur les recommandations certifiées reçues de professionnels reconnus.
+            </p>
+          </div>
+          <div style="border-top: 1px solid var(--border); padding-top: 14px;">
+            <button class="btn-primary" style="width: 100%;" onclick="openAddReferralModal()">
+              ➕ Ajouter une recommandation
+            </button>
+          </div>
+        </div>
+
+        <!-- Liste des recommandations -->
+        <div class="page-card">
+          <h3 style="font-size: 1.1rem; margin-bottom: 16px;">📜 Recommandations Validées au Dossier</h3>
+          <div id="referralsListContainer">
+            <!-- Rempli par JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== VUE 11 : WHATSAPP BOT & SMS EN DIRECT ==================== -->
+    <div id="viewBot" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #14532d 0%, #166534 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(37, 211, 102, 0.3); color: #86efac;">📱 Canaux Mobiles Autonomes</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Simulateur WhatsApp Bot & Mode SMS Hors-ligne
+        </h2>
+        <p style="color: #bbf7d0; font-size: 0.95rem; max-width: 780px;">
+          Testez en direct l'expérience candidat sans navigateur. Les utilisateurs peuvent chercher des emplois, postuler et s'entraîner aux entretiens simplement en envoyant un message WhatsApp ou un SMS.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; flex-wrap: wrap;">
+        <!-- Simulateur Écran WhatsApp -->
+        <div class="page-card" style="background: #0b141a; color: #e9edef; border-radius: 18px; padding: 0; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+          <!-- Entête WhatsApp -->
+          <div style="background: #202c33; padding: 14px 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2a3942;">
+            <div style="width: 42px; height: 42px; border-radius: 50%; background: #25d366; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+              🤖
+            </div>
+            <div>
+              <div style="font-weight: 700; font-size: 1rem; color: #e9edef;">SunuJob AI Bot (Officiel)</div>
+              <div style="font-size: 0.78rem; color: #25d366;">🟢 En ligne · Répond instantanément</div>
+            </div>
+          </div>
+
+          <!-- Zone de messages -->
+          <div id="whatsappChatBox" style="padding: 18px; height: 380px; overflow-y: auto; background-color: #0b141a; display: flex; flex-direction: column; gap: 10px;">
+            <!-- Rempli par JavaScript -->
+          </div>
+
+          <!-- Barre de saisie -->
+          <div style="background: #202c33; padding: 12px; display: flex; gap: 8px;">
+            <input type="text" id="whatsappUserInput" placeholder="Écrivez un message (ex: JOBS Dakar, SALAIRE Tech)..." style="flex: 1; background: #2a3942; border: none; color: white; padding: 10px 14px; border-radius: 20px; font-size: 0.9rem;" onkeypress="if(event.key === 'Enter') sendWhatsAppMessage()">
+            <button onclick="sendWhatsAppMessage()" style="background: #25d366; border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 1.1rem;">
+              ➤
+            </button>
+          </div>
+        </div>
+
+        <!-- Commandes & Mode SMS -->
+        <div style="display: flex; flex-direction: column; gap: 18px;">
+          <!-- Boutons de raccourcis WhatsApp -->
+          <div class="page-card">
+            <h4 style="margin-bottom: 12px; font-size: 1rem; color: var(--accent);">⚡ Raccourcis de Test WhatsApp</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button class="chip" onclick="triggerBotQuickCommand('JOBS Dakar')">🔍 JOBS Dakar</button>
+              <button class="chip" onclick="triggerBotQuickCommand('JOBS Abidjan')">🔍 JOBS Abidjan</button>
+              <button class="chip" onclick="triggerBotQuickCommand('SALAIRE Tech Dakar')">💰 SALAIRE Tech Dakar</button>
+              <button class="chip" onclick="triggerBotQuickCommand('CONCOURS Sénégal')">📢 CONCOURS Sénégal</button>
+              <button class="chip" onclick="triggerBotQuickCommand('PROFIL')">👤 Mon Profil</button>
+              <button class="chip" onclick="triggerBotQuickCommand('POSTULER 1')">📝 POSTULER 1</button>
+              <button class="chip" onclick="triggerBotQuickCommand('AIDE')">❓ Menu Aide</button>
+            </div>
+          </div>
+
+          <!-- Mode SMS Hors-Ligne -->
+          <div class="page-card">
+            <h4 style="margin-bottom: 12px; font-size: 1rem; color: #60a5fa;">📱 Mode SMS 160 Caractères (Sans Internet)</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+              Compatible avec tous les téléphones basiques (feature phones) via le numéro court <strong>21021</strong> (Sénégal/CI).
+            </p>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+              <input type="text" id="smsCommandInput" placeholder="Ex: SUNUJOB comptable Dakar" style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem;">
+              <button class="btn-secondary" onclick="simulateSMS()">Simuler SMS</button>
+            </div>
+            <div id="smsOutputBox" style="background: var(--surface-2); border: 1px dashed var(--border); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 0.82rem; color: var(--text-main); min-height: 50px;">
+              Envoyez une commande pour voir la réponse SMS GSM...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
+
 
   <!-- ==================== MODAL CANDIDATURE MULTI-AGENTS (LE STUDIO) ==================== -->
   <div class="modal-backdrop" id="studioModal" style="display: none;">

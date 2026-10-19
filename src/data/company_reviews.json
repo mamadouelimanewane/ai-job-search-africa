@@ -1,0 +1,80 @@
+[
+  {
+    "id": "rev-sonatel-01",
+    "company_id": "sonatel-orange-sn",
+    "author_role": "Ingénieur DevOps Cloud",
+    "author_city": "Dakar",
+    "rating": 5,
+    "title": "Excellente école technique et rémunération de pointe à Dakar",
+    "pros": "Package salarial très attractif avec 13ème mois, couverture santé à 100%, cantine d'entreprise moderne et accès aux certifications AWS et Azure financées par le groupe.",
+    "cons": "Processus de décision parfois hiérarchique compte tenu de la taille du groupe, réunions fréquentes.",
+    "advice_to_management": "Continuer d'encourager la prise d'initiative des jeunes ingénieurs et développer davantage le télétravail hybride 2 jours par semaine.",
+    "created_at": "2026-08-15T10:30:00.000Z",
+    "verified": true
+  },
+  {
+    "id": "rev-wave-01",
+    "company_id": "wave-senegal",
+    "author_role": "Backend Engineer Node.js",
+    "author_city": "Dakar",
+    "rating": 5,
+    "title": "Culture tech de niveau mondial (Silicon Valley meets Teranga)",
+    "pros": "Équipe ultra-talentueuse, pas de bureaucratie, stack technologique ultra-moderne, salaires très compétitifs alignés sur les standards internationaux, politique remote très flexible.",
+    "cons": "Rythme de travail soutenu lors des lancements de nouvelles fonctionnalités monétiques ou des campagnes Tabaski / Korité.",
+    "advice_to_management": "Maintenir la proximité humaine malgré la forte expansion régionale.",
+    "created_at": "2026-09-02T14:15:00.000Z",
+    "verified": true
+  },
+  {
+    "id": "rev-orange-ci-01",
+    "company_id": "orange-cote-divoire",
+    "author_role": "Chef de Produit Digital",
+    "author_city": "Abidjan",
+    "rating": 4.5,
+    "title": "Leader incontesté des télécoms à Abidjan",
+    "pros": "Siège flambant neuf à Abidjan Riviera Golf, grande visibilité des projets, avantages sociaux remarquables pour la famille, primes d'intéressement au rendement.",
+    "cons": "Compétition interne importante entre départements, cycles de validation parfois longs.",
+    "advice_to_management": "Fluidifier la collaboration transverse entre le pôle digital et les réseaux physiques.",
+    "created_at": "2026-09-18T11:45:00.000Z",
+    "verified": true
+  },
+  {
+    "id": "rev-ecobank-01",
+    "company_id": "ecobank-transnational",
+    "author_role": "Analyste Risques Financiers",
+    "author_city": "Lomé",
+    "rating": 4.5,
+    "title": "Immersion panafricaine unique au siège de Lomé",
+    "pros": "Environnement bilingue anglais-français très stimulant, collègues venus de toute l'Afrique, formation continue de premier plan avec l'Ecobank Academy.",
+    "cons": "Pression sur les délais de clôture comptable et réglementaire UEMOA.",
+    "advice_to_management": "Accélérer l'automatisation des reportings prudentiels pour alléger la charge des équipes risques.",
+    "created_at": "2026-09-25T16:20:00.000Z",
+    "verified": true
+  },
+  {
+    "id": "rev-sgci-01",
+    "company_id": "societe-generale-ci",
+    "author_role": "Chargé d'Affaires Entreprises",
+    "author_city": "Abidjan",
+    "rating": 4.5,
+    "title": "Banque de référence pour le Corporate Banking à Abidjan",
+    "pros": "Rigueur méthodologique exemplaire, portefeuille clients constitué des plus grandes entreprises de Côte d'Ivoire, rémunération fixe et variable motivante.",
+    "cons": "Cadre réglementaire de conformité très lourd, temps passé en comités de crédit.",
+    "advice_to_management": "Accélérer la numérisation des processus d'octroi de crédit aux PME.",
+    "created_at": "2026-10-01T09:00:00.000Z",
+    "verified": true
+  },
+  {
+    "id": "rev-boad-01",
+    "company_id": "boad-uemoa",
+    "author_role": "Chargé d'Investissement Infrastructures",
+    "author_city": "Lomé",
+    "rating": 5,
+    "title": "Excellence institutionnelle et impact concret sur l'UEMOA",
+    "pros": "Statut international très protecteur, rémunération nette hors impôt national, projets d'envergure régionale (routes, énergie, ports, barrages), conditions de travail prestigieuses.",
+    "cons": "Processus de recrutement extrêmement sélectif et protocole diplomatique rigoureux.",
+    "advice_to_management": "Poursuivre l'ouverture accrue vers les profils jeunes talents et repats de la diaspora.",
+    "created_at": "2026-10-05T15:30:00.000Z",
+    "verified": true
+  }
+]

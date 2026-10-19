@@ -38,32 +38,33 @@ async function initApp() {
 // ==================== NAVIGATION ENTRE LES VUES ==================== //
 
 function switchNavView(view) {
-  // Masquer toutes les vues
-  document.getElementById('viewFeed').style.display = view === 'feed' ? 'block' : 'none';
-  document.getElementById('viewProfile').style.display = view === 'profile' ? 'block' : 'none';
-  document.getElementById('viewCustom').style.display = view === 'custom' ? 'block' : 'none';
-  document.getElementById('viewPricing').style.display = view === 'pricing' ? 'block' : 'none';
-  const aggView = document.getElementById('viewAggregator');
-  if (aggView) aggView.style.display = view === 'aggregator' ? 'block' : 'none';
+  const views = ['feed', 'profile', 'custom', 'pricing', 'aggregator', 'salary', 'concours', 'companies', 'diaspora', 'network', 'bot'];
+  
+  views.forEach(v => {
+    const elId = 'view' + v.charAt(0).toUpperCase() + v.slice(1);
+    const el = document.getElementById(elId);
+    if (el) el.style.display = (view === v) ? 'block' : 'none';
 
-  // Mettre à jour les boutons navbar
-  document.getElementById('navFeedBtn').classList.toggle('active', view === 'feed');
-  document.getElementById('navProfileBtn').classList.toggle('active', view === 'profile');
-  document.getElementById('navCustomJobBtn').classList.toggle('active', view === 'custom');
-  document.getElementById('navPricingBtn').classList.toggle('active', view === 'pricing');
-  const navAggBtn = document.getElementById('navAggregatorBtn');
-  if (navAggBtn) navAggBtn.classList.toggle('active', view === 'aggregator');
+    const btnId = 'nav' + v.charAt(0).toUpperCase() + v.slice(1) + 'Btn';
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.toggle('active', view === v);
+  });
 
-  // Ajuster la visibilité du banner héro
+  // Ajuster la visibilité du banner héro (visible uniquement sur feed)
   const heroBanner = document.getElementById('heroBanner');
-  if (view === 'feed') {
-    heroBanner.style.display = 'block';
-  } else {
-    heroBanner.style.display = 'none';
-  }
+  if (heroBanner) heroBanner.style.display = (view === 'feed') ? 'block' : 'none';
+
+  // Chargement des données à la demande
+  if (view === 'salary') loadSalaryBenchmark();
+  if (view === 'concours') loadConcoursList();
+  if (view === 'companies') loadCompaniesList();
+  if (view === 'diaspora') convertDiasporaSalary();
+  if (view === 'network') loadReferralsNetwork();
+  if (view === 'bot') initWhatsAppChat();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 
 // ==================== GESTION DU PROFIL ==================== //
 
@@ -1252,4 +1253,465 @@ function buildProfileFromForm() {
     summary:            document.getElementById('formSummary')?.value.trim() || '',
     experiences:        (state.currentProfile && state.currentProfile.experiences) || []
   };
+}
+
+// ==================== 1. BAROMÈTRE DES SALAIRES FCFA ==================== //
+
+async function loadSalaryBenchmark() {
+  const sector = document.getElementById('salarySectorSelect')?.value || 'Tech & Digital';
+  const level = document.getElementById('salaryLevelSelect')?.value || 'Confirmé (3-5 ans)';
+  const city = document.getElementById('salaryCitySelect')?.value || 'Dakar';
+  const container = document.getElementById('salaryBenchmarkResult');
+  if (!container) return;
+
+  container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">⏳ Chargement du baromètre...</div>';
+
+  try {
+    const res = await fetch(`/api/salary/benchmark?sector=${encodeURIComponent(sector)}&level=${encodeURIComponent(level)}&city=${encodeURIComponent(city)}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const b = data.benchmark;
+    container.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <div class="ai-kpi-card" style="border-top: 4px solid var(--accent);">
+          <div class="ai-kpi-label">Salaire Net Médian</div>
+          <div class="ai-kpi-value" style="font-size: 1.6rem; color: var(--accent); margin: 8px 0;">${b.median.toLocaleString('fr-FR')} FCFA</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">${b.city} · ${b.level}</div>
+        </div>
+        <div class="ai-kpi-card">
+          <div class="ai-kpi-label">Fourchette Pratiquée</div>
+          <div class="ai-kpi-value" style="font-size: 1.25rem; color: var(--text-main); margin: 8px 0;">${b.min.toLocaleString('fr-FR')} - ${b.max.toLocaleString('fr-FR')}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">Fourchette basse à haute</div>
+        </div>
+        <div class="ai-kpi-card">
+          <div class="ai-kpi-label">Tendance sur 12 Mois</div>
+          <div class="ai-kpi-value" style="font-size: 1.4rem; color: #34d399; margin: 8px 0;">${b.growth_12m}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">Demande : ${b.demand_level}</div>
+        </div>
+        <div class="ai-kpi-card">
+          <div class="ai-kpi-label">Avantages Courants</div>
+          <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin: 8px 0;">${b.top_perk}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">Négociable en entretien</div>
+        </div>
+      </div>
+
+      <div class="page-card">
+        <h4 style="font-size: 1.1rem; margin-bottom: 16px;">🌍 Comparatif Inter-Villes (${b.sector} · ${b.level})</h4>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          ${b.city_comparison.map(c => `
+            <div style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; background: ${c.is_current ? 'rgba(245, 158, 11, 0.15)' : 'var(--surface-2)'}; border: 1px solid ${c.is_current ? 'var(--accent)' : 'var(--border)'}; border-radius: 8px;">
+              <span style="font-weight: 700; width: 120px;">${c.city} ${c.is_current ? '👈' : ''}</span>
+              <div style="flex: 1; background: var(--surface-3); height: 10px; border-radius: 5px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, var(--primary-light), var(--accent)); height: 100%; width: ${Math.round((c.median / b.city_comparison[0].median) * 100)}%;"></div>
+              </div>
+              <span style="font-weight: 800; color: var(--accent); width: 140px; text-align: right;">${c.median.toLocaleString('fr-FR')} FCFA</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color: #f87171; padding: 20px;">Erreur chargement : ${err.message}</div>`;
+  }
+}
+
+// ==================== 2. RADAR CONCOURS FONCTION PUBLIQUE ==================== //
+
+let stateConcoursList = [];
+
+async function loadConcoursList() {
+  const country = document.getElementById('filterConcoursCountry')?.value || 'Tous';
+  const container = document.getElementById('concoursGridContainer');
+  const counter = document.getElementById('concoursStatsCounter');
+  if (!container) return;
+
+  container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px;">⏳ Chargement des avis officiels...</div>';
+
+  try {
+    const res = await fetch(`/api/concours?country=${encodeURIComponent(country)}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    stateConcoursList = data.concours;
+    if (counter) counter.textContent = `${data.count} concours ouverts actuellement`;
+
+    renderConcoursGrid(data.concours);
+  } catch (err) {
+    container.innerHTML = `<div style="color: #f87171; padding: 20px;">Erreur : ${err.message}</div>`;
+  }
+}
+
+function renderConcoursGrid(list) {
+  const container = document.getElementById('concoursGridContainer');
+  if (!container) return;
+
+  if (list.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">Aucun concours correspondant.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(c => `
+    <div class="source-card" style="border-left: 4px solid #3b82f6;">
+      <div class="source-card-header">
+        <span class="source-flag">🏛️ ${c.country}</span>
+        <span class="source-status-badge ${c.days_left <= 30 ? 'status-inactive' : 'status-active'}">
+          ${c.days_left <= 30 ? '⏳ ' + c.days_left + 'j restants' : '✅ ' + c.days_left + ' jours'}
+        </span>
+      </div>
+      <div class="source-card-body">
+        <h4 class="source-name" style="font-size: 1.05rem; margin-bottom: 6px;">${c.title}</h4>
+        <div style="font-size: 0.85rem; color: var(--accent); font-weight: 700; margin-bottom: 8px;">${c.institution}</div>
+        <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px;">${c.description}</p>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+          <span class="badge-mini">👥 ${c.positions_count} postes</span>
+          <span class="badge-mini">📚 ${c.sector}</span>
+        </div>
+      </div>
+      <div class="source-card-footer">
+        <a href="${c.registration_url}" target="_blank" rel="noopener" class="source-link-btn" style="color: #60a5fa; font-weight: 700;">
+          📝 S'inscrire au concours
+        </a>
+      </div>
+    </div>
+  `).join('');
+}
+
+function searchConcoursUI() {
+  const query = (document.getElementById('searchConcoursInput')?.value || '').toLowerCase();
+  const filtered = stateConcoursList.filter(c => 
+    c.title.toLowerCase().includes(query) ||
+    c.institution.toLowerCase().includes(query) ||
+    c.sector.toLowerCase().includes(query)
+  );
+  renderConcoursGrid(filtered);
+}
+
+// ==================== 3. INTELLIGENCE ENTREPRISES ==================== //
+
+let stateCompaniesList = [];
+
+async function loadCompaniesList() {
+  const country = document.getElementById('filterCompanyCountry')?.value || 'Tous';
+  const diasporaOnly = document.getElementById('filterDiasporaFriendly')?.checked || false;
+  const container = document.getElementById('companiesGridContainer');
+  if (!container) return;
+
+  container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px;">⏳ Chargement des fiches entreprises...</div>';
+
+  try {
+    const res = await fetch(`/api/companies?country=${encodeURIComponent(country)}&diasporaOnly=${diasporaOnly}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    stateCompaniesList = data.companies;
+    renderCompaniesGrid(data.companies);
+  } catch (err) {
+    container.innerHTML = `<div style="color: #f87171; padding: 20px;">Erreur : ${err.message}</div>`;
+  }
+}
+
+function renderCompaniesGrid(list) {
+  const container = document.getElementById('companiesGridContainer');
+  if (!container) return;
+
+  if (list.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">Aucune entreprise trouvée.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(c => `
+    <div class="source-card" style="border-top: 3px solid var(--accent);">
+      <div class="source-card-header">
+        <span class="source-flag">🏢 ${c.country}</span>
+        <span class="source-status-badge status-active">★ ${c.rating} (${c.review_count} avis)</span>
+      </div>
+      <div class="source-card-body">
+        <h4 class="source-name" style="font-size: 1.15rem; margin-bottom: 4px;">${c.name}</h4>
+        <div style="font-size: 0.82rem; color: var(--accent); margin-bottom: 8px;">${c.sector} · ${c.city}</div>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px;">${c.description}</p>
+        
+        <div style="background: var(--surface-2); padding: 8px 10px; border-radius: 6px; font-size: 0.78rem; margin-bottom: 8px;">
+          <strong>💰 Salaires observés :</strong> ${c.salary_range}
+        </div>
+
+        <div style="font-size: 0.78rem; color: var(--text-main); margin-bottom: 8px;">
+          <strong>⚡ Délais de réponse :</strong> ~${c.avg_response_days} jours
+        </div>
+
+        ${c.diaspora_friendly ? '<span class="badge-mini" style="background: rgba(99, 102, 241, 0.2); color: #818cf8; border-color: rgba(99, 102, 241, 0.4);">🌍 Diaspora Friendly</span>' : ''}
+      </div>
+      <div class="source-card-footer" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+        <div style="font-size: 0.75rem; color: var(--accent); font-weight: 700;">💡 Conseil initié :</div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;">"${c.insider_tips[0] || 'Préparez votre entretien'}"</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function searchCompaniesUI() {
+  const query = (document.getElementById('searchCompanyInput')?.value || '').toLowerCase();
+  const filtered = stateCompaniesList.filter(c => 
+    c.name.toLowerCase().includes(query) ||
+    c.sector.toLowerCase().includes(query) ||
+    c.city.toLowerCase().includes(query)
+  );
+  renderCompaniesGrid(filtered);
+}
+
+// ==================== 4. MODE DIASPORA RETURN ==================== //
+
+async function convertDiasporaSalary() {
+  const amount = document.getElementById('diasporaAmountInput')?.value || 3000;
+  const currency = document.getElementById('diasporaCurrencySelect')?.value || 'EUR';
+  const source_city = document.getElementById('diasporaSourceCity')?.value || 'Paris';
+  const target_city = document.getElementById('diasporaTargetCity')?.value || 'Dakar';
+  const container = document.getElementById('diasporaConversionResult');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/diaspora/convert-salary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount, currency, source_city, target_city })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const r = data.result;
+    container.innerHTML = `
+      <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+          <div>
+            <div style="font-size: 0.8rem; color: #a5b4fc; text-transform: uppercase;">Salaire Nominal Converti</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: white;">${r.nominal_fcfa.toLocaleString('fr-FR')} FCFA</div>
+            <div style="font-size: 0.78rem; color: #cbd5e1;">Taux officiel de change</div>
+          </div>
+          <div>
+            <div style="font-size: 0.8rem; color: #34d399; text-transform: uppercase;">Pouvoir d'Achat Équivalent</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: #34d399;">${r.equivalent_purchasing_power_fcfa.toLocaleString('fr-FR')} FCFA</div>
+            <div style="font-size: 0.78rem; color: #cbd5e1;">Pour vivre comme à ${r.source_city}</div>
+          </div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase;">Fourchette de Négociation</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: var(--accent);">${r.recommended_negotiation_range.formatted}</div>
+            <div style="font-size: 0.78rem; color: #cbd5e1;">À demander aux recruteurs locaux</div>
+          </div>
+        </div>
+        <p style="font-size: 0.88rem; color: #e2e8f0; margin: 0; line-height: 1.6;">
+          💡 <strong>Analyse du coût de la vie :</strong> ${r.rent_differential}
+        </p>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color: #f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+async function adaptProfileForDiaspora() {
+  const container = document.getElementById('diasporaAdaptationResult');
+  if (!container) return;
+
+  container.innerHTML = '<div style="padding: 16px; color: var(--text-muted);">⏳ Traduction et adaptation en cours...</div>';
+
+  try {
+    const res = await fetch('/api/diaspora/adapt-cv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile: state.currentProfile })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const a = data.adaptation;
+    container.innerHTML = `
+      <div style="background: var(--surface-2); border-radius: 10px; padding: 18px; margin-top: 14px;">
+        <h4 style="color: var(--accent); margin-bottom: 10px;">✅ Modifications Appliquées pour les DRH d'Afrique de l'Ouest :</h4>
+        <ul style="margin: 0 0 14px 18px; font-size: 0.88rem; line-height: 1.6;">
+          ${a.applied_changes.map(c => `<li>${c}</li>`).join('')}
+        </ul>
+        <div style="background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; padding: 10px 14px; font-size: 0.85rem; border-radius: 4px; margin-bottom: 12px;">
+          <strong>Mention mobilité ajoutée :</strong> "${a.mobility_statement}"
+        </div>
+        <button class="btn-primary" onclick="alert('✅ Profil adapté enregistré avec les équivalences CAMES !')">
+          💾 Enregistrer ces adaptations au profil maître
+        </button>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color: #f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+async function loadDiasporaGuide(country) {
+  const container = document.getElementById('diasporaGuideContent');
+  if (!container) return;
+
+  try {
+    const res = await fetch(`/api/diaspora/guide?country=${encodeURIComponent(country)}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const g = data.guide;
+    container.innerHTML = `
+      <div style="background: var(--surface-2); border-radius: 10px; padding: 16px; font-size: 0.88rem; line-height: 1.6;">
+        <h4 style="color: var(--accent); margin-bottom: 8px;">Guide d'installation : ${g.country}</h4>
+        <p><strong>Quartiers recommandés :</strong> ${g.main_cities.join(' · ')}</p>
+        <p><strong>Banques avec services diaspora :</strong> ${g.banking_diaspora.join(', ')}</p>
+        <p><strong>Fiscalité :</strong> ${g.tax_tips}</p>
+        <p><strong>Loyers moyens :</strong> ${g.housing_avg_dakar || g.housing_avg_abidjan}</p>
+        <p><strong>Écoles internationales :</strong> ${g.schools}</p>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color: #f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+// ==================== 5. PISTON DIGITAL (RÉSEAU DE COOPTATION) ==================== //
+
+async function loadReferralsNetwork() {
+  const scoreNum = document.getElementById('referralScoreNum');
+  const badgeText = document.getElementById('referralBadgeText');
+  const listContainer = document.getElementById('referralsListContainer');
+  if (!listContainer) return;
+
+  try {
+    const res = await fetch('/api/referrals');
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    if (scoreNum) scoreNum.textContent = data.reputation_score;
+    if (badgeText) badgeText.textContent = data.badge;
+
+    listContainer.innerHTML = data.referrals.map(r => `
+      <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+          <div>
+            <div style="font-weight: 700; font-size: 1rem;">${r.referrer_name}</div>
+            <div style="font-size: 0.82rem; color: var(--accent);">${r.referrer_title} — ${r.referrer_company}</div>
+          </div>
+          <span class="badge-mini" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">${r.endorsement_strength}</span>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-main); font-style: italic; margin-bottom: 10px;">"${r.text}"</p>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          ${(r.skills_endorsed || []).map(s => `<span class="badge-mini">✓ ${s}</span>`).join('')}
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    listContainer.innerHTML = `<div style="color: #f87171;">Erreur : ${err.message}</div>`;
+  }
+}
+
+function openAddReferralModal() {
+  const name = prompt("Nom et prénom du référent (ex: Amadou Diallo) :");
+  if (!name) return;
+  const company = prompt("Entreprise du référent (ex: Sonatel) :", "Orange / Sonatel");
+  const title = prompt("Titre du référent :", "Directeur de Projet");
+  const text = prompt("Texte de recommandation :");
+  if (!text) return;
+
+  fetch('/api/referrals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ referrer_name: name, referrer_company: company, referrer_title: title, text })
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      alert("✅ Recommandation ajoutée à votre dossier !");
+      loadReferralsNetwork();
+    }
+  });
+}
+
+// ==================== 6. WHATSAPP BOT & SMS EN DIRECT ==================== //
+
+function initWhatsAppChat() {
+  const chatBox = document.getElementById('whatsappChatBox');
+  if (!chatBox || chatBox.children.length > 0) return;
+
+  // Message d'accueil par défaut
+  chatBox.innerHTML = `
+    <div style="align-self: flex-start; max-width: 82%; background: #202c33; color: #e9edef; padding: 10px 14px; border-radius: 8px 8px 8px 0; font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap;">👋 *Bienvenue sur SunuJob AI WhatsApp Bot !*
+
+Bonjour Ibrahima. Je suis votre assistant de carrière autonome.
+
+🔍 *JOBS [poste] [ville]* — Trouver les offres
+💰 *SALAIRE [secteur] [ville]* — Baromètre salaires
+📢 *CONCOURS [pays]* — Concours de l'État
+👤 *PROFIL* — Voir mon profil actif
+
+_Essayez dès maintenant en écrivant :_ *JOBS Dakar*</div>
+  `;
+}
+
+async function sendWhatsAppMessage() {
+  const input = document.getElementById('whatsappUserInput');
+  const chatBox = document.getElementById('whatsappChatBox');
+  if (!input || !chatBox) return;
+
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  // Bulle utilisateur (vert WhatsApp)
+  chatBox.innerHTML += `
+    <div style="align-self: flex-end; max-width: 80%; background: #005c4b; color: #e9edef; padding: 10px 14px; border-radius: 8px 8px 0 8px; font-size: 0.88rem; line-height: 1.5;">
+      ${msg}
+    </div>
+  `;
+  input.value = '';
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  try {
+    const res = await fetch('/api/whatsapp/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    });
+    const data = await res.json();
+    if (data.success && data.reply) {
+      setTimeout(() => {
+        chatBox.innerHTML += `
+          <div style="align-self: flex-start; max-width: 85%; background: #202c33; color: #e9edef; padding: 10px 14px; border-radius: 8px 8px 8px 0; font-size: 0.88rem; line-height: 1.5; white-space: pre-wrap;">${data.reply.text}</div>
+        `;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 400);
+    }
+  } catch (err) {
+    chatBox.innerHTML += `<div style="align-self: flex-start; color: #f87171; font-size: 0.8rem;">Erreur de connexion bot</div>`;
+  }
+}
+
+function triggerBotQuickCommand(cmd) {
+  const input = document.getElementById('whatsappUserInput');
+  if (input) {
+    input.value = cmd;
+    sendWhatsAppMessage();
+  }
+}
+
+async function simulateSMS() {
+  const input = document.getElementById('smsCommandInput');
+  const output = document.getElementById('smsOutputBox');
+  if (!input || !output) return;
+
+  const cmd = input.value.trim() || 'SUNUJOB Dakar';
+  output.textContent = 'Envoi du SMS vers le 21021...';
+
+  try {
+    const res = await fetch('/api/sms/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body: cmd })
+    });
+    const data = await res.json();
+    if (data.success) {
+      output.innerHTML = `
+        <div style="color: #86efac; font-weight: 700; margin-bottom: 4px;">📩 Réponse SMS Reçue (${data.char_count || 140}/160 car.) :</div>
+        <div style="color: white; line-height: 1.4;">${data.message || data.text || 'Commande traitée avec succès'}</div>
+      `;
+    }
+  } catch (err) {
+    output.textContent = 'Erreur simulation SMS : ' + err.message;
+  }
 }
