@@ -266,6 +266,116 @@
           </button>
         </div>
       </div>
+
+      <!-- ==================== PANNEAU IA — ANALYSE DU PROFIL ==================== -->
+      <div class="page-card" style="margin-top: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:16px;">
+          <div>
+            <h3 class="section-heading" style="font-size:1.3rem;">🤖 Coaching IA du Dossier</h3>
+            <p class="section-desc">L'IA analyse votre profil, calcule votre score ATS, génère votre pitch et identifie vos lacunes vs le marché.</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn-secondary" onclick="runProfileAIAnalysis()" id="btnProfileAnalysis">
+              📊 Analyser mon profil
+            </button>
+            <button class="btn-secondary" onclick="runGenerateSummary()" id="btnGenerateSummary">
+              🖊️ Générer mon pitch IA
+            </button>
+            <button class="btn-primary" style="background:var(--accent);color:#1e1e1e;font-weight:800;" onclick="runSkillGapAnalysis()" id="btnSkillGaps">
+              🔍 Lacunes compétences
+            </button>
+          </div>
+        </div>
+
+        <!-- Scores KPI du profil (masqués jusqu'à analyse) -->
+        <div id="profileKpiBar" style="display:none; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px;">
+          <div class="ai-kpi-card">
+            <div class="ai-kpi-icon">✅</div>
+            <div class="ai-kpi-value" id="profileCompletionVal">—</div>
+            <div class="ai-kpi-label">Complétude</div>
+          </div>
+          <div class="ai-kpi-card">
+            <div class="ai-kpi-icon">🎯</div>
+            <div class="ai-kpi-value" id="profileAtsVal">—</div>
+            <div class="ai-kpi-label">Score ATS</div>
+          </div>
+          <div class="ai-kpi-card">
+            <div class="ai-kpi-icon">🏆</div>
+            <div class="ai-kpi-value" id="profileSectorVal">—</div>
+            <div class="ai-kpi-label">Secteur détecté</div>
+          </div>
+          <div class="ai-kpi-card">
+            <div class="ai-kpi-icon">⚡</div>
+            <div class="ai-kpi-value" id="profileSkillsVal">—</div>
+            <div class="ai-kpi-label">Compétences</div>
+          </div>
+        </div>
+
+        <!-- Forces & Faiblesses -->
+        <div id="profileStrengthsPanel" style="display:none; margin-bottom:20px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:12px; padding:16px;">
+              <h4 style="color:#34d399; margin:0 0 10px; font-size:0.95rem;">💪 Points Forts</h4>
+              <ul id="profileStrengthsList" style="margin:0; padding-left:16px; font-size:0.88rem; color:var(--text-main); line-height:1.7;"></ul>
+            </div>
+            <div style="background:rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:16px;">
+              <h4 style="color:#f87171; margin:0 0 10px; font-size:0.95rem;">⚠️ Points à Améliorer</h4>
+              <ul id="profileWeaknessesList" style="margin:0; padding-left:16px; font-size:0.88rem; color:var(--text-main); line-height:1.7;"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- ATS Checklist -->
+        <div id="profileAtsPanel" style="display:none; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px;">
+          <h4 style="margin:0 0 12px; font-size:0.95rem; color:var(--accent);">🎯 Checklist ATS — Compatibilité Recruteurs</h4>
+          <div id="profileAtsChecklist" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px;"></div>
+        </div>
+
+        <!-- Générateur de Pitch IA -->
+        <div id="profileSummaryPanel" style="display:none; background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:16px; margin-bottom:16px;">
+          <h4 style="color:#fbbf24; margin:0 0 10px; font-size:0.95rem;">🖊️ Pitch Professionnel Généré par l'IA</h4>
+          <div id="profileSummaryFull" style="font-size:0.9rem; line-height:1.7; color:var(--text-main); background:var(--surface-2); padding:14px; border-radius:8px; margin-bottom:10px;"></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+            <div style="flex:1; background:var(--surface-2); padding:10px 12px; border-radius:8px; font-size:0.82rem;">
+              <strong style="color:#fbbf24; display:block; margin-bottom:4px;">📱 Pitch WhatsApp court :</strong>
+              <span id="profileShortPitch" style="color:var(--text-main);"></span>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="applyGeneratedSummary()" style="font-size:0.85rem; padding:8px 16px;">
+            ✅ Insérer dans mon profil
+          </button>
+        </div>
+
+        <!-- Lacunes Compétences -->
+        <div id="profileGapsPanel" style="display:none; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+            <h4 style="margin:0; font-size:0.95rem; color:var(--accent);">🔍 Lacunes vs Marché Ouest-Africain</h4>
+            <select id="gapSectorSelect" onchange="runSkillGapAnalysis()" style="padding:6px 10px; border-radius:8px; font-size:0.82rem; font-weight:600;">
+              <option value="Tech &amp; Digital">Tech &amp; Digital</option>
+              <option value="Finance &amp; Banque">Finance &amp; Banque</option>
+              <option value="Commerce &amp; Ventes">Commerce &amp; Ventes</option>
+              <option value="Logistique &amp; Transit">Logistique &amp; Transit</option>
+              <option value="Énergie &amp; Mines">Énergie &amp; Mines</option>
+              <option value="RH &amp; Management">RH &amp; Management</option>
+            </select>
+          </div>
+          <div id="profileGapsContent"></div>
+        </div>
+
+        <!-- Actions Prioritaires IA -->
+        <div id="profileActionsPanel" style="display:none; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.2); border-radius:12px; padding:16px;">
+          <h4 style="margin:0 0 12px; font-size:0.95rem; color:#34d399;">🚀 Actions Prioritaires pour Renforcer votre Dossier</h4>
+          <div id="profileActionsList"></div>
+        </div>
+
+        <!-- Placeholder initial -->
+        <div id="profileAIPlaceholder" style="text-align:center; padding:30px 20px; color:var(--text-muted);">
+          <div style="font-size:2.5rem; margin-bottom:10px;">🤖</div>
+          <p style="margin:0 0 6px; font-size:0.95rem;">Cliquez sur <strong>Analyser mon profil</strong> pour obtenir votre diagnostic IA complet.</p>
+          <p style="margin:0; font-size:0.82rem;">Score ATS · Forces · Lacunes · Pitch généré · Actions prioritaires</p>
+        </div>
+      </div>
+
     </div>
 
     <!-- ==================== VUE 3 : AJOUT D'UNE OFFRE LIBRE ==================== -->

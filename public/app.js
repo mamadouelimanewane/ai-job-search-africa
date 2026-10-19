@@ -1019,3 +1019,237 @@ function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
 }
+
+// ==================== COACHING IA — PROFIL & DOSSIER ==================== //
+
+// Stockage local des résultats IA profil
+state.profileAnalysis = null;
+state.generatedSummary = null;
+
+async function runProfileAIAnalysis() {
+  const btn = document.getElementById('btnProfileAnalysis');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analyse…'; btn.classList.add('btn-ai-active'); }
+
+  // Construire le profil depuis le formulaire (état actuel, pas forcément sauvegardé)
+  const liveProfile = buildProfileFromForm();
+
+  try {
+    const res = await fetch('/api/ai/profile-analysis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile: liveProfile })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Erreur analyse');
+
+    const a = data.analysis;
+    state.profileAnalysis = a;
+
+    // Masquer placeholder
+    document.getElementById('profileAIPlaceholder')?.style.setProperty('display','none');
+
+    // Afficher KPI bar
+    const kpiBar = document.getElementById('profileKpiBar');
+    if (kpiBar) kpiBar.style.display = 'grid';
+    setText('profileCompletionVal', a.completion_score + '% · ' + a.level);
+    setText('profileAtsVal',        a.ats_score.score + '/100');
+    setText('profileSectorVal',     a.detected_sector);
+    setText('profileSkillsVal',     a.skills_count + ' listées');
+
+    // Forces & Faiblesses
+    const strengthsList = document.getElementById('profileStrengthsList');
+    const weaknessesList = document.getElementById('profileWeaknessesList');
+    if (strengthsList) {
+      strengthsList.innerHTML = (a.strengths.length > 0
+        ? a.strengths.map(s => `<li>✅ ${s}</li>`).join('')
+        : '<li style="color:var(--text-muted)">Complétez votre profil pour voir vos forces.</li>');
+    }
+    if (weaknessesList) {
+      weaknessesList.innerHTML = (a.weaknesses.length > 0
+        ? a.weaknesses.map(w => `<li>${w}</li>`).join('')
+        : '<li style="color:#34d399">✅ Aucune faiblesse majeure détectée !</li>');
+    }
+    document.getElementById('profileStrengthsPanel')?.style.setProperty('display','block');
+
+    // ATS Checklist
+    renderATSChecklist(a.ats_score.details);
+    document.getElementById('profileAtsPanel')?.style.setProperty('display','block');
+
+    // Actions prioritaires
+    const actionsRes = await fetch('/api/ai/next-actions');
+    const actionsData = await actionsRes.json();
+    if (actionsData.success) renderProfileActions(actionsData.actions.priority_actions);
+    document.getElementById('profileActionsPanel')?.style.setProperty('display','block');
+
+  } catch (err) {
+    alert('Erreur analyse profil IA : ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📊 Analyser mon profil'; btn.classList.remove('btn-ai-active'); }
+  }
+}
+
+async function runGenerateSummary() {
+  const btn = document.getElementById('btnGenerateSummary');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Génération…'; btn.classList.add('btn-ai-active'); }
+
+  const liveProfile = buildProfileFromForm();
+
+  try {
+    const res = await fetch('/api/ai/generate-summary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile: liveProfile })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Erreur génération');
+
+    const r = data.result;
+    state.generatedSummary = r;
+
+    document.getElementById('profileAIPlaceholder')?.style.setProperty('display','none');
+
+    const panel = document.getElementById('profileSummaryPanel');
+    const fullEl  = document.getElementById('profileSummaryFull');
+    const shortEl = document.getElementById('profileShortPitch');
+
+    if (panel) panel.style.display = 'block';
+    if (fullEl)  fullEl.textContent  = r.full_summary;
+    if (shortEl) shortEl.textContent = r.short_pitch;
+
+  } catch (err) {
+    alert('Erreur génération pitch IA : ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🖊️ Générer mon pitch IA'; btn.classList.remove('btn-ai-active'); }
+  }
+}
+
+function applyGeneratedSummary() {
+  if (!state.generatedSummary) return;
+  const summaryField = document.getElementById('formSummary');
+  if (summaryField) {
+    summaryField.value = state.generatedSummary.full_summary;
+    summaryField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Flash visuel pour indiquer la mise à jour
+    summaryField.style.border = '2px solid var(--accent)';
+    setTimeout(() => { summaryField.style.border = ''; }, 2000);
+    alert('✅ Pitch IA inséré dans le champ résumé. N\'oubliez pas de sauvegarder votre profil !');
+  }
+}
+
+async function runSkillGapAnalysis() {
+  const btn    = document.getElementById('btnSkillGaps');
+  const sector = document.getElementById('gapSectorSelect')?.value || 'Tech & Digital';
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analyse…'; }
+
+  const liveProfile = buildProfileFromForm();
+
+  try {
+    const res = await fetch('/api/ai/skill-gaps', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile: liveProfile, sector })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Erreur analyse lacunes');
+
+    const gaps = data.gaps;
+    document.getElementById('profileAIPlaceholder')?.style.setProperty('display','none');
+
+    const panel   = document.getElementById('profileGapsPanel');
+    const content = document.getElementById('profileGapsContent');
+    if (panel) panel.style.display = 'block';
+
+    if (content) {
+      const coverageColor = gaps.coverage_rate >= 70 ? '#34d399' : gaps.coverage_rate >= 50 ? '#fbbf24' : '#f87171';
+      content.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; padding:10px; background:rgba(255,255,255,0.04); border-radius:8px;">
+          <div style="font-size:1.8rem; font-weight:800; color:${coverageColor};">${gaps.coverage_rate}%</div>
+          <div>
+            <div style="font-weight:700; color:${coverageColor};">${gaps.market_alignment} — Alignement marché ${sector}</div>
+            <div style="font-size:0.82rem; color:var(--text-muted);">${gaps.skills_present.length} compétences présentes · ${gaps.skills_missing.length} lacunes détectées</div>
+          </div>
+        </div>
+        ${gaps.skills_present.length > 0 ? `
+          <div style="margin-bottom:12px;">
+            <div style="font-size:0.82rem; font-weight:600; color:#34d399; margin-bottom:6px;">✅ Compétences validées :</div>
+            <div>${gaps.skills_present.map(s => `<span class="ai-skill-tag" style="border-color:rgba(52,211,153,0.4);color:#34d399;">${s}</span>`).join('')}</div>
+          </div>` : ''}
+        ${gaps.skills_missing.length > 0 ? `
+          <div style="margin-bottom:14px;">
+            <div style="font-size:0.82rem; font-weight:600; color:#f87171; margin-bottom:6px;">❌ Compétences manquantes :</div>
+            <div>${gaps.skills_missing.map(s => `<span class="ai-skill-tag" style="border-color:rgba(248,113,113,0.4);color:#f87171;">${s}</span>`).join('')}</div>
+          </div>` : ''}
+        ${gaps.training_recommendations.length > 0 ? `
+          <div>
+            <div style="font-size:0.85rem; font-weight:700; color:var(--accent); margin-bottom:8px;">📚 Formations recommandées :</div>
+            ${gaps.training_recommendations.map(t => `
+              <div style="background:var(--surface-2); border-radius:8px; padding:10px 12px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                <div>
+                  <span style="font-weight:600; color:var(--text-main);">${t.skill}</span>
+                  <span style="font-size:0.78rem; color:var(--text-muted); margin-left:8px;">${t.duration}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:0.75rem;">${t.priority}</span>
+                  <span style="font-size:0.78rem; color:var(--text-muted);">${t.platforms.join(' · ')}</span>
+                </div>
+              </div>`).join('')}
+          </div>` : ''}`;
+    }
+
+  } catch (err) {
+    alert('Erreur analyse lacunes : ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔍 Lacunes compétences'; }
+  }
+}
+
+// ─── Renderers profil ────────────────────────────────────────────────────────
+
+function renderATSChecklist(details) {
+  const container = document.getElementById('profileAtsChecklist');
+  if (!container || !details) return;
+  container.innerHTML = details.map(item => `
+    <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; background:var(--surface-3,rgba(255,255,255,0.04)); border-radius:8px; font-size:0.82rem;">
+      <span style="font-size:1rem;">${item.ok ? '✅' : '❌'}</span>
+      <span style="flex:1; color:${item.ok ? 'var(--text-main)' : '#f87171'};">${item.label}</span>
+      <span style="color:var(--accent); font-weight:700; font-size:0.78rem;">+${item.pts}pts</span>
+    </div>`).join('');
+}
+
+function renderProfileActions(actions) {
+  const container = document.getElementById('profileActionsList');
+  if (!container || !actions) return;
+  container.innerHTML = actions.map((a, i) => `
+    <div style="display:flex; align-items:flex-start; gap:12px; padding:10px; border-radius:10px; background:rgba(255,255,255,0.03); margin-bottom:8px; border-left:3px solid var(--accent);">
+      <span style="font-size:1.3rem; min-width:28px;">${a.icon}</span>
+      <div style="flex:1;">
+        <div style="font-weight:600; font-size:0.9rem; color:var(--text-main);">${a.action}</div>
+        <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
+          Impact : <strong style="color:${a.impact === 'Très élevé' ? '#34d399' : a.impact === 'Élevé' ? '#fbbf24' : '#94a3b8'};">${a.impact}</strong>
+          &nbsp;·&nbsp; Effort : ${a.effort}
+        </div>
+      </div>
+      <span style="font-size:0.75rem; font-weight:700; color:var(--accent); min-width:20px; text-align:right;">#${i + 1}</span>
+    </div>`).join('');
+}
+
+// ─── Helper : lire le profil depuis le formulaire (sans sauvegarder) ──────────
+
+function buildProfileFromForm() {
+  return {
+    name:               document.getElementById('formName')?.value.trim() || '',
+    title:              document.getElementById('formTitle')?.value.trim() || '',
+    phone:              document.getElementById('formPhone')?.value.trim() || '',
+    email:              document.getElementById('formEmail')?.value.trim() || '',
+    country:            document.getElementById('formCountry')?.value || '',
+    city:               document.getElementById('formCity')?.value.trim() || '',
+    education:          document.getElementById('formEducation')?.value.trim() || '',
+    years_of_experience: parseInt(document.getElementById('formYearsExp')?.value) || 0,
+    salary_expectation: document.getElementById('formSalary')?.value.trim() || '',
+    languages:          (document.getElementById('formLanguages')?.value || '').split(',').map(s => s.trim()).filter(Boolean),
+    skills:             (document.getElementById('formSkills')?.value || '').split(',').map(s => s.trim()).filter(Boolean),
+    summary:            document.getElementById('formSummary')?.value.trim() || '',
+    experiences:        (state.currentProfile && state.currentProfile.experiences) || []
+  };
+}

@@ -226,6 +226,51 @@ app.post('/api/ai/rank-jobs', (req, res) => {
   res.json({ success: true, count: ranked.length, jobs: ranked });
 });
 
+// =================== ROUTES IA — PROFIL & DOSSIER DE CANDIDATURE =================== //
+
+// Analyse complète du profil actif
+app.get('/api/ai/profile-analysis', (req, res) => {
+  const profile = profileManager.getProfile();
+  const analysis = aiAnalyzer.analyzeProfile(profile);
+  res.json({ success: true, analysis });
+});
+
+// Analyse d'un profil fourni en POST
+app.post('/api/ai/profile-analysis', (req, res) => {
+  const profile = req.body.profile || profileManager.getProfile();
+  const analysis = aiAnalyzer.analyzeProfile(profile);
+  res.json({ success: true, analysis });
+});
+
+// Générer un pitch/résumé professionnel automatique
+app.post('/api/ai/generate-summary', (req, res) => {
+  const profile = req.body.profile || profileManager.getProfile();
+  const result  = aiAnalyzer.generateProfessionalSummary(profile);
+  res.json({ success: true, result });
+});
+
+// Détecter les lacunes de compétences vs marché
+app.post('/api/ai/skill-gaps', (req, res) => {
+  const { profile, sector } = req.body;
+  const activeProfile = profile || profileManager.getProfile();
+  const gaps = aiAnalyzer.detectSkillGaps(activeProfile, sector);
+  res.json({ success: true, gaps });
+});
+
+// Score ATS du profil
+app.post('/api/ai/ats-score', (req, res) => {
+  const profile  = req.body.profile || profileManager.getProfile();
+  const atsScore = aiAnalyzer.scoreProfileATS(profile);
+  res.json({ success: true, ats: atsScore });
+});
+
+// Suggestions d'actions prioritaires
+app.get('/api/ai/next-actions', (req, res) => {
+  const profile  = profileManager.getProfile();
+  const actions  = aiAnalyzer.suggestNextActions(profile);
+  res.json({ success: true, actions });
+});
+
 // Lancement du serveur
 app.listen(PORT, () => {
   console.log(`=======================================================`);

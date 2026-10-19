@@ -362,5 +362,258 @@ module.exports = {
   generateSmartQuery,
   detectMarketTrends,
   rankJobsForProfile,
-  generateInsightReport
+  generateInsightReport,
+  // ── Nouvelles fonctions IA Profil & Dossier ──
+  analyzeProfile,
+  generateProfessionalSummary,
+  detectSkillGaps,
+  scoreProfileATS,
+  suggestNextActions
 };
+
+// ==================== IA PROFIL & DOSSIER DE CANDIDATURE ==================== //
+
+/**
+ * Analyse complète du profil candidat
+ * Retourne : score de complétude, forces, faiblesses, axes d'amélioration
+ */
+function analyzeProfile(profile) {
+  if (!profile) return { error: "Profil vide" };
+
+  const checks = {
+    name:         !!(profile.name && profile.name.trim().length > 2),
+    title:        !!(profile.title && profile.title.trim().length > 3),
+    email:        !!(profile.email && profile.email.includes('@')),
+    phone:        !!(profile.phone && profile.phone.trim().length > 7),
+    city:         !!(profile.city || profile.district),
+    education:    !!(profile.education && profile.education.trim().length > 3),
+    years_exp:    !!(profile.years_of_experience > 0),
+    skills:       !!(profile.skills && profile.skills.length >= 3),
+    languages:    !!(profile.languages && profile.languages.length >= 1),
+    summary:      !!(profile.summary && profile.summary.trim().length > 40),
+    salary:       !!(profile.salary_expectation && profile.salary_expectation.trim().length > 3),
+    experiences:  !!(profile.experiences && profile.experiences.length > 0)
+  };
+
+  const filled = Object.values(checks).filter(Boolean).length;
+  const total  = Object.keys(checks).length;
+  const completionScore = Math.round((filled / total) * 100);
+
+  // Niveau du score
+  const level = completionScore >= 85 ? "Excellent" :
+                completionScore >= 65 ? "Bon" :
+                completionScore >= 40 ? "Moyen" : "Incomplet";
+
+  // Forces détectées
+  const strengths = [];
+  if (checks.skills && profile.skills.length >= 5) strengths.push(`${profile.skills.length} compétences listées — excellent pour l'ATS`);
+  if (checks.summary) strengths.push("Pitch d'accroche présent — attire l'attention du recruteur");
+  if (checks.languages && profile.languages.length >= 2) strengths.push(`${profile.languages.length} langues maîtrisées — atout en Afrique de l'Ouest`);
+  if (checks.years_exp && profile.years_of_experience >= 3) strengths.push(`${profile.years_of_experience} ans d'expérience — profil crédible`);
+  if (checks.experiences) strengths.push("Expériences professionnelles renseignées — renforce la candidature");
+
+  // Faiblesses / manques
+  const weaknesses = [];
+  if (!checks.summary) weaknesses.push("❌ Pitch d'accroche absent — les recruteurs passent en moyenne 6 secondes sur un CV");
+  if (!checks.skills || profile.skills.length < 3) weaknesses.push("❌ Moins de 3 compétences — les systèmes ATS pourraient ne pas vous indexer");
+  if (!checks.experiences) weaknesses.push("❌ Aucune expérience renseignée — ajoutez au moins 2 postes pour crédibiliser le dossier");
+  if (!checks.phone) weaknesses.push("❌ Numéro WhatsApp manquant — 60% des recruteurs en Afrique de l'Ouest contactent par WhatsApp");
+  if (!checks.salary) weaknesses.push("⚠️ Prétentions salariales non définies — compliquera la négociation");
+  if (!checks.languages) weaknesses.push("⚠️ Langues non renseignées — l'anglais est un avantage différenciateur au Sénégal et en CI");
+
+  // Score ATS
+  const atsScore = scoreProfileATS(profile);
+
+  // Secteur déduit
+  const titleText = (profile.title || '') + ' ' + (profile.skills || []).join(' ');
+  let detectedSector = "Généraliste";
+  let maxM = 0;
+  for (const [sector, keywords] of Object.entries(SECTOR_KEYWORDS)) {
+    const m = keywords.filter(kw => titleText.toLowerCase().includes(kw)).length;
+    if (m > maxM) { maxM = m; detectedSector = sector; }
+  }
+
+  return {
+    completion_score:  completionScore,
+    level,
+    checks,
+    strengths,
+    weaknesses,
+    ats_score:         atsScore,
+    detected_sector:   detectedSector,
+    skills_count:      (profile.skills || []).length,
+    missing_fields:    Object.entries(checks).filter(([,v]) => !v).map(([k]) => k),
+    analyzed_at:       new Date().toISOString()
+  };
+}
+
+/**
+ * Génération automatique d'un pitch professionnel depuis le profil
+ */
+function generateProfessionalSummary(profile) {
+  if (!profile) return { error: "Profil vide" };
+
+  const name      = profile.name || "Le/La candidat(e)";
+  const title     = profile.title || "professionnel(le)";
+  const years     = profile.years_of_experience || 0;
+  const city      = profile.city || "Afrique de l'Ouest";
+  const education = profile.education || "formation supérieure";
+  const skills    = (profile.skills || []).slice(0, 5);
+  const languages = (profile.languages || ["Français"]).join(", ");
+
+  // Détecter le secteur depuis les compétences
+  const skillText = skills.join(' ').toLowerCase();
+  let sector = "domaine professionnel";
+  for (const [s, kws] of Object.entries(SECTOR_KEYWORDS)) {
+    if (kws.some(kw => skillText.includes(kw))) { sector = s; break; }
+  }
+
+  // Templates selon niveau d'expérience
+  let summary;
+  if (years <= 1) {
+    summary = `Jeune diplômé(e) en ${education}, ${name} est un(e) ${title} en début de carrière basé(e) à ${city}. ` +
+              `Motivé(e) et rigoureux(se), il/elle maîtrise notamment ${skills.slice(0,3).join(', ')} et s'exprime couramment en ${languages}. ` +
+              `À la recherche d'une première opportunité significative dans le secteur ${sector} pour développer son expertise et contribuer à des projets ambitieux.`;
+  } else if (years <= 4) {
+    summary = `${title} avec ${years} années d'expérience confirmée, ${name} intervient dans le secteur ${sector} depuis ${city}. ` +
+              `Diplômé(e) de ${education}, il/elle apporte une maîtrise technique de ${skills.join(', ')} et une capacité éprouvée à livrer des résultats concrets. ` +
+              `Bilingue (${languages}), il/elle est reconnu(e) pour son autonomie et son sens du travail en équipe dans des environnements exigeants d'Afrique de l'Ouest.`;
+  } else {
+    summary = `${title} senior fort(e) de ${years} ans d'expérience, ${name} est une référence dans le secteur ${sector} à ${city}. ` +
+              `Son expertise approfondie en ${skills.slice(0,4).join(', ')} combinée à sa formation en ${education} lui permet d'apporter une valeur ajoutée immédiate. ` +
+              `Leader reconnu(e) et communicant(e) en ${languages}, il/elle pilote des projets à fort impact dans des contextes multi-culturels et multi-pays.`;
+  }
+
+  // Variantes courtes pour WhatsApp / LinkedIn
+  const shortPitch = `${title} | ${years > 0 ? years + ' ans d\'exp.' : 'Jeune diplômé'} | ${city} | ${skills.slice(0,3).join(' · ')}`;
+  const linkedinHeadline = `${title} @ ${city} | ${sector} | ${skills.slice(0,2).join(' & ')}`;
+
+  return {
+    full_summary:      summary,
+    short_pitch:       shortPitch,
+    linkedin_headline: linkedinHeadline,
+    word_count:        summary.split(' ').length,
+    generated_at:      new Date().toISOString()
+  };
+}
+
+/**
+ * Détection des lacunes de compétences par rapport au marché
+ */
+function detectSkillGaps(profile, targetSector) {
+  const profileSkills = (profile.skills || []).map(s => s.toLowerCase().trim());
+  const sector = targetSector || "Tech & Digital";
+
+  // Compétences de référence par secteur (marché ouest-africain 2025)
+  const sectorSkillsMap = {
+    "Tech & Digital":        ["JavaScript","Python","React","Node.js","SQL","Docker","Git","APIs","Agile","Linux"],
+    "Finance & Banque":      ["SYSCOHADA","Excel avancé","SAP","Sage","IFRS","BCEAO","Audit","Gestion de risques","ERP","VBA"],
+    "Commerce & Ventes":     ["CRM","Négociation","Salesforce","Excel","Analyse des ventes","B2B","Gestion de portefeuille"],
+    "Logistique & Transit":  ["SAP","Douane","Transport","Incoterms","Excel","ERP","Supply Chain","ASYCUDA"],
+    "Énergie & Mines":       ["AutoCAD","QGIS","HSE","SIG","Project","Excel","Reporting","Géologie","Hydrologie"],
+    "RH & Management":       ["GPEC","Paie","Excel","Recrutement","Formation","Leadership","Communication","ATS","HRIS"]
+  };
+
+  const targetSkills = sectorSkillsMap[sector] || sectorSkillsMap["Tech & Digital"];
+
+  const present = targetSkills.filter(sk => profileSkills.some(ps => ps.includes(sk.toLowerCase())));
+  const missing  = targetSkills.filter(sk => !profileSkills.some(ps => ps.includes(sk.toLowerCase())));
+
+  const coverageRate = Math.round((present.length / targetSkills.length) * 100);
+
+  // Recommandations de formation (plateformes disponibles en Afrique)
+  const trainingRecommendations = missing.slice(0, 4).map(skill => ({
+    skill,
+    platforms: ["Coursera","OpenClassrooms","LinkedIn Learning","YouTube","CTIC Dakar"].slice(0, 3),
+    duration:  "2–8 semaines",
+    priority:  targetSkills.indexOf(skill) < 3 ? "🔴 Prioritaire" : "🟡 Recommandé"
+  }));
+
+  return {
+    target_sector:     sector,
+    coverage_rate:     coverageRate,
+    skills_present:    present,
+    skills_missing:    missing,
+    training_recommendations: trainingRecommendations,
+    market_alignment:  coverageRate >= 70 ? "Excellent" : coverageRate >= 50 ? "Bon" : "À renforcer",
+    analyzed_at:       new Date().toISOString()
+  };
+}
+
+/**
+ * Score ATS — Compatibilité avec les systèmes de tracking recruteurs
+ */
+function scoreProfileATS(profile) {
+  let score = 0;
+  const details = [];
+
+  // Présence des champs clés
+  if (profile.name)          { score += 8;  details.push({ label: "Nom complet", pts: 8, ok: true }); }
+  else                       {              details.push({ label: "Nom complet", pts: 8, ok: false }); }
+
+  if (profile.title)         { score += 12; details.push({ label: "Titre professionnel", pts: 12, ok: true }); }
+  else                       {              details.push({ label: "Titre professionnel", pts: 12, ok: false }); }
+
+  if (profile.email)         { score += 8;  details.push({ label: "Email", pts: 8, ok: true }); }
+  else                       {              details.push({ label: "Email", pts: 8, ok: false }); }
+
+  if (profile.phone)         { score += 8;  details.push({ label: "Téléphone", pts: 8, ok: true }); }
+  else                       {              details.push({ label: "Téléphone", pts: 8, ok: false }); }
+
+  const skillsCount = (profile.skills || []).length;
+  if (skillsCount >= 8)      { score += 20; details.push({ label: `${skillsCount} compétences (≥8 idéal)`, pts: 20, ok: true }); }
+  else if (skillsCount >= 4) { score += 12; details.push({ label: `${skillsCount} compétences (8 recommandées)`, pts: 12, ok: true }); }
+  else                       {              details.push({ label: "Compétences insuffisantes", pts: 20, ok: false }); }
+
+  if (profile.education)     { score += 10; details.push({ label: "Formation", pts: 10, ok: true }); }
+  else                       {              details.push({ label: "Formation", pts: 10, ok: false }); }
+
+  if (profile.summary && profile.summary.length > 60) { score += 15; details.push({ label: "Pitch/Résumé", pts: 15, ok: true }); }
+  else if (profile.summary)  { score += 8;  details.push({ label: "Pitch court (enrichir)", pts: 15, ok: true }); }
+  else                       {              details.push({ label: "Pitch/Résumé", pts: 15, ok: false }); }
+
+  if (profile.years_of_experience > 0) { score += 10; details.push({ label: "Expérience (années)", pts: 10, ok: true }); }
+  else                       {              details.push({ label: "Expérience (années)", pts: 10, ok: false }); }
+
+  if (profile.languages && profile.languages.length > 0) { score += 9; details.push({ label: "Langues", pts: 9, ok: true }); }
+  else                       {              details.push({ label: "Langues", pts: 9, ok: false }); }
+
+  const atsLevel = score >= 80 ? "🟢 Optimisé ATS" : score >= 60 ? "🟡 Passable" : "🔴 Non-optimisé";
+
+  return { score: Math.min(100, score), level: atsLevel, details };
+}
+
+/**
+ * Suggestions d'actions prioritaires pour améliorer le dossier
+ */
+function suggestNextActions(profile) {
+  const analysis = analyzeProfile(profile);
+  const actions = [];
+
+  if (!analysis.checks.summary) {
+    actions.push({ priority: 1, icon: "🖊️", action: "Générer un pitch automatique avec l'IA", impact: "Très élevé", effort: "1 minute" });
+  }
+  if (!analysis.checks.experiences) {
+    actions.push({ priority: 2, icon: "💼", action: "Ajouter vos expériences professionnelles", impact: "Élevé", effort: "10 minutes" });
+  }
+  if (analysis.checks.skills && profile.skills.length < 6) {
+    actions.push({ priority: 3, icon: "⚡", action: "Ajouter des compétences techniques (viser 8+)", impact: "Élevé", effort: "5 minutes" });
+  }
+  if (!analysis.checks.phone) {
+    actions.push({ priority: 4, icon: "📱", action: "Ajouter votre numéro WhatsApp (indispensable en Afrique)", impact: "Moyen", effort: "1 minute" });
+  }
+  if (!analysis.checks.languages) {
+    actions.push({ priority: 5, icon: "🌍", action: "Renseigner les langues maîtrisées (Français, Anglais, Wolof...)", impact: "Moyen", effort: "2 minutes" });
+  }
+
+  // Actions avancées
+  actions.push({ priority: 6, icon: "📊", action: "Lancer l'analyse de lacunes compétences vs marché", impact: "Élevé", effort: "30 secondes" });
+  actions.push({ priority: 7, icon: "🛰️", action: "Scanner le web pour trouver des offres correspondant à votre profil", impact: "Très élevé", effort: "1 clic" });
+
+  return {
+    priority_actions: actions.slice(0, 5),
+    completion_score: analysis.completion_score,
+    ats_score:        analysis.ats_score.score,
+    total_actions:    actions.length
+  };
+}
