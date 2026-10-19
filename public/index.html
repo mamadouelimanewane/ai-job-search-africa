@@ -426,6 +426,94 @@
         </div>
       </div>
 
+      <!-- ==================== PANNEAU IA — INTELLIGENCE DU MARCHÉ ==================== -->
+      <div class="page-card" style="margin-top: 24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:16px;">
+          <div>
+            <h3 class="section-heading" style="font-size:1.4rem;">🤖 Intelligence IA du Marché d'Emploi</h3>
+            <p class="section-desc">Analyse en temps réel des offres : secteurs porteurs, compétences recherchées, tendances et recommandations personnalisées.</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn-secondary" onclick="runAIMarketAnalysis()" id="btnAIAnalysis">
+              📊 Analyser le Marché
+            </button>
+            <button class="btn-secondary" onclick="runAISmartQuery()" id="btnSmartQuery">
+              🔍 Requête Intelligente
+            </button>
+            <button class="btn-primary" style="background:var(--accent);color:#1e1e1e;font-weight:800;" onclick="runAIInsightReport()" id="btnInsightReport">
+              🧠 Rapport IA Complet
+            </button>
+          </div>
+        </div>
+
+        <!-- Indicateurs KPI IA -->
+        <div id="aiKpiBar" style="display:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px;">
+          <div class="ai-kpi-card" id="kpiMarketHeat">
+            <div class="ai-kpi-icon">🔥</div>
+            <div class="ai-kpi-value" id="kpiHeatValue">—</div>
+            <div class="ai-kpi-label">Indice de chaleur</div>
+          </div>
+          <div class="ai-kpi-card" id="kpiTopSector">
+            <div class="ai-kpi-icon">🏆</div>
+            <div class="ai-kpi-value" id="kpiSectorValue">—</div>
+            <div class="ai-kpi-label">Secteur N°1</div>
+          </div>
+          <div class="ai-kpi-card" id="kpiTopSkill">
+            <div class="ai-kpi-icon">⚡</div>
+            <div class="ai-kpi-value" id="kpiSkillValue">—</div>
+            <div class="ai-kpi-label">Compétence clé</div>
+          </div>
+          <div class="ai-kpi-card" id="kpiTopCity">
+            <div class="ai-kpi-icon">🏙️</div>
+            <div class="ai-kpi-value" id="kpiCityValue">—</div>
+            <div class="ai-kpi-label">Ville active</div>
+          </div>
+          <div class="ai-kpi-card" id="kpiJobsAnalyzed">
+            <div class="ai-kpi-icon">📋</div>
+            <div class="ai-kpi-value" id="kpiJobsValue">—</div>
+            <div class="ai-kpi-label">Offres analysées</div>
+          </div>
+        </div>
+
+        <!-- Tendances Secteurs + Compétences -->
+        <div id="aiTrendsPanel" style="display:none; margin-bottom:20px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; flex-wrap:wrap;">
+            <!-- Top Secteurs -->
+            <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:16px;">
+              <h4 style="margin:0 0 12px; color:var(--accent);">📈 Secteurs Porteurs</h4>
+              <div id="aiSectorBars"></div>
+            </div>
+            <!-- Top Compétences -->
+            <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:16px;">
+              <h4 style="margin:0 0 12px; color:var(--accent);">⚡ Compétences en Demande</h4>
+              <div id="aiSkillTags"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone Requête Intelligente -->
+        <div id="aiSmartQueryPanel" style="display:none; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:16px; margin-bottom:16px;">
+          <h4 style="color:#fbbf24; margin:0 0 10px;">🔍 Requête de Recherche Intelligente</h4>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:10px;">Générée automatiquement depuis votre profil :</p>
+          <div id="aiSmartQueryResult" style="font-family:monospace; font-size:0.95rem; background:var(--surface-2); border-radius:8px; padding:12px; margin-bottom:10px;"></div>
+          <button class="btn-primary" onclick="applySuggestedQuery()" style="font-size:0.85rem; padding:8px 16px;">
+            ✅ Appliquer cette requête au scan
+          </button>
+        </div>
+
+        <!-- Rapport narratif IA -->
+        <div id="aiInsightReportPanel" style="display:none; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.25); border-radius:12px; padding:20px;">
+          <div id="aiReportContent"></div>
+        </div>
+
+        <!-- État initial (avant première analyse) -->
+        <div id="aiPlaceholder" style="text-align:center; padding:40px 20px; color:var(--text-muted);">
+          <div style="font-size:3rem; margin-bottom:12px;">🤖</div>
+          <p style="font-size:1rem; margin:0 0 6px;">L'IA est prête à analyser votre marché.</p>
+          <p style="font-size:0.85rem;">Cliquez sur <strong>Analyser le Marché</strong> pour démarrer.</p>
+        </div>
+      </div>
+
     </div>
 
   </div>

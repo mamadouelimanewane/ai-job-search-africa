@@ -1469,3 +1469,151 @@ body {
 .source-link-btn:hover {
   text-decoration: underline;
 }
+
+/* ========================================================
+   PANNEAU IA — Intelligence du Marché
+======================================================== */
+
+.ai-kpi-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 12px;
+  text-align: center;
+  transition: transform 0.2s, border-color 0.2s;
+  cursor: default;
+}
+
+.ai-kpi-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+}
+
+.ai-kpi-icon {
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+}
+
+.ai-kpi-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-kpi-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Barres de tendance secteur */
+.ai-trend-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ai-trend-label {
+  font-size: 0.82rem;
+  color: var(--text-main);
+  min-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-trend-bar-wrap {
+  flex: 1;
+  background: var(--surface-3, rgba(255,255,255,0.06));
+  border-radius: 6px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.ai-trend-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-light), var(--accent));
+  border-radius: 6px;
+  transition: width 0.6s ease;
+}
+
+.ai-trend-count {
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 700;
+  min-width: 24px;
+  text-align: right;
+}
+
+/* Skill tags IA */
+.ai-skill-tag {
+  display: inline-block;
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: #fbbf24;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin: 4px;
+  transition: background 0.2s;
+}
+
+.ai-skill-tag:hover {
+  background: rgba(245,158,11,0.25);
+}
+
+/* Rapport IA narratif */
+.ai-report-headline {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 14px;
+  padding: 12px;
+  background: rgba(16,185,129,0.1);
+  border-radius: 8px;
+  border-left: 3px solid #10b981;
+}
+
+.ai-report-insights {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.ai-report-insights li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.ai-report-insights li:last-child {
+  border-bottom: none;
+}
+
+.ai-report-recommendation {
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 0.9rem;
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+/* Animation pulse pour boutons IA actifs */
+@keyframes ai-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+}
+
+.btn-ai-active {
+  animation: ai-pulse 1.5s infinite;
+}

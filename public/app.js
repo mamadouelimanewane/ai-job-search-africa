@@ -840,3 +840,182 @@ async function submitNewSource() {
     alert('Erreur réseau. Veuillez réessayer.');
   }
 }
+
+// ==================== PANNEAU IA — INTELLIGENCE DU MARCHÉ ==================== //
+
+// Stockage local de la dernière analyse
+state.aiTrends = null;
+state.aiReport = null;
+state.aiSmartQuery = null;
+
+async function runAIMarketAnalysis() {
+  const btn = document.getElementById('btnAIAnalysis');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analyse…'; btn.classList.add('btn-ai-active'); }
+
+  try {
+    const res = await fetch('/api/ai/market-trends');
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Erreur analyse');
+
+    const trends = data.trends;
+    state.aiTrends = trends;
+
+    // Masquer placeholder
+    document.getElementById('aiPlaceholder')?.style.setProperty('display','none');
+
+    // Afficher KPI bar
+    const kpiBar = document.getElementById('aiKpiBar');
+    if (kpiBar) kpiBar.style.display = 'grid';
+    setText('kpiHeatValue', `${trends.market_heat_score}/100`);
+    setText('kpiSectorValue', trends.top_sectors[0]?.key || '—');
+    setText('kpiSkillValue',  trends.top_skills_in_demand[0]?.key || '—');
+    setText('kpiCityValue',   trends.top_cities[0]?.key || '—');
+    setText('kpiJobsValue',   trends.total_jobs_analyzed);
+
+    // Afficher barres secteurs
+    renderSectorBars(trends.top_sectors);
+
+    // Afficher skill tags
+    renderSkillTags(trends.top_skills_in_demand);
+
+    document.getElementById('aiTrendsPanel')?.style.setProperty('display','block');
+
+  } catch (err) {
+    alert('Erreur analyse IA : ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📊 Analyser le Marché'; btn.classList.remove('btn-ai-active'); }
+  }
+}
+
+async function runAIInsightReport() {
+  const btn = document.getElementById('btnInsightReport');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Génération…'; btn.classList.add('btn-ai-active'); }
+
+  try {
+    const res = await fetch('/api/ai/insight-report');
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Erreur rapport');
+
+    const report = data.report;
+    state.aiReport = report;
+
+    document.getElementById('aiPlaceholder')?.style.setProperty('display','none');
+
+    // D'abord, lancer l'analyse marché si pas déjà faite
+    if (!state.aiTrends) await runAIMarketAnalysis();
+
+    // Rendre le rapport narratif
+    const panel = document.getElementById('aiInsightReportPanel');
+    const content = document.getElementById('aiReportContent');
+    if (panel && content) {
+      panel.style.display = 'block';
+      content.innerHTML = `
+        <h4 style="font-family:'Space Grotesk',sans-serif;font-size:1.15rem;color:var(--accent);margin:0 0 14px;">
+          ${report.title}
+        </h4>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 10px;">📅 ${report.date}</p>
+        <div class="ai-report-headline">${report.headline}</div>
+        <h5 style="color:var(--text-main);margin:0 0 8px;font-size:0.9rem;">Points clés :</h5>
+        <ul class="ai-report-insights">
+          ${(report.key_insights || []).map(i => `<li>${i.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</li>`).join('')}
+        </ul>
+        <div class="ai-report-recommendation">
+          💡 Recommandation IA : ${report.recommendation}
+        </div>`;
+    }
+
+  } catch (err) {
+    alert('Erreur génération rapport : ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🧠 Rapport IA Complet'; btn.classList.remove('btn-ai-active'); }
+  }
+}
+
+async function runAISmartQuery() {
+  const btn = document.getElementById('btnSmartQuery');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Génération…'; }
+
+  try {
+    const profile = state.currentProfile;
+    const res = await fetch('/api/ai/smart-query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Erreur requête');
+
+    const q = data.query;
+    state.aiSmartQuery = q;
+
+    document.getElementById('aiPlaceholder')?.style.setProperty('display','none');
+
+    const panel  = document.getElementById('aiSmartQueryPanel');
+    const result = document.getElementById('aiSmartQueryResult');
+    if (panel && result) {
+      panel.style.display = 'block';
+      result.innerHTML = `
+        <div style="color:var(--accent);font-weight:700;margin-bottom:6px;">🔍 "${q.primary_query || 'emploi Afrique Ouest'}"</div>
+        ${q.alternative_queries && q.alternative_queries.length > 0 ?
+          `<div style="font-size:0.82rem;color:var(--text-muted);margin-top:6px;">
+            Alternatives : ${q.alternative_queries.map(alt => `<span class="ai-skill-tag">${alt}</span>`).join('')}
+          </div>` : ''}
+        ${q.explanation && q.explanation.length > 0 ?
+          `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:8px;border-top:1px solid var(--border);padding-top:6px;">
+            ${q.explanation.map(e => `• ${e}`).join('<br>')}
+          </div>` : ''}`;
+    }
+  } catch (err) {
+    alert('Erreur requête IA : ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔍 Requête Intelligente'; }
+  }
+}
+
+function applySuggestedQuery() {
+  if (!state.aiSmartQuery) return;
+  const query = state.aiSmartQuery.primary_query;
+  const input = document.getElementById('scanQueryInput');
+  if (input) {
+    input.value = query;
+    input.focus();
+    // Scroll vers le haut du formulaire de scan
+    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+// ─── Renderers ───────────────────────────────────────────────────────────────
+
+function renderSectorBars(sectors) {
+  const container = document.getElementById('aiSectorBars');
+  if (!container || !sectors) return;
+  const max = sectors[0]?.count || 1;
+  container.innerHTML = sectors.map(s => {
+    const pct = Math.round((s.count / max) * 100);
+    return `
+      <div class="ai-trend-bar-row">
+        <span class="ai-trend-label" title="${s.key}">${s.key}</span>
+        <div class="ai-trend-bar-wrap">
+          <div class="ai-trend-bar-fill" style="width:${pct}%;"></div>
+        </div>
+        <span class="ai-trend-count">${s.count}</span>
+      </div>`;
+  }).join('');
+}
+
+function renderSkillTags(skills) {
+  const container = document.getElementById('aiSkillTags');
+  if (!container || !skills) return;
+  const max = skills[0]?.count || 1;
+  container.innerHTML = skills.map(sk => {
+    const size = sk.count >= max * 0.7 ? 1.1 : sk.count >= max * 0.4 ? 0.95 : 0.82;
+    return `<span class="ai-skill-tag" style="font-size:${size}rem;">${sk.key} (${sk.count})</span>`;
+  }).join('');
+}
+
+// ─── Utilitaire ──────────────────────────────────────────────────────────────
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}

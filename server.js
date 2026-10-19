@@ -12,6 +12,7 @@ const dualAgentEngine = require('./src/core/dual_agent');
 const interviewCoach = require('./src/core/interview_coach');
 const paymentManager = require('./src/core/payments');
 const webScanner = require('./src/core/web_scanner');
+const aiAnalyzer = require('./src/core/ai_analyzer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -176,6 +177,53 @@ app.post('/api/aggregator/add-site', (req, res) => {
   }
   const newSite = webScanner.addNewSource({ name, url, country, city, type });
   res.json({ success: true, site: newSite });
+});
+
+// =================== ROUTES IA — ANALYSE INTELLIGENTE DES OFFRES =================== //
+
+// Analyser une offre spécifique
+app.post('/api/ai/analyze-job', (req, res) => {
+  const { job } = req.body;
+  if (!job) return res.status(400).json({ success: false, error: 'Offre manquante' });
+  const analysis = aiAnalyzer.analyzeJobOffer(job);
+  res.json({ success: true, analysis });
+});
+
+// Analyser en lot toutes les offres de la base
+app.get('/api/ai/analyze-all', (req, res) => {
+  const jobs = jobAggregator.getAllJobs();
+  const enriched = aiAnalyzer.batchAnalyzeJobs(jobs);
+  res.json({ success: true, count: enriched.length, jobs: enriched });
+});
+
+// Tendances du marché
+app.get('/api/ai/market-trends', (req, res) => {
+  const jobs = jobAggregator.getAllJobs();
+  const trends = aiAnalyzer.detectMarketTrends(jobs);
+  res.json({ success: true, trends });
+});
+
+// Rapport narratif IA du marché
+app.get('/api/ai/insight-report', (req, res) => {
+  const jobs = jobAggregator.getAllJobs();
+  const report = aiAnalyzer.generateInsightReport(jobs);
+  res.json({ success: true, report });
+});
+
+// Générer une requête de recherche intelligente depuis le profil
+app.post('/api/ai/smart-query', (req, res) => {
+  const { profile } = req.body;
+  const query = aiAnalyzer.generateSmartQuery(profile || profileManager.getProfile());
+  res.json({ success: true, query });
+});
+
+// Classement personnalisé des offres pour le profil actif
+app.post('/api/ai/rank-jobs', (req, res) => {
+  const { profile } = req.body;
+  const jobs  = jobAggregator.getAllJobs();
+  const activeProfile = profile || profileManager.getProfile();
+  const ranked = aiAnalyzer.rankJobsForProfile(jobs, activeProfile);
+  res.json({ success: true, count: ranked.length, jobs: ranked });
 });
 
 // Lancement du serveur
