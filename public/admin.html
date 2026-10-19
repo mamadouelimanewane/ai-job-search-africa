@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Back-Office Administration | SunuJob AI</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #06110e;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .admin-header {
+      background: #091a15;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .admin-badge {
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+    }
+    .admin-status-indicators {
+      display: flex;
+      gap: 16px;
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      margin-right: 6px;
+    }
+    .admin-nav-bar {
+      background: #0b1e19;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0 24px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+    }
+    .admin-tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #94a3b8;
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 16px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .admin-tab-btn:hover {
+      color: #f8fafc;
+    }
+    .admin-tab-btn.active {
+      color: #10b981;
+      border-bottom-color: #10b981;
+      font-weight: 700;
+    }
+    .admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px 24px 60px;
+    }
+    /* Stats Row */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+    .kpi-card {
+      background: #0f261f;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+    }
+    .kpi-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .kpi-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+    .kpi-sub {
+      font-size: 0.78rem;
+      color: #10b981;
+      margin-top: 6px;
+    }
+    /* Table styling */
+    .admin-panel {
+      background: #0f261f;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .admin-table th {
+      background: rgba(0, 0, 0, 0.25);
+      color: #94a3b8;
+      text-align: left;
+      padding: 12px 16px;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .admin-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #cbd5e1;
+    }
+    .admin-table tr:hover td {
+      background: rgba(16, 185, 129, 0.04);
+    }
+    .badge-status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-status.actif, .badge-status.valide {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+    .badge-status.suspendu {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+    .badge-status.en_attente {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+    }
+    .btn-action-sm {
+      background: #143229;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #f8fafc;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-action-sm:hover {
+      background: #10b981;
+      color: #000;
+    }
+    .btn-action-danger {
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+    .btn-action-danger:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+    .search-box-admin {
+      background: #091a15;
+      border: 1px solid #1a3c31;
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #f8fafc;
+      font-size: 0.88rem;
+      outline: none;
+      width: 280px;
+    }
+    .search-box-admin:focus {
+      border-color: #10b981;
+    }
+
+    /* Modal */
+    .admin-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+    .admin-modal-box {
+      background: #0f261f;
+      border: 1px solid #10b981;
+      border-radius: 16px;
+      max-width: 580px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+    .form-group-admin {
+      margin-bottom: 14px;
+    }
+    .form-group-admin label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .form-group-admin input, .form-group-admin select, .form-group-admin textarea {
+      width: 100%;
+      background: #091a15;
+      border: 1px solid #1a3c31;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .toast-admin {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10b981;
+      color: #000;
+      font-weight: 700;
+      padding: 12px 20px;
+      border-radius: 8px;
+      display: none;
+      z-index: 10000;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== HEADER ADMIN ==================== -->
+  <header class="admin-header">
+    <div class="admin-brand">
+      <a href="/admin" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.4rem;">⚡</span>
+        <span style="font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 800;">SunuJob <span style="color: #10b981;">AI</span></span>
+      </a>
+      <span class="admin-badge">BACK-OFFICE ADMIN</span>
+    </div>
+
+    <div class="admin-status-indicators">
+      <div><span class="status-dot"></span> Serveur Node : <strong>OK (Port 3000)</strong></div>
+      <div><span class="status-dot"></span> Moteur IA : <strong id="lblAiModel">Gemini 1.5 Pro</strong></div>
+      <div id="lblClock">Dakar / Abidjan : 17:35 GMT</div>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <a href="/" target="_blank" class="btn-action-sm">👁️ Page d'Accueil</a>
+      <a href="/app" target="_blank" class="btn-action-sm" style="background: #10b981; color: #000;">🚀 Espace Candidat</a>
+    </div>
+  </header>
+
+  <!-- ==================== NAVIGATION ONGLETS ==================== -->
+  <nav class="admin-nav-bar">
+    <button class="admin-tab-btn active" onclick="switchAdminTab('dashboard')">
+      <span>📊</span> Vue d'Ensemble & KPIs
+    </button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('users')">
+      <span>👥</span> Candidats & Inscriptions (<span id="tabUsersCount">...</span>)
+    </button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('jobs')">
+      <span>💼</span> Modération Offres & Arnaques (<span id="tabJobsCount">...</span>)
+    </button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('payments')">
+      <span>💳</span> Transactions Wave / OM
+    </button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('ai_monitoring')">
+      <span>🤖</span> Surveillance Moteur IA
+    </button>
+    <button class="admin-tab-btn" onclick="switchAdminTab('settings')">
+      <span>⚙️</span> Paramètres & Quotas
+    </button>
+  </nav>
+
+  <!-- ==================== CONTENU PRINCIPAL ==================== -->
+  <main class="admin-container">
+
+    <!-- KPI ROW (TOUJOURS VISIBLE) -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Candidats Inscrits</div>
+        <div class="kpi-val" id="kpiUsers">--</div>
+        <div class="kpi-sub">🇸🇳 Sénégal & 🇨🇮 RCI</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Candidatures Générées</div>
+        <div class="kpi-val" id="kpiApplications">--</div>
+        <div class="kpi-sub">Optimisées au filtre ATS</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Entretiens Vocaux</div>
+        <div class="kpi-val" id="kpiInterviews">--</div>
+        <div class="kpi-sub">Simulateur vocal interactif</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Recettes Wave / OM</div>
+        <div class="kpi-val" id="kpiRevenue">-- FCFA</div>
+        <div class="kpi-sub">Paiements validés</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Arnaques Interceptées</div>
+        <div class="kpi-val" id="kpiScams" style="color: #f87171;">--</div>
+        <div class="kpi-sub">Bouclier anti-fraude actif</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Disponibilité Système</div>
+        <div class="kpi-val" id="kpiUptime" style="color: #34d399;">99.9%</div>
+        <div class="kpi-sub">Temps réponse : ~1.4s</div>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 1 : DASHBOARD ==================== -->
+    <div id="section-dashboard" class="admin-tab-content">
+      <div class="admin-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>⚡</span> Dernières Inscriptions Récentes</div>
+          <button class="btn-action-sm" onclick="switchAdminTab('users')">Voir tous les utilisateurs →</button>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Candidat</th>
+              <th>Contact</th>
+              <th>Pays / Ville</th>
+              <th>Métier Visé</th>
+              <th>Crédits</th>
+              <th>Statut</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="tblRecentUsers">
+            <tr><td colspan="7" style="text-align: center;">Chargement des données...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="admin-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>💳</span> Derniers Encaissements Wave & Orange Money</div>
+          <button class="btn-action-sm" onclick="switchAdminTab('payments')">Toutes les transactions →</button>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Réf Transaction</th>
+              <th>Client</th>
+              <th>Pack</th>
+              <th>Méthode</th>
+              <th>Montant</th>
+              <th>Statut</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="tblRecentPayments">
+            <tr><td colspan="7" style="text-align: center;">Chargement des transactions...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 2 : GESTION CANDIDATS ==================== -->
+    <div id="section-users" class="admin-tab-content" style="display: none;">
+      <div class="admin-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>👥</span> Liste Complète des Candidats Inscrits</div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" class="search-box-admin" id="searchUserInput" placeholder="Rechercher nom, tél, métier..." oninput="filterUsersTable()">
+            <button class="btn-action-sm" onclick="openAddUserModal()">➕ Inscrire un Candidat</button>
+          </div>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nom & Prénom</th>
+              <th>WhatsApp / Tél</th>
+              <th>Pays & Ville</th>
+              <th>Poste Ciblé</th>
+              <th>Solde Crédits</th>
+              <th>Statut</th>
+              <th>Inscrit le</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tblAllUsers">
+            <tr><td colspan="9" style="text-align: center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 3 : GESTION OFFRES & ARNAQUES ==================== -->
+    <div id="section-jobs" class="admin-tab-content" style="display: none;">
+      <div class="admin-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>💼</span> Modération des Offres d'Emploi</div>
+          <button class="btn-action-sm" onclick="openAddJobModal()" style="background: #10b981; color: #000; font-weight: 700;">➕ Ajouter une Offre d'Emploi</button>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Poste</th>
+              <th>Entreprise</th>
+              <th>Lieu</th>
+              <th>Contrat</th>
+              <th>Salaire</th>
+              <th>Sécurité Arnaque</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tblAllJobs">
+            <tr><td colspan="8" style="text-align: center;">Chargement des offres...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 4 : TRANSACTIONS ==================== -->
+    <div id="section-payments" class="admin-tab-content" style="display: none;">
+      <div class="admin-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>💳</span> Historique Complet des Paiements Wave & OM</div>
+          <button class="btn-action-sm" onclick="loadAdminData()">🔄 Actualiser</button>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Client</th>
+              <th>Téléphone</th>
+              <th>Formule / Pack</th>
+              <th>Moyen</th>
+              <th>Montant</th>
+              <th>Statut</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="tblFullPayments">
+            <tr><td colspan="8" style="text-align: center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 5 : SURVEILLANCE IA ==================== -->
+    <div id="section-ai_monitoring" class="admin-tab-content" style="display: none;">
+      <div class="admin-panel">
+        <div class="panel-header">
+          <div class="panel-title"><span>🤖</span> État du Moteur d'IA & Agents Autonomes</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 24px;">
+          <div style="background: #091a15; padding: 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+            <h4 style="color: #10b981; margin-bottom: 8px;">Agent 1 : Rédacteur CV Sur-Mesure</h4>
+            <p style="font-size: 0.85rem; color: #94a3b8;">Spécialisé dans la mise en valeur des compétences locales et l'alignement précis avec les mots-clés de l'annonce.</p>
+            <div style="margin-top: 10px; font-weight: 700; color: #34d399;">Statut : Opérationnel 🟢</div>
+          </div>
+
+          <div style="background: #091a15; padding: 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+            <h4 style="color: #f59e0b; margin-bottom: 8px;">Agent 2 : DRH Critique & Filtre ATS</h4>
+            <p style="font-size: 0.85rem; color: #94a3b8;">Simule un recruteur intransigeant d'une grande entreprise ou banque ouest-africaine. Élimine les faiblesses.</p>
+            <div style="margin-top: 10px; font-weight: 700; color: #34d399;">Statut : Opérationnel 🟢</div>
+          </div>
+
+          <div style="background: #091a15; padding: 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+            <h4 style="color: #60a5fa; margin-bottom: 8px;">Agent 3 : Coach Vocal d'Entretien</h4>
+            <p style="font-size: 0.85rem; color: #94a3b8;">Analyse la fluidité orale, la concision et la réponse aux questions pièges en contexte professionnel local.</p>
+            <div style="margin-top: 10px; font-weight: 700; color: #34d399;">Statut : Opérationnel 🟢</div>
+          </div>
+        </div>
+
+        <div style="background: #091a15; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.05);">
+          <h4 style="margin-bottom: 12px;">Journal des Activités IA Récentes</h4>
+          <div id="aiActivityLog" style="font-family: monospace; font-size: 0.82rem; color: #86efac; line-height: 1.8;">
+            <div>[2026-10-19 17:30:12] Dual-Agent : Optimisation CV candidat pour Baobab FinTech (Score ATS: 96%)</div>
+            <div>[2026-10-19 17:28:44] Scam Shield : 1 annonce suspecte filtrée (demande illégale de 5000 FCFA Mobile Money)</div>
+            <div>[2026-10-19 17:22:05] Simulation vocale terminée : Candidat évalué 17/20 sur questions comportementales</div>
+            <div>[2026-10-19 17:15:33] Mini-Site Pro généré : /u/ibrahima-ndiaye certifié conforme</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 6 : PARAMÈTRES ==================== -->
+    <div id="section-settings" class="admin-tab-content" style="display: none;">
+      <div class="admin-panel" style="max-width: 700px;">
+        <div class="panel-header">
+          <div class="panel-title"><span>⚙️</span> Configuration Globale de la Plateforme</div>
+        </div>
+        <form onsubmit="handleSaveSettings(event)">
+          <div class="form-group-admin">
+            <label>Nom public de la plateforme</label>
+            <input type="text" id="cfgPlatformName" value="SunuJob AI / IvoireJob">
+          </div>
+
+          <div class="form-group-admin">
+            <label>Crédits gratuits offerts à chaque nouvelle inscription</label>
+            <input type="number" id="cfgFreeCredits" min="1" max="10" value="3">
+          </div>
+
+          <div class="form-group-admin">
+            <label>Coût par génération de dossier (CV + Lettre)</label>
+            <input type="number" id="cfgCostApp" min="1" max="5" value="1">
+          </div>
+
+          <div class="form-group-admin">
+            <label>Coût par simulation d'entretien vocal</label>
+            <input type="number" id="cfgCostInterview" min="1" max="5" value="2">
+          </div>
+
+          <div class="form-group-admin">
+            <label>Numéro WhatsApp Support / Admin</label>
+            <input type="text" id="cfgWhatsappAdmin" value="+221774567890">
+          </div>
+
+          <div class="form-group-admin">
+            <label>Email Support Officiel</label>
+            <input type="email" id="cfgSupportEmail" value="support@sunujob.ai">
+          </div>
+
+          <button type="submit" class="btn-action-sm" style="background: #10b981; color: #000; font-weight: 800; padding: 12px 24px; font-size: 0.95rem; margin-top: 12px;">
+            💾 Enregistrer la Configuration
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== MODALES ==================== -->
+  <!-- Modal Ajouter Offre -->
+  <div id="modalAddJob" class="admin-modal-overlay">
+    <div class="admin-modal-box">
+      <h3 style="color: #f8fafc; margin-bottom: 16px;">➕ Publier une Nouvelle Offre d'Emploi</h3>
+      <form onsubmit="handleAddJobSubmit(event)">
+        <div class="form-group-admin">
+          <label>Intitulé du poste *</label>
+          <input type="text" id="newJobTitle" required placeholder="Ex: Chef de Projet Digital">
+        </div>
+        <div class="form-group-admin">
+          <label>Entreprise *</label>
+          <input type="text" id="newJobCompany" required placeholder="Ex: Sonatel / Orange">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group-admin">
+            <label>Pays</label>
+            <select id="newJobCountry">
+              <option value="Sénégal" selected>Sénégal</option>
+              <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+            </select>
+          </div>
+          <div class="form-group-admin">
+            <label>Ville</label>
+            <input type="text" id="newJobCity" placeholder="Ex: Dakar ou Abidjan" value="Dakar">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group-admin">
+            <label>Type de contrat</label>
+            <select id="newJobContract">
+              <option value="CDI">CDI</option>
+              <option value="CDD">CDD</option>
+              <option value="Stage">Stage</option>
+              <option value="Freelance / Pige">Freelance</option>
+            </select>
+          </div>
+          <div class="form-group-admin">
+            <label>Fourchette Salariale</label>
+            <input type="text" id="newJobSalary" placeholder="Ex: 500 000 - 800 000 FCFA">
+          </div>
+        </div>
+        <div class="form-group-admin">
+          <label>Description du poste</label>
+          <textarea id="newJobDesc" rows="3" placeholder="Missions et profil recherché..."></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+          <button type="button" class="btn-action-sm" onclick="closeAddJobModal()">Annuler</button>
+          <button type="submit" class="btn-action-sm" style="background: #10b981; color: #000; font-weight: 700;">Publier l'Offre</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Admin -->
+  <div id="adminToast" class="toast-admin"></div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

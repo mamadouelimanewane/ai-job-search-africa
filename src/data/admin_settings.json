@@ -1,0 +1,17 @@
+{
+  "platform_name": "SunuJob AI / IvoireJob",
+  "maintenance_mode": false,
+  "free_credits_on_signup": 3,
+  "credit_cost_application": 1,
+  "credit_cost_interview": 2,
+  "credit_cost_portfolio": 1,
+  "wave_merchant_id": "SN_WAVE_MAMADOU_01",
+  "wave_api_enabled": true,
+  "om_merchant_id": "CI_OM_778899",
+  "ai_provider": "gemini-1.5-pro",
+  "ai_fallback_provider": "deepseek-chat",
+  "auto_scam_detection": true,
+  "notification_whatsapp_admin": "+221774567890",
+  "support_email": "support@sunujob.ai",
+  "last_updated": "2026-10-19T17:35:00.000Z"
+}

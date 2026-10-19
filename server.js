@@ -32,6 +32,8 @@ const credentialVault = require('./src/core/credential_vault');
 const careerRoadmap = require('./src/core/career_roadmap');
 const videoPitch = require('./src/core/video_pitch');
 const concoursPrep = require('./src/core/concours_prep');
+// Module Back-Office Admin
+const adminService = require('./src/core/admin_service');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,6 +42,149 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// =================== PAGES NAVIGATION =================== //
+
+// Espace candidat (ancienne application principale)
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'app.html'));
+});
+
+// Back-Office Administration
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// =================== API INSCRIPTION / AUTH =================== //
+
+app.post('/api/auth/register', (req, res) => {
+  try {
+    const result = adminService.registerUser(req.body);
+    res.json(result);
+  } catch (e) {
+    console.error('Erreur inscription:', e);
+    res.status(500).json({ success: false, error: 'Erreur serveur lors de l\'inscription' });
+  }
+});
+
+// =================== API BACK-OFFICE ADMIN =================== //
+
+// Stats globales
+app.get('/api/admin/stats', (req, res) => {
+  try {
+    res.json({ success: true, stats: adminService.getStats() });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// Gestion Utilisateurs
+app.get('/api/admin/users', (req, res) => {
+  try {
+    res.json({ success: true, users: adminService.getUsers() });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.post('/api/admin/users/:id/credits', (req, res) => {
+  try {
+    res.json(adminService.updateUserCredits(req.params.id, req.body.delta || 0));
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.post('/api/admin/users/:id/toggle', (req, res) => {
+  try {
+    res.json(adminService.toggleUserStatus(req.params.id));
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.delete('/api/admin/users/:id', (req, res) => {
+  try {
+    res.json(adminService.deleteUser(req.params.id));
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// Modération Offres d'Emploi
+app.get('/api/admin/jobs', (req, res) => {
+  try {
+    res.json({ success: true, jobs: adminService.getAllJobsForAdmin() });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.post('/api/admin/jobs', (req, res) => {
+  try {
+    res.json({ success: true, job: adminService.addAdminJob(req.body) });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.delete('/api/admin/jobs/:id', (req, res) => {
+  try {
+    res.json(adminService.deleteJob(req.params.id));
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.post('/api/admin/jobs/:id/verify', (req, res) => {
+  try {
+    res.json(adminService.toggleJobVerification(req.params.id));
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// Transactions Wave & Orange Money
+app.get('/api/admin/transactions', (req, res) => {
+  try {
+    res.json({ success: true, transactions: adminService.getTransactions() });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.post('/api/admin/transactions', (req, res) => {
+  try {
+    res.json({ success: true, transaction: adminService.recordTransaction(req.body) });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.post('/api/admin/transactions/:id/validate', (req, res) => {
+  try {
+    res.json(adminService.validateTransaction(req.params.id));
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// Paramètres Plateforme
+app.get('/api/admin/settings', (req, res) => {
+  try {
+    res.json({ success: true, settings: adminService.getSettings() });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+app.post('/api/admin/settings', (req, res) => {
+  try {
+    res.json({ success: true, settings: adminService.saveSettings(req.body) });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
 
 // =================== ROUTES PROFIL CANDIDAT =================== //
 

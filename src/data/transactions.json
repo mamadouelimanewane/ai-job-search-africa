@@ -1,0 +1,46 @@
+[
+  {
+    "id": "TX-WAVE-8921",
+    "user_name": "Ibrahima Ndiaye",
+    "user_phone": "+221774567890",
+    "pack": "Pack Candidat Pro (10 candidatures)",
+    "method": "Wave",
+    "amount_fcfa": 2500,
+    "status": "valide",
+    "reference": "WAVE-SN-49281729",
+    "created_at": "2026-10-18T16:22:10.000Z"
+  },
+  {
+    "id": "TX-OM-4310",
+    "user_name": "Aïssatou Diallo",
+    "user_phone": "+221781234567",
+    "pack": "Pass Réussite 30 Jours",
+    "method": "Orange Money",
+    "amount_fcfa": 5000,
+    "status": "valide",
+    "reference": "OM-CI-88992211",
+    "created_at": "2026-10-19T09:14:05.000Z"
+  },
+  {
+    "id": "TX-WAVE-7704",
+    "user_name": "Kouamé Jean-Marc Konan",
+    "user_phone": "+2250708091011",
+    "pack": "Pack Découverte (3 candidatures)",
+    "method": "Wave",
+    "amount_fcfa": 1000,
+    "status": "valide",
+    "reference": "WAVE-CI-33441199",
+    "created_at": "2026-10-19T10:45:30.000Z"
+  },
+  {
+    "id": "TX-WAVE-9901",
+    "user_name": "Mamadou Lamine Touré",
+    "user_phone": "+221773344556",
+    "pack": "Pass Réussite 30 Jours",
+    "method": "Wave",
+    "amount_fcfa": 5000,
+    "status": "valide",
+    "reference": "WAVE-SN-99882244",
+    "created_at": "2026-10-19T14:02:18.000Z"
+  }
+]

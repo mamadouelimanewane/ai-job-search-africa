@@ -71,6 +71,7 @@ function searchJobs(query = '', country = '', contract = '') {
 
 module.exports = {
   getAllJobs,
+  saveJobs,
   getJobById,
   addCustomJob,
   searchJobs

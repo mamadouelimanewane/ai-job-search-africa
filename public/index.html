@@ -3,27 +3,347 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SunuJob AI — L'Assistant IA de Candidature & Recrutement en Afrique de l'Ouest</title>
-  <meta name="description" content="Le premier assistant IA de candidature sur-mesure pour le Sénégal et la Côte d'Ivoire. CV ciblés, lettres révisées par un agent DRH critique, postulation WhatsApp et paiements Wave / Orange Money.">
+  <title>SunuJob AI — L'Assistant IA de Recrutement & Candidature en Afrique de l'Ouest</title>
+  <meta name="description" content="Décrochez votre prochain emploi au Sénégal et en Côte d'Ivoire grâce à l'IA : CV ciblés ATS, simulateur d'entretien vocal, radar 16 sites d'emploi et paiements Wave / Orange Money.">
   <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0a4c3e">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Styles spécifiques Landing Page */
+    .landing-hero {
+      position: relative;
+      padding: 60px 24px 80px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    @media (max-width: 960px) {
+      .landing-hero {
+        grid-template-columns: 1fr;
+        padding: 40px 16px 60px;
+        gap: 36px;
+      }
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.15;
+      color: #f8fafc;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+    @media (max-width: 768px) {
+      .hero-title { font-size: 2.2rem; }
+    }
+    .hero-title span.grad {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 50%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: 1.12rem;
+      line-height: 1.6;
+      color: #94a3b8;
+      margin-bottom: 32px;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .hero-stat-item strong {
+      display: block;
+      font-size: 1.6rem;
+      color: #10b981;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .hero-stat-item span {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    /* Signup Card */
+    .signup-card {
+      background: linear-gradient(180deg, #11221c 0%, #0d1a16 100%);
+      border: 2px solid rgba(16, 185, 129, 0.4);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), 0 0 30px rgba(16, 185, 129, 0.15);
+      position: relative;
+    }
+    .signup-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .signup-pill {
+      background: #f59e0b;
+      color: #000;
+      font-weight: 800;
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .signup-header h3 {
+      font-size: 1.4rem;
+      color: #f8fafc;
+      margin-bottom: 6px;
+    }
+    .signup-header p {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+    .form-group-landing {
+      margin-bottom: 16px;
+    }
+    .form-group-landing label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .form-group-landing input, .form-group-landing select {
+      width: 100%;
+      background: #091310;
+      border: 1px solid #1f382f;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #f8fafc;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .form-group-landing input:focus, .form-group-landing select:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+    .btn-signup-cta {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin-top: 20px;
+    }
+    .btn-signup-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45);
+    }
+    .signup-footer-note {
+      text-align: center;
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 14px;
+    }
+
+    /* Brand Logos ticker */
+    .sources-ticker {
+      max-width: 1200px;
+      margin: 0 auto 60px;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+    .sources-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+    .sources-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px 24px;
+    }
+    .source-tag {
+      background: #11221c;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Features Grid */
+    .section-title-wrap {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 48px;
+      padding: 0 16px;
+    }
+    .section-title-wrap h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.2rem;
+      color: #f8fafc;
+      margin-bottom: 12px;
+    }
+    .features-grid {
+      max-width: 1200px;
+      margin: 0 auto 80px;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .feature-box {
+      background: #11221c;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 16px;
+      padding: 28px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .feature-box:hover {
+      transform: translateY(-4px);
+      border-color: #10b981;
+    }
+    .feature-icon-big {
+      font-size: 2.4rem;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+    .feature-box h3 {
+      font-size: 1.25rem;
+      color: #f8fafc;
+      margin-bottom: 10px;
+    }
+    .feature-box p {
+      font-size: 0.92rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    /* Pricing Section */
+    .pricing-grid {
+      max-width: 1050px;
+      margin: 0 auto 80px;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .pricing-card {
+      background: #11221c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 32px 24px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .pricing-card.featured {
+      border: 2px solid #10b981;
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.25);
+    }
+    .pricing-card .badge-rec {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: #10b981;
+      color: #000;
+      font-weight: 800;
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .pricing-price {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #f8fafc;
+      margin: 16px 0;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .pricing-price span {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+    .pricing-features {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0 30px;
+      flex-grow: 1;
+    }
+    .pricing-features li {
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Floating Success Modal */
+    .toast-popup {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10b981;
+      color: #000;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      display: none;
+      z-index: 9999;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ==================== BANDEAU D'ANNONCE HAUT ==================== -->
+  <!-- Top Announcement Bar -->
   <div class="top-announcement">
     <span>🇸🇳 <strong>Sénégal</strong> & 🇨🇮 <strong>Côte d'Ivoire</strong> : Remplissez votre profil une seule fois, l'IA adapte votre CV et prépare vos entretiens.</span>
-    <span class="announcement-pill">Paiement Wave & OM disponible</span>
+    <span class="announcement-pill">Paiements Wave & Orange Money acceptés</span>
   </div>
 
-  <!-- ==================== NAVIGATION PRINCIPALE ==================== -->
+  <!-- Navigation Bar -->
   <header class="navbar">
     <div class="nav-container">
-      <a href="#" class="brand-logo" onclick="switchNavView('feed')">
+      <a href="/" class="brand-logo">
         <div class="brand-icon">⚡</div>
         <div class="brand-text">
           <span class="brand-name">SunuJob <span class="highlight">AI</span></span>
@@ -31,1646 +351,389 @@
         </div>
       </a>
 
-      <!-- Menu Navigation -->
       <nav class="nav-menu">
-        <button class="nav-link active" id="navFeedBtn" onclick="switchNavView('feed')">
-          <span>💼</span> Offres & Matching
-        </button>
-        <button class="nav-link" id="navProfileBtn" onclick="switchNavView('profile')">
-          <span>👤</span> Mon Profil Maître
-        </button>
-        <button class="nav-link" id="navCustomJobBtn" onclick="switchNavView('custom')">
-          <span>➕</span> Coller une Offre
-        </button>
-        <button class="nav-link" id="navPricingBtn" onclick="switchNavView('pricing')">
-          <span>💳</span> Tarifs & Wave
-        </button>
-        <button class="nav-link" id="navAggregatorBtn" onclick="switchNavView('aggregator')">
-          <span>🌐</span> Radar Web
-        </button>
-        <button class="nav-link" id="navSalaryBtn" onclick="switchNavView('salary')">
-          <span>💰</span> Salaires FCFA
-        </button>
-        <button class="nav-link" id="navConcoursBtn" onclick="switchNavView('concours')">
-          <span>📢</span> Concours Publics
-        </button>
-        <button class="nav-link" id="navCompaniesBtn" onclick="switchNavView('companies')">
-          <span>🏢</span> Entreprises
-        </button>
-        <button class="nav-link" id="navDiasporaBtn" onclick="switchNavView('diaspora')">
-          <span>🌍</span> Mode Diaspora
-        </button>
-        <button class="nav-link" id="navNetworkBtn" onclick="switchNavView('network')">
-          <span>🤝</span> Piston Digital
-        </button>
-        <button class="nav-link" id="navBotBtn" onclick="switchNavView('bot')">
-          <span>🟢</span> WhatsApp & SMS
-        </button>
-        <button class="nav-link" id="navInterviewBtn" onclick="switchNavView('interview')">
-          <span>🎭</span> Entretien IA
-        </button>
-        <button class="nav-link" id="navPayrollBtn" onclick="switchNavView('payroll')">
-          <span>💼</span> Paie & Contrats UEMOA
-        </button>
-        <button class="nav-link" id="navTalentPoolBtn" onclick="switchNavView('talentpool')">
-          <span>🎯</span> Talent Pool
-        </button>
-        <button class="nav-link" id="navRemoteBtn" onclick="switchNavView('remote')">
-          <span>🌍</span> Télétravail & Pige
-        </button>
-        <button class="nav-link" id="navRoadmapBtn" onclick="switchNavView('roadmap')">
-          <span>🧭</span> Mentor Carrière
-        </button>
-        <button class="nav-link" id="navB2BBtn" onclick="switchNavView('b2b')">
-          <span>👔</span> Espace DRH
-        </button>
-        <button class="nav-link" id="navQuizBtn" onclick="switchNavView('quiz')">
-          <span>👥</span> QCM Concours
-        </button>
+        <a href="#features" class="nav-link"><span>✨</span> Fonctionnalités</a>
+        <a href="#demo" class="nav-link"><span>📱</span> Démonstration</a>
+        <a href="#pricing" class="nav-link"><span>💳</span> Tarifs Wave & OM</a>
+        <a href="#testimonials" class="nav-link"><span>⭐</span> Témoignages</a>
       </nav>
 
-      <!-- Actions Rapides -->
-      <div class="nav-right">
-        <div class="credit-counter" onclick="openPaymentModal()" title="Cliquer pour recharger">
-          <span class="credit-icon">⚡</span>
-          <span id="navCreditsCount">Chargement...</span>
-        </div>
-        <a href="/u/ibrahima-ndiaye" target="_blank" class="chip" style="color: #fbbf24; border-color: rgba(245, 158, 11, 0.4); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-          🌐 Mon Mini-Site Pro
+      <div class="nav-right" style="gap: 12px;">
+        <a href="/admin" class="chip" style="color: #60a5fa; border-color: rgba(96, 165, 250, 0.4); text-decoration: none; font-weight: 700;">
+          ⚙️ Back-Office
         </a>
-        <button class="btn-cta-nav" onclick="openPaymentModal()">
-          Recharger
-        </button>
+        <a href="/app" class="btn-primary" style="text-decoration: none; padding: 8px 18px; font-size: 0.9rem; font-weight: 700;">
+          🚀 Espace Candidat
+        </a>
       </div>
     </div>
   </header>
 
-  <!-- ==================== HERO SECTION ACCUEIL ==================== -->
-  <section class="hero-section" id="heroBanner">
-    <div class="hero-content">
-      <div class="hero-badge">
-        <span>🚀 Premier Assistant IA de Recrutement & Candidature en Afrique de l'Ouest</span>
-      </div>
-      <h1 class="hero-title">
-        Décrochez votre prochain poste à <span class="text-accent">Dakar</span> & <span class="text-accent-secondary">Abidjan</span> avec l'IA.
-      </h1>
-      <p class="hero-subtitle">
-        Fini de réécrire vos CVs et lettres à la main. Renseignez votre profil une fois : notre système à <strong>Double Agent IA</strong> analyse l'offre, rédige un dossier sur-mesure et le fait auditer par un DRH virtuel exigeant avant expédition en 1 clic sur WhatsApp ou Email.
-      </p>
-
-      <!-- Métriques de succès (inspirées de Mads Lorentzen) -->
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-val">69</div>
-          <div class="metric-label">Candidatures ciblées</div>
+  <!-- ==================== HERO SECTION & SIGNUP ==================== -->
+  <main>
+    <section class="landing-hero">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span>🚀 Nouveau en Afrique de l'Ouest</span>
+          <span>•</span>
+          <span>Sénégal & Côte d'Ivoire</span>
         </div>
-        <div class="metric-card">
-          <div class="metric-val text-success">20</div>
-          <div class="metric-label">Entretiens obtenus</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-val text-accent">0</div>
-          <div class="metric-label">Spam à l'aveugle</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-val text-blue">1-Clic</div>
-          <div class="metric-label">Envoi WhatsApp / Email</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== APPLICATION PRINCIPALE (ONGLETS DYNAMIQUES) ==================== -->
-  <div class="main-container">
-
-    <!-- ==================== VUE 1 : FEED D'OFFRES & MATCHING (PAR DÉFAUT) ==================== -->
-    <div id="viewFeed" class="app-view active">
-      
-      <div class="feed-layout">
-
-        <!-- Barre Latérale Résumé Profil -->
-        <aside class="sidebar-summary">
-          <div class="summary-card">
-            <div class="summary-header">
-              <div class="summary-avatar" id="sideAvatar">IN</div>
-              <div>
-                <h3 class="summary-name" id="sideName">Ibrahima Ndiaye</h3>
-                <p class="summary-title" id="sideTitle">Développeur Full-Stack</p>
-              </div>
-            </div>
-            
-            <div class="summary-tags">
-              <span class="badge-mini" id="sideCity">📍 Dakar, Sénégal</span>
-              <span class="badge-mini" id="sideDegree">🎓 Master ESP / UCAD</span>
-              <span class="badge-mini" id="sideSalary">💰 750 000 FCFA net</span>
-            </div>
-
-            <div class="summary-section">
-              <div class="summary-section-title">Compétences actives :</div>
-              <div class="skills-wrap" id="sideSkillsList"></div>
-            </div>
-
-            <div class="summary-actions">
-              <button class="btn-outline-sm" onclick="switchNavView('profile')">
-                ✏️ Modifier mon profil
-              </button>
-              <div class="demo-switch-box">
-                <label for="sideSampleSelect">Profil de démo :</label>
-                <select id="sideSampleSelect" onchange="switchDemoProfile(this.value)">
-                  <option value="">Changer de profil...</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Carte Recommandation / WhatsApp -->
-          <div class="whatsapp-tip-card">
-            <h4>💡 Le saviez-vous ?</h4>
-            <p>En Afrique de l'Ouest, plus de 60 % des premiers contacts de recrutement s'effectuent via WhatsApp. Notre outil génère un pitch direct calibré pour les DRH.</p>
-          </div>
-        </aside>
-
-        <!-- Colonne Principale des Offres -->
-        <div class="feed-main">
-          
-          <!-- Filtres et recherche -->
-          <div class="search-filter-card">
-            <div class="search-row">
-              <div class="search-input-field">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" placeholder="Intitulé de poste, compétences (ex: React, Comptabilité, Odoo)..." oninput="handleSearch()">
-              </div>
-              <div class="filter-controls">
-                <select id="countryFilter" onchange="handleSearch()">
-                  <option value="">Tous les pays</option>
-                  <option value="Sénégal">🇸🇳 Sénégal</option>
-                  <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-                </select>
-                <select id="contractFilter" onchange="handleSearch()">
-                  <option value="">Tous contrats</option>
-                  <option value="CDI">CDI</option>
-                  <option value="CDD">CDD</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="quick-chips">
-              <span class="chip-label">Suggestions rapides :</span>
-              <button class="chip" onclick="quickFilter('Dakar')">Dakar</button>
-              <button class="chip" onclick="quickFilter('Abidjan')">Abidjan</button>
-              <button class="chip" onclick="quickFilter('FinTech')">FinTech & Mobile Money</button>
-              <button class="chip" onclick="quickFilter('Logistique')">Logistique</button>
-              <button class="chip" onclick="quickFilter('Comptable')">Comptabilité</button>
-            </div>
-          </div>
-
-          <!-- Liste des opportunités d'emploi -->
-          <div class="jobs-grid" id="jobsGrid">
-            <!-- Injecté par JavaScript -->
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- ==================== VUE 2 : ÉDITEUR DU PROFIL MAÎTRE ==================== -->
-    <div id="viewProfile" class="app-view" style="display: none;">
-      <div class="page-card">
-        <div class="page-card-header">
-          <div>
-            <h2 class="section-heading">Mon Profil Candidat Maître</h2>
-            <p class="section-desc">Vous ne remplissez ces informations qu'une seule fois. L'IA les exploitera pour adapter chaque candidature au millimètre.</p>
-          </div>
-          <button class="btn-primary" onclick="saveProfileChanges()">
-            💾 Enregistrer le profil
-          </button>
-        </div>
-
-        <!-- BANNIÈRE VOICE-TO-CV : DICTÉE VOCALE DU PROFIL -->
-        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 78, 59, 0.25) 100%); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 18px; margin-bottom: 22px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
-            <div>
-              <span class="hero-badge" style="background: rgba(16, 185, 129, 0.25); color: #86efac; border-color: rgba(16, 185, 129, 0.4);">
-                🎤 Voice-to-CV (Wolof & Français)
-              </span>
-              <h4 style="font-size: 1.15rem; margin: 6px 0 2px; color: var(--text-main);">Parlez, l'IA remplit votre profil en 60 secondes</h4>
-              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">Dictez votre parcours ou testez un mémo vocal pré-enregistré.</p>
-            </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn-primary" id="btnVoiceRecord" onclick="toggleVoiceRecording()" style="background: #10b981; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                <span id="voiceRecordIcon">🎙️</span> <span id="voiceRecordLabel">Démarrer la dictée vocale</span>
-              </button>
-              <select id="voiceSampleSelect" onchange="loadVoiceSample(this.value)" style="padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;">
-                <option value="">Charger un exemple vocal...</option>
-                <option value="tech_dakar">🎧 Audio Démo : Ingénieur Data / DevOps (Dakar)</option>
-                <option value="commercial_abidjan">🎧 Audio Démo : Responsable Commercial (Abidjan)</option>
-                <option value="comptable_cotonou">🎧 Audio Démo : Comptable SYSCOHADA (Cotonou)</option>
-              </select>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="text" id="voiceTranscriptInput" placeholder="Votre dictée vocale ou transcription apparaîtra ici en temps réel..." style="flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.88rem; background: var(--surface-2); color: var(--text-main);">
-            <button class="btn-secondary" onclick="applyVoiceProfile()" style="font-weight: 700;">
-              ⚡ Extraire & Injecter
-            </button>
-          </div>
-          <div id="voiceStatusMsg" style="font-size: 0.78rem; color: #86efac; margin-top: 6px; display: none;"></div>
-        </div>
-
-        <div class="profile-form-grid">
-          <div class="form-group">
-            <label>Nom complet :</label>
-            <input type="text" id="formName" value="Ibrahima Ndiaye">
-          </div>
-          <div class="form-group">
-            <label>Titre professionnel souhaité :</label>
-            <input type="text" id="formTitle" value="Développeur Web & Mobile Full-Stack">
-          </div>
-          <div class="form-group">
-            <label>Numéro de téléphone (avec indicatif WhatsApp) :</label>
-            <input type="text" id="formPhone" value="+221 77 654 32 10">
-          </div>
-          <div class="form-group">
-            <label>Adresse email :</label>
-            <input type="email" id="formEmail" value="ibrahima.ndiaye.dev@gmail.com">
-          </div>
-          <div class="form-group">
-            <label>Pays de résidence :</label>
-            <select id="formCountry">
-              <option value="Sénégal" selected>Sénégal</option>
-              <option value="Côte d'Ivoire">Côte d'Ivoire</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Ville & Quartier :</label>
-            <input type="text" id="formCity" value="Dakar, Mermoz / Sacré-Cœur">
-          </div>
-          <div class="form-group">
-            <label>Niveau de diplôme le plus élevé (CAMES / National) :</label>
-            <input type="text" id="formEducation" value="Master en Génie Logiciel (ESP Dakar / UCAD)">
-          </div>
-          <div class="form-group">
-            <label>Années d'expérience professionnelle :</label>
-            <input type="number" id="formYearsExp" value="4">
-          </div>
-          <div class="form-group">
-            <label>Prétentions salariales mensuelles nettes en FCFA :</label>
-            <input type="text" id="formSalary" value="750 000 FCFA net / mois">
-          </div>
-          <div class="form-group">
-            <label>Langues maîtrisées :</label>
-            <input type="text" id="formLanguages" value="Français (Courant), Anglais (Professionnel), Wolof">
-          </div>
-          <div class="form-group full-width">
-            <label>Compétences clés (séparées par des virgules) :</label>
-            <textarea id="formSkills" rows="3">JavaScript, TypeScript, React.js, Node.js, Express, PostgreSQL, Docker, Git, API Wave, API Orange Money, Agile Scrum</textarea>
-          </div>
-          <div class="form-group full-width">
-            <label>Pitch d'accroche / Résumé de carrière :</label>
-            <textarea id="formSummary" rows="4">Développeur Full-Stack passionné avec 4 années d'expérience dans la conception d'applications web et l'intégration de solutions de paiement Mobile Money au Sénégal. Autonome, rigoureux et orienté résultats.</textarea>
-          </div>
-        </div>
-
-        <div style="margin-top: 24px; text-align: right;">
-          <button class="btn-primary" onclick="saveProfileChanges()">
-            💾 Enregistrer et mettre à jour les candidatures
-          </button>
-        </div>
-      </div>
-
-      <!-- ==================== PANNEAU IA — ANALYSE DU PROFIL ==================== -->
-      <div class="page-card" style="margin-top: 20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:16px;">
-          <div>
-            <h3 class="section-heading" style="font-size:1.3rem;">🤖 Coaching IA du Dossier</h3>
-            <p class="section-desc">L'IA analyse votre profil, calcule votre score ATS, génère votre pitch et identifie vos lacunes vs le marché.</p>
-          </div>
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn-secondary" onclick="runProfileAIAnalysis()" id="btnProfileAnalysis">
-              📊 Analyser mon profil
-            </button>
-            <button class="btn-secondary" onclick="runGenerateSummary()" id="btnGenerateSummary">
-              🖊️ Générer mon pitch IA
-            </button>
-            <button class="btn-primary" style="background:var(--accent);color:#1e1e1e;font-weight:800;" onclick="runSkillGapAnalysis()" id="btnSkillGaps">
-              🔍 Lacunes compétences
-            </button>
-          </div>
-        </div>
-
-        <!-- Scores KPI du profil (masqués jusqu'à analyse) -->
-        <div id="profileKpiBar" style="display:none; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px;">
-          <div class="ai-kpi-card">
-            <div class="ai-kpi-icon">✅</div>
-            <div class="ai-kpi-value" id="profileCompletionVal">—</div>
-            <div class="ai-kpi-label">Complétude</div>
-          </div>
-          <div class="ai-kpi-card">
-            <div class="ai-kpi-icon">🎯</div>
-            <div class="ai-kpi-value" id="profileAtsVal">—</div>
-            <div class="ai-kpi-label">Score ATS</div>
-          </div>
-          <div class="ai-kpi-card">
-            <div class="ai-kpi-icon">🏆</div>
-            <div class="ai-kpi-value" id="profileSectorVal">—</div>
-            <div class="ai-kpi-label">Secteur détecté</div>
-          </div>
-          <div class="ai-kpi-card">
-            <div class="ai-kpi-icon">⚡</div>
-            <div class="ai-kpi-value" id="profileSkillsVal">—</div>
-            <div class="ai-kpi-label">Compétences</div>
-          </div>
-        </div>
-
-        <!-- Forces & Faiblesses -->
-        <div id="profileStrengthsPanel" style="display:none; margin-bottom:20px;">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-            <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:12px; padding:16px;">
-              <h4 style="color:#34d399; margin:0 0 10px; font-size:0.95rem;">💪 Points Forts</h4>
-              <ul id="profileStrengthsList" style="margin:0; padding-left:16px; font-size:0.88rem; color:var(--text-main); line-height:1.7;"></ul>
-            </div>
-            <div style="background:rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:16px;">
-              <h4 style="color:#f87171; margin:0 0 10px; font-size:0.95rem;">⚠️ Points à Améliorer</h4>
-              <ul id="profileWeaknessesList" style="margin:0; padding-left:16px; font-size:0.88rem; color:var(--text-main); line-height:1.7;"></ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- ATS Checklist -->
-        <div id="profileAtsPanel" style="display:none; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px;">
-          <h4 style="margin:0 0 12px; font-size:0.95rem; color:var(--accent);">🎯 Checklist ATS — Compatibilité Recruteurs</h4>
-          <div id="profileAtsChecklist" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px;"></div>
-        </div>
-
-        <!-- Générateur de Pitch IA -->
-        <div id="profileSummaryPanel" style="display:none; background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:16px; margin-bottom:16px;">
-          <h4 style="color:#fbbf24; margin:0 0 10px; font-size:0.95rem;">🖊️ Pitch Professionnel Généré par l'IA</h4>
-          <div id="profileSummaryFull" style="font-size:0.9rem; line-height:1.7; color:var(--text-main); background:var(--surface-2); padding:14px; border-radius:8px; margin-bottom:10px;"></div>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
-            <div style="flex:1; background:var(--surface-2); padding:10px 12px; border-radius:8px; font-size:0.82rem;">
-              <strong style="color:#fbbf24; display:block; margin-bottom:4px;">📱 Pitch WhatsApp court :</strong>
-              <span id="profileShortPitch" style="color:var(--text-main);"></span>
-            </div>
-          </div>
-          <button class="btn-primary" onclick="applyGeneratedSummary()" style="font-size:0.85rem; padding:8px 16px;">
-            ✅ Insérer dans mon profil
-          </button>
-        </div>
-
-        <!-- Lacunes Compétences -->
-        <div id="profileGapsPanel" style="display:none; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
-            <h4 style="margin:0; font-size:0.95rem; color:var(--accent);">🔍 Lacunes vs Marché Ouest-Africain</h4>
-            <select id="gapSectorSelect" onchange="runSkillGapAnalysis()" style="padding:6px 10px; border-radius:8px; font-size:0.82rem; font-weight:600;">
-              <option value="Tech &amp; Digital">Tech &amp; Digital</option>
-              <option value="Finance &amp; Banque">Finance &amp; Banque</option>
-              <option value="Commerce &amp; Ventes">Commerce &amp; Ventes</option>
-              <option value="Logistique &amp; Transit">Logistique &amp; Transit</option>
-              <option value="Énergie &amp; Mines">Énergie &amp; Mines</option>
-              <option value="RH &amp; Management">RH &amp; Management</option>
-            </select>
-          </div>
-          <div id="profileGapsContent"></div>
-        </div>
-
-        <!-- Actions Prioritaires IA -->
-        <div id="profileActionsPanel" style="display:none; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.2); border-radius:12px; padding:16px;">
-          <h4 style="margin:0 0 12px; font-size:0.95rem; color:#34d399;">🚀 Actions Prioritaires pour Renforcer votre Dossier</h4>
-          <div id="profileActionsList"></div>
-        </div>
-
-        <!-- Placeholder initial -->
-        <div id="profileAIPlaceholder" style="text-align:center; padding:30px 20px; color:var(--text-muted);">
-          <div style="font-size:2.5rem; margin-bottom:10px;">🤖</div>
-          <p style="margin:0 0 6px; font-size:0.95rem;">Cliquez sur <strong>Analyser mon profil</strong> pour obtenir votre diagnostic IA complet.</p>
-          <p style="margin:0; font-size:0.82rem;">Score ATS · Forces · Lacunes · Pitch généré · Actions prioritaires</p>
-        </div>
-      </div>
-
-      <!-- ==================== COFFRE-FORT NUMÉRIQUE & DIPLÔMES VÉRIFIÉS ==================== -->
-      <div class="page-card" style="margin-top: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
-          <div>
-            <span class="hero-badge" style="background: rgba(16, 185, 129, 0.2); color: #86efac;">📜 Anti-Fraude & Cryptographie</span>
-            <h3 class="section-heading" style="font-size: 1.3rem; margin-top: 6px;">Coffre-Fort Numérique de Diplômes & Certifications</h3>
-            <p class="section-desc">Générez une empreinte cryptographique SHA-256 infalsifiable pour vos diplômes universitaires.</p>
-          </div>
-          <button class="btn-primary" onclick="openRegisterDiplomaModal()">
-            ➕ Enregistrer un Diplôme
-          </button>
-        </div>
-        <div id="credentialVaultList" style="display: flex; flex-direction: column; gap: 12px;"></div>
-      </div>
-
-      <!-- ==================== VIDÉO PITCH 30 SECONDES ==================== -->
-      <div class="page-card" style="margin-top: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
-          <div>
-            <span class="hero-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">🎬 Vidéo Pitch Express</span>
-            <h3 class="section-heading" style="font-size: 1.3rem; margin-top: 6px;">Script de Vidéo Pitch 30s (WhatsApp & Profil)</h3>
-            <p class="section-desc">Script percutant en 5 phrases chronométré pour 30 secondes, prêt à tourner sur smartphone.</p>
-          </div>
-          <button class="btn-primary" onclick="generateVideoScriptUI()">
-            ⚡ Générer mon Script Vidéo IA
-          </button>
-        </div>
-        <div id="videoPitchOutput"></div>
-      </div>
-
-    </div>
-
-    <!-- ==================== VUE 3 : AJOUT D'UNE OFFRE LIBRE ==================== -->
-    <div id="viewCustom" class="app-view" style="display: none;">
-      <div class="page-card max-width-700">
-        <h2 class="section-heading">Coller une offre libre (WhatsApp, LinkedIn, Facebook)</h2>
-        <!-- EXTRACTEUR IA D'OFFRE INFORMELLE (WHATSAPP / FACEBOOK) -->
-        <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(180, 83, 9, 0.2) 100%); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px; padding: 18px; margin-bottom: 22px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
-            <div>
-              <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);">
-                🕵️ Scraper & Parser IA Informel
-              </span>
-              <h4 style="font-size: 1.1rem; margin: 6px 0 2px; color: var(--text-main);">Coller un post brut de groupe WhatsApp ou Facebook</h4>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">L'IA détecte automatiquement l'intitulé, la ville, le salaire, les compétences et les contacts.</p>
-            </div>
-            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-              <button class="chip" onclick="loadInformalSample('comptable_dakar')">📋 Post WhatsApp : Comptable</button>
-              <button class="chip" onclick="loadInformalSample('dev_abidjan')">📋 Post Facebook : Dev Flutter</button>
-            </div>
-          </div>
-
-          <textarea id="informalRawPostInput" rows="3" placeholder="Collez ici le message WhatsApp brut sans mise en forme (ex: 'Urgent cherche comptable sur Dakar salaire 600k contact whatsapp 771234567...')" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; background: var(--surface-2); color: var(--text-main); margin-bottom: 10px;"></textarea>
-
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <button class="btn-primary" onclick="parseAndFillInformalJob()" style="font-size: 0.88rem; padding: 10px 18px; background: var(--accent); color: #1e1e1e; font-weight: 800;">
-              ⚡ Analyser & Auto-Remplir le Formulaire
-            </button>
-            <span id="informalParseStatus" style="font-size: 0.8rem; color: #34d399; font-weight: 600; display: none;"></span>
-          </div>
-        </div>
-
-        <div class="custom-job-form">
-          <div class="form-group">
-            <label>Intitulé du poste : *</label>
-            <input type="text" id="cJobTitle" placeholder="Ex: Comptable Junior, Responsable Commercial...">
-          </div>
-          <div class="form-group">
-            <label>Nom de l'entreprise ou cabinet :</label>
-            <input type="text" id="cJobCompany" placeholder="Ex: Groupe Commercial Dakar, ou Confidentiel">
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Pays :</label>
-              <select id="cJobCountry">
-                <option value="Sénégal" selected>🇸🇳 Sénégal</option>
-                <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Ville / Quartier :</label>
-              <input type="text" id="cJobCity" placeholder="Ex: Dakar Plateau ou Abidjan Cocody">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Texte complet de l'offre d'emploi : *</label>
-            <textarea id="cJobDescription" rows="8" placeholder="Collez ici le descriptif, les missions, les exigences et le profil recherché..."></textarea>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Email du recruteur (si mentionné) :</label>
-              <input type="email" id="cJobEmail" placeholder="recrutement@domaine.com">
-            </div>
-            <div class="form-group">
-              <label>Numéro WhatsApp du recruteur (si mentionné) :</label>
-              <input type="tel" id="cJobWhatsapp" placeholder="+221 77... ou +225 07...">
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
-            <button type="button" class="btn-secondary" onclick="runScamAuditCustomJob()" style="display: flex; align-items: center; gap: 6px; font-weight: 700;">
-              🛡️ Auditer cette offre (Bouclier Anti-Arnaque IA)
-            </button>
-            <button type="button" class="btn-secondary" onclick="reportCurrentJobScam()" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4); font-size: 0.8rem;">
-              🚩 Signaler comme arnaque
-            </button>
-          </div>
-          <div id="scamAuditResultBox" style="display: none; margin-bottom: 16px;"></div>
-
-          <button class="btn-primary btn-lg" onclick="handleCustomJobSubmit()">
-            🚀 Enregistrer & Générer la Candidature Sur-Mesure
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== VUE 4 : TARIFS & PAIEMENTS WAVE / ORANGE MONEY ==================== -->
-    <div id="viewPricing" class="app-view" style="display: none;">
-      <div class="page-card text-center">
-        <h2 class="section-heading">Tarifs Clairs & Paiement en FCFA (XOF)</h2>
-        <p class="section-desc">Pas besoin de carte bancaire internationale en dollars. Rechargez instantanément avec vos comptes Mobile Money locaux.</p>
-
-        <div class="pricing-cards-container" id="pricingCards">
-          <!-- Injecté par JavaScript -->
-        </div>
-
-        <div class="payment-guarantee-banner">
-          <div class="guarantee-item">
-            <span class="icon">🌊</span>
-            <strong>Wave</strong>
-            <p>Validation par QR Code ou push mobile en 3 secondes.</p>
-          </div>
-          <div class="guarantee-item">
-            <span class="icon">🟠</span>
-            <strong>Orange Money</strong>
-            <p>Disponible au Sénégal et en Côte d'Ivoire.</p>
-          </div>
-          <div class="guarantee-item">
-            <span class="icon">🟡</span>
-            <strong>MTN MoMo</strong>
-            <p>Idéal pour la Côte d'Ivoire.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== VUE 5 : RADAR & AGRÉGATEUR SITES D'EMPLOI OUEST-AFRIQUE ==================== -->
-    <div id="viewAggregator" class="app-view" style="display: none;">
-      
-      <!-- Bannière Console de Balayage Web -->
-      <div class="page-card" style="margin-bottom: 24px; background: linear-gradient(135deg, #07332a 0%, #0a4c3e 100%); color: white;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
-          <div>
-            <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;">
-              📡 Robot Crawler & Scanner Web en Direct
-            </span>
-            <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-              Radar Web d'Emploi — Toute la Zone Afrique de l'Ouest
-            </h2>
-            <p style="color: #d1fae5; font-size: 0.95rem; max-width: 780px;">
-              Ce robot balise en temps réel les portails leaders, les cabinets RH, les concours et les flux web pour indexer les dernières offres publiées au Sénégal, en Côte d'Ivoire, au Bénin, au Togo, au Mali et au Burkina Faso.
-            </p>
-          </div>
-          <button class="btn-primary" style="background: var(--accent); color: #1e1e1e; font-weight: 800; padding: 12px 22px; font-size: 0.95rem;" onclick="triggerLiveWebScan()">
-            ⚡ Lancer le Balayage Web en Temps Réel
-          </button>
-        </div>
-
-        <!-- Formulaire de paramétrage du scan -->
-        <div style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 16px; margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
-          <input type="text" id="scanQueryInput" placeholder="Mots-clés ciblés pour le robot (ex: React, Logistique, Comptable, Transit)..." style="flex:1; min-width: 250px; background: white; color: var(--text-main);">
-          <select id="scanCountrySelect" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); font-weight: 600;">
-            <option value="">🌍 Toute la sous-région (UEMOA / CEDEAO)</option>
-            <option value="Sénégal">🇸🇳 Sénégal</option>
-            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-            <option value="Bénin">🇧🇯 Bénin</option>
-            <option value="Togo">🇹🇬 Togo</option>
-            <option value="Mali">🇲🇱 Mali</option>
-            <option value="Burkina Faso">🇧🇫 Burkina Faso</option>
-          </select>
-          <button class="btn-primary" onclick="triggerLiveWebScan()">
-            Scanner
-          </button>
-        </div>
-
-        <!-- Console Terminal de Log du Crawler en Direct -->
-        <div id="scanConsole" style="display: none; margin-top: 18px; background: #051c17; border: 1px solid #14532d; border-radius: 10px; padding: 16px; font-family: monospace; font-size: 0.82rem; color: #86efac; max-height: 220px; overflow-y: auto;">
-          <div style="font-weight: 700; color: #facc15; margin-bottom: 6px;">[TERMINAL CRAWLER ACTIVE] Début de la session de balisage web...</div>
-          <div id="scanLogContent"></div>
-        </div>
-
-        <!-- Rapport statistique du scan -->
-        <div id="scanReportBanner" style="display: none; margin-top: 14px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; border-radius: 8px; padding: 12px 16px; color: #ecfdf5; font-size: 0.88rem;"></div>
-      </div>
-
-      <!-- Annuaire & Cartographie des Sites d'Emploi Ouest-Africains -->
-      <div class="page-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
-          <div>
-            <h3 class="section-heading" style="font-size: 1.4rem;">Annuaire des Sites d'Emploi Répertoriés</h3>
-            <p class="section-desc">Plateformes d'emploi, cabinets de recrutement et portails officiels surveillés 24/7 par le robot SunuJob AI.</p>
-          </div>
-          <div style="display: flex; gap: 10px;">
-            <select id="filterSourceCountry" onchange="filterSourcesByCountry(this.value)" style="padding: 8px 12px; border-radius: 8px; font-weight: 600;">
-              <option value="">Tous les pays</option>
-              <option value="Sénégal">🇸🇳 Sénégal</option>
-              <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-              <option value="Bénin">🇧🇯 Bénin</option>
-              <option value="Togo">🇹🇬 Togo</option>
-              <option value="Mali">🇲🇱 Mali</option>
-              <option value="Burkina Faso">🇧🇫 Burkina Faso</option>
-            </select>
-            <button class="btn-secondary" onclick="openAddSourceModal()">
-              ➕ Ajouter un site au radar
-            </button>
-          </div>
-        </div>
-
-        <!-- Grille des Sites Répertoriés -->
-        <div class="sources-grid" id="sourcesGridContainer">
-          <!-- Injecté par JavaScript -->
-        </div>
-      </div>
-
-      <!-- ==================== PANNEAU IA — INTELLIGENCE DU MARCHÉ ==================== -->
-      <div class="page-card" style="margin-top: 24px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:16px;">
-          <div>
-            <h3 class="section-heading" style="font-size:1.4rem;">🤖 Intelligence IA du Marché d'Emploi</h3>
-            <p class="section-desc">Analyse en temps réel des offres : secteurs porteurs, compétences recherchées, tendances et recommandations personnalisées.</p>
-          </div>
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn-secondary" onclick="runAIMarketAnalysis()" id="btnAIAnalysis">
-              📊 Analyser le Marché
-            </button>
-            <button class="btn-secondary" onclick="runAISmartQuery()" id="btnSmartQuery">
-              🔍 Requête Intelligente
-            </button>
-            <button class="btn-primary" style="background:var(--accent);color:#1e1e1e;font-weight:800;" onclick="runAIInsightReport()" id="btnInsightReport">
-              🧠 Rapport IA Complet
-            </button>
-          </div>
-        </div>
-
-        <!-- Indicateurs KPI IA -->
-        <div id="aiKpiBar" style="display:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px;">
-          <div class="ai-kpi-card" id="kpiMarketHeat">
-            <div class="ai-kpi-icon">🔥</div>
-            <div class="ai-kpi-value" id="kpiHeatValue">—</div>
-            <div class="ai-kpi-label">Indice de chaleur</div>
-          </div>
-          <div class="ai-kpi-card" id="kpiTopSector">
-            <div class="ai-kpi-icon">🏆</div>
-            <div class="ai-kpi-value" id="kpiSectorValue">—</div>
-            <div class="ai-kpi-label">Secteur N°1</div>
-          </div>
-          <div class="ai-kpi-card" id="kpiTopSkill">
-            <div class="ai-kpi-icon">⚡</div>
-            <div class="ai-kpi-value" id="kpiSkillValue">—</div>
-            <div class="ai-kpi-label">Compétence clé</div>
-          </div>
-          <div class="ai-kpi-card" id="kpiTopCity">
-            <div class="ai-kpi-icon">🏙️</div>
-            <div class="ai-kpi-value" id="kpiCityValue">—</div>
-            <div class="ai-kpi-label">Ville active</div>
-          </div>
-          <div class="ai-kpi-card" id="kpiJobsAnalyzed">
-            <div class="ai-kpi-icon">📋</div>
-            <div class="ai-kpi-value" id="kpiJobsValue">—</div>
-            <div class="ai-kpi-label">Offres analysées</div>
-          </div>
-        </div>
-
-        <!-- Tendances Secteurs + Compétences -->
-        <div id="aiTrendsPanel" style="display:none; margin-bottom:20px;">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; flex-wrap:wrap;">
-            <!-- Top Secteurs -->
-            <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:16px;">
-              <h4 style="margin:0 0 12px; color:var(--accent);">📈 Secteurs Porteurs</h4>
-              <div id="aiSectorBars"></div>
-            </div>
-            <!-- Top Compétences -->
-            <div style="background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:16px;">
-              <h4 style="margin:0 0 12px; color:var(--accent);">⚡ Compétences en Demande</h4>
-              <div id="aiSkillTags"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Zone Requête Intelligente -->
-        <div id="aiSmartQueryPanel" style="display:none; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:16px; margin-bottom:16px;">
-          <h4 style="color:#fbbf24; margin:0 0 10px;">🔍 Requête de Recherche Intelligente</h4>
-          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:10px;">Générée automatiquement depuis votre profil :</p>
-          <div id="aiSmartQueryResult" style="font-family:monospace; font-size:0.95rem; background:var(--surface-2); border-radius:8px; padding:12px; margin-bottom:10px;"></div>
-          <button class="btn-primary" onclick="applySuggestedQuery()" style="font-size:0.85rem; padding:8px 16px;">
-            ✅ Appliquer cette requête au scan
-          </button>
-        </div>
-
-        <!-- Rapport narratif IA -->
-        <div id="aiInsightReportPanel" style="display:none; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.25); border-radius:12px; padding:20px;">
-          <div id="aiReportContent"></div>
-        </div>
-
-        <!-- État initial (avant première analyse) -->
-        <div id="aiPlaceholder" style="text-align:center; padding:40px 20px; color:var(--text-muted);">
-          <div style="font-size:3rem; margin-bottom:12px;">🤖</div>
-          <p style="font-size:1rem; margin:0 0 6px;">L'IA est prête à analyser votre marché.</p>
-          <p style="font-size:0.85rem;">Cliquez sur <strong>Analyser le Marché</strong> pour démarrer.</p>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ==================== VUE 6 : BAROMÈTRE SALAIRES FCFA ==================== -->
-    <div id="viewSalary" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #07332a 0%, #0a4c3e 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">💰 Baromètre en Temps Réel</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Baromètre des Salaires FCFA — Afrique de l'Ouest
-        </h2>
-        <p style="color: #d1fae5; font-size: 0.95rem; max-width: 780px;">
-          Données réelles des grilles salariales pratiquées au Sénégal, en Côte d'Ivoire, au Bénin, au Togo, au Mali et au Burkina Faso. Salaires nets mensuels en Francs CFA (XOF).
+        <h1 class="hero-title">
+          Décrochez votre prochain emploi grâce à <span class="grad">l'Intelligence Artificielle</span>.
+        </h1>
+        <p class="hero-subtitle">
+          Ne postulez plus avec un CV générique ignoré par les recruteurs. Notre moteur d'IA adapte votre candidature sur-mesure à chaque offre, simule vos entretiens à la voix et filtre les arnaques.
         </p>
-      </div>
 
-      <!-- Sélecteur interactif -->
-      <div class="page-card" style="margin-bottom: 24px;">
-        <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
-          <div style="flex: 1; min-width: 200px;">
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Secteur d'activité :</label>
-            <select id="salarySectorSelect" onchange="loadSalaryBenchmark()" style="width: 100%; padding: 10px 14px; border-radius: 8px; font-weight: 600;">
-              <option value="Tech & Digital">Tech & Digital</option>
-              <option value="Finance & Banque">Finance & Banque</option>
-              <option value="Énergie & Mines">Énergie & Mines</option>
-              <option value="Logistique & Transit">Logistique & Transit</option>
-              <option value="Commerce & Ventes">Commerce & Ventes</option>
-              <option value="RH & Management">RH & Management</option>
-            </select>
-          </div>
-          <div style="flex: 1; min-width: 180px;">
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Niveau d'expérience :</label>
-            <select id="salaryLevelSelect" onchange="loadSalaryBenchmark()" style="width: 100%; padding: 10px 14px; border-radius: 8px; font-weight: 600;">
-              <option value="Junior (0-2 ans)">Junior (0-2 ans)</option>
-              <option value="Confirmé (3-5 ans)" selected>Confirmé (3-5 ans)</option>
-              <option value="Senior (6+ ans)">Senior (6+ ans)</option>
-            </select>
-          </div>
-          <div style="flex: 1; min-width: 160px;">
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Ville de référence :</label>
-            <select id="salaryCitySelect" onchange="loadSalaryBenchmark()" style="width: 100%; padding: 10px 14px; border-radius: 8px; font-weight: 600;">
-              <option value="Dakar">🇸🇳 Dakar</option>
-              <option value="Abidjan">🇨🇮 Abidjan</option>
-              <option value="Cotonou">🇧🇯 Cotonou</option>
-              <option value="Lomé">🇹🇬 Lomé</option>
-              <option value="Bamako">🇲🇱 Bamako</option>
-              <option value="Ouagadougou">🇧🇫 Ouagadougou</option>
-            </select>
-          </div>
-          <button class="btn-primary" onclick="loadSalaryBenchmark()" style="margin-top: 22px;">
-            🔄 Actualiser
-          </button>
-        </div>
-      </div>
-
-      <!-- Résultat Benchmark -->
-      <div id="salaryBenchmarkResult">
-        <!-- Rempli par JavaScript -->
-      </div>
-    </div>
-
-    <!-- ==================== VUE 7 : RADAR CONCOURS FONCTION PUBLIQUE ==================== -->
-    <div id="viewConcours" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🏛️ Concours & Postes Publics</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Radar Concours de la Fonction Publique
-        </h2>
-        <p style="color: #bfdbfe; font-size: 0.95rem; max-width: 780px;">
-          Suivi 24/7 des concours officiels d'entrée dans les grandes écoles (ENA, Douanes, Police, Magistrature, FASTEF, INFAS) et institutions internationales (BCEAO, BAD).
-        </p>
-      </div>
-
-      <!-- Filtres et stats -->
-      <div class="page-card" style="margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 16px;">
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <select id="filterConcoursCountry" onchange="loadConcoursList()" style="padding: 8px 12px; border-radius: 8px; font-weight: 600;">
-              <option value="Tous">🌍 Tous les pays</option>
-              <option value="Sénégal">🇸🇳 Sénégal</option>
-              <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-              <option value="Sous-Région UEMOA">🏛️ Institutions Régionales</option>
-              <option value="Bénin">🇧🇯 Bénin</option>
-              <option value="Togo">🇹🇬 Togo</option>
-            </select>
-            <input type="text" id="searchConcoursInput" placeholder="Rechercher un concours (ex: Douanes, ENA, BCEAO)..." oninput="searchConcoursUI()" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); min-width: 250px;">
-          </div>
-          <div id="concoursStatsCounter" style="font-size: 0.88rem; font-weight: 700; color: var(--accent);">
-            Chargement...
-          </div>
-        </div>
-
-        <div id="concoursGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
-          <!-- Rempli par JavaScript -->
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== VUE 8 : INTELLIGENCE ENTREPRISES ==================== -->
-    <div id="viewCompanies" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #374151 0%, #1f2937 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🏢 Fiches Entreprises & Avis</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Intelligence Entreprises & Culture RH
-        </h2>
-        <p style="color: #e5e7eb; font-size: 0.95rem; max-width: 780px;">
-          Ce que les recruteurs ne vous disent pas : salaires réels pratiqués, étapes d'entretien, avis d'employés et conseils d'initiés pour réussir votre candidature.
-        </p>
-      </div>
-
-      <div class="page-card" style="margin-bottom: 20px;">
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-          <input type="text" id="searchCompanyInput" placeholder="Rechercher une entreprise (ex: Wave, Sonatel, Orange, NSIA)..." oninput="searchCompaniesUI()" style="flex: 1; min-width: 240px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border);">
-          <select id="filterCompanyCountry" onchange="loadCompaniesList()" style="padding: 10px 14px; border-radius: 8px; font-weight: 600;">
-            <option value="Tous">Tous pays</option>
-            <option value="Sénégal">🇸🇳 Sénégal</option>
-            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-          </select>
-          <label style="display: flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">
-            <input type="checkbox" id="filterDiasporaFriendly" onchange="loadCompaniesList()">
-            🌍 Ouvertes à la Diaspora
-          </label>
-        </div>
-      </div>
-
-      <div id="companiesGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px;">
-        <!-- Rempli par JavaScript -->
-      </div>
-    </div>
-
-    <!-- ==================== VUE 9 : MODE DIASPORA RETURN ==================== -->
-    <div id="viewDiaspora" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🌍 Passerelle Diaspora ➔ Afrique</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Mode Diaspora Return & Mobilité Internationale
-        </h2>
-        <p style="color: #c7d2fe; font-size: 0.95rem; max-width: 780px;">
-          Vous travaillez en France, au Canada, aux USA ou en Europe ? Adaptez votre profil aux standards ouest-africains, convertissez votre salaire avec le différentiel de pouvoir d'achat et accédez aux entreprises qui valorisent votre profil.
-        </p>
-      </div>
-
-      <!-- Convertisseur de Pouvoir d'Achat -->
-      <div class="page-card" style="margin-bottom: 24px;">
-        <h3 class="section-heading" style="font-size: 1.3rem;">💱 Convertisseur de Salaire & Pouvoir d'Achat</h3>
-        <p class="section-desc">Calculez ce que votre salaire actuel vaut réellement à Dakar ou Abidjan (coût des loyers, parité de pouvoir d'achat).</p>
-        
-        <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 16px;">
-          <div style="flex: 1; min-width: 160px;">
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Salaire net mensuel actuel :</label>
-            <input type="number" id="diasporaAmountInput" value="3000" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem; font-weight: 700;">
-          </div>
-          <div style="flex: 1; min-width: 120px;">
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Devise :</label>
-            <select id="diasporaCurrencySelect" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
-              <option value="EUR" selected>€ Euros (EUR)</option>
-              <option value="USD">$ Dollars US (USD)</option>
-              <option value="CAD">$ Dollars Can (CAD)</option>
-              <option value="GBP">£ Livres (GBP)</option>
-            </select>
-          </div>
-          <div style="flex: 1; min-width: 140px;">
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Ville d'origine :</label>
-            <select id="diasporaSourceCity" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
-              <option value="Paris" selected>Paris</option>
-              <option value="Lyon">Lyon</option>
-              <option value="Montréal">Montréal</option>
-              <option value="Bruxelles">Bruxelles</option>
-              <option value="New York">New York</option>
-              <option value="Londres">Londres</option>
-            </select>
-          </div>
-          <div style="flex: 1; min-width: 140px;">
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Ville de destination :</label>
-            <select id="diasporaTargetCity" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
-              <option value="Dakar" selected>🇸🇳 Dakar</option>
-              <option value="Abidjan">🇨🇮 Abidjan</option>
-              <option value="Cotonou">🇧🇯 Cotonou</option>
-              <option value="Lomé">🇹🇬 Lomé</option>
-            </select>
-          </div>
-          <button class="btn-primary" onclick="convertDiasporaSalary()" style="margin-top: 22px;">
-            ⚡ Calculer l'équivalent
-          </button>
-        </div>
-
-        <div id="diasporaConversionResult" style="margin-top: 20px;">
-          <!-- Injecté par JavaScript -->
-        </div>
-      </div>
-
-      <!-- Adaptation Automatique du CV -->
-      <div class="page-card" style="margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
-          <div>
-            <h3 class="section-heading" style="font-size: 1.3rem;">📄 Traducteur de Profil pour l'Afrique de l'Ouest</h3>
-            <p class="section-desc">Adapte vos intitulés de postes, équivalences de diplômes (CAMES/BAC+5) et ajoute la mention de disponibilité pour retour.</p>
-          </div>
-          <button class="btn-primary" onclick="adaptProfileForDiaspora()">
-            ✨ Adapter mon profil pour l'AOF
-          </button>
-        </div>
-        <div id="diasporaAdaptationResult"></div>
-      </div>
-
-      <!-- Guide Pratique d'Installation -->
-      <div class="page-card">
-        <h3 class="section-heading" style="font-size: 1.3rem;">📍 Guide Pratique d'Installation & Fiscalité</h3>
-        <div style="display: flex; gap: 10px; margin: 12px 0 20px;">
-          <button class="btn-secondary" onclick="loadDiasporaGuide('Sénégal')">🇸🇳 Guide Sénégal</button>
-          <button class="btn-secondary" onclick="loadDiasporaGuide('Côte d\'Ivoire')">🇨🇮 Guide Côte d'Ivoire</button>
-        </div>
-        <div id="diasporaGuideContent"></div>
-      </div>
-    </div>
-
-    <!-- ==================== VUE 10 : PISTON DIGITAL (RÉSEAU DE COOPTATION) ==================== -->
-    <div id="viewNetwork" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #064e3b 0%, #047857 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🤝 Réseau & Cooptation</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Le "Piston Digital" — Recommandations Vérifiées
-        </h2>
-        <p style="color: #a7f3d0; font-size: 0.95rem; max-width: 780px;">
-          En Afrique de l'Ouest, la confiance et la recommandation d'un pair multiplient par 5 les chances d'entretien. Centralisez vos soutiens professionnels et intégrez-les à vos candidatures en 1 clic.
-        </p>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; flex-wrap: wrap;">
-        <!-- Score de réputation -->
-        <div class="page-card" style="height: fit-content;">
-          <h3 style="font-size: 1.1rem; margin-bottom: 12px;">🏆 Votre Score de Cooptation</h3>
-          <div style="text-align: center; padding: 20px 0;">
-            <div id="referralScoreNum" style="font-size: 3.5rem; font-weight: 800; color: var(--accent);">
-              --
-            </div>
-            <div id="referralBadgeText" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-top: 4px;">
-              Chargement...
-            </div>
-            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 8px;">
-              Basé sur les recommandations certifiées reçues de professionnels reconnus.
-            </p>
-          </div>
-          <div style="border-top: 1px solid var(--border); padding-top: 14px;">
-            <button class="btn-primary" style="width: 100%;" onclick="openAddReferralModal()">
-              ➕ Ajouter une recommandation
-            </button>
-          </div>
-        </div>
-
-        <!-- Liste des recommandations -->
-        <div class="page-card">
-          <h3 style="font-size: 1.1rem; margin-bottom: 16px;">📜 Recommandations Validées au Dossier</h3>
-          <div id="referralsListContainer">
-            <!-- Rempli par JavaScript -->
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== VUE 11 : WHATSAPP BOT & SMS EN DIRECT ==================== -->
-    <div id="viewBot" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #14532d 0%, #166534 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(37, 211, 102, 0.3); color: #86efac;">📱 Canaux Mobiles Autonomes</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Simulateur WhatsApp Bot & Mode SMS Hors-ligne
-        </h2>
-        <p style="color: #bbf7d0; font-size: 0.95rem; max-width: 780px;">
-          Testez en direct l'expérience candidat sans navigateur. Les utilisateurs peuvent chercher des emplois, postuler et s'entraîner aux entretiens simplement en envoyant un message WhatsApp ou un SMS.
-        </p>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; flex-wrap: wrap;">
-        <!-- Simulateur Écran WhatsApp -->
-        <div class="page-card" style="background: #0b141a; color: #e9edef; border-radius: 18px; padding: 0; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
-          <!-- Entête WhatsApp -->
-          <div style="background: #202c33; padding: 14px 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2a3942;">
-            <div style="width: 42px; height: 42px; border-radius: 50%; background: #25d366; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
-              🤖
-            </div>
-            <div>
-              <div style="font-weight: 700; font-size: 1rem; color: #e9edef;">SunuJob AI Bot (Officiel)</div>
-              <div style="font-size: 0.78rem; color: #25d366;">🟢 En ligne · Répond instantanément</div>
-            </div>
-          </div>
-
-          <!-- Zone de messages -->
-          <div id="whatsappChatBox" style="padding: 18px; height: 380px; overflow-y: auto; background-color: #0b141a; display: flex; flex-direction: column; gap: 10px;">
-            <!-- Rempli par JavaScript -->
-          </div>
-
-          <!-- Barre de saisie -->
-          <div style="background: #202c33; padding: 12px; display: flex; gap: 8px;">
-            <input type="text" id="whatsappUserInput" placeholder="Écrivez un message (ex: JOBS Dakar, SALAIRE Tech)..." style="flex: 1; background: #2a3942; border: none; color: white; padding: 10px 14px; border-radius: 20px; font-size: 0.9rem;" onkeypress="if(event.key === 'Enter') sendWhatsAppMessage()">
-            <button onclick="sendWhatsAppMessage()" style="background: #25d366; border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 1.1rem;">
-              ➤
-            </button>
-          </div>
-        </div>
-
-        <!-- Commandes & Mode SMS -->
-        <div style="display: flex; flex-direction: column; gap: 18px;">
-          <!-- Boutons de raccourcis WhatsApp -->
-          <div class="page-card">
-            <h4 style="margin-bottom: 12px; font-size: 1rem; color: var(--accent);">⚡ Raccourcis de Test WhatsApp</h4>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <button class="chip" onclick="triggerBotQuickCommand('JOBS Dakar')">🔍 JOBS Dakar</button>
-              <button class="chip" onclick="triggerBotQuickCommand('JOBS Abidjan')">🔍 JOBS Abidjan</button>
-              <button class="chip" onclick="triggerBotQuickCommand('SALAIRE Tech Dakar')">💰 SALAIRE Tech Dakar</button>
-              <button class="chip" onclick="triggerBotQuickCommand('CONCOURS Sénégal')">📢 CONCOURS Sénégal</button>
-              <button class="chip" onclick="triggerBotQuickCommand('PROFIL')">👤 Mon Profil</button>
-              <button class="chip" onclick="triggerBotQuickCommand('POSTULER 1')">📝 POSTULER 1</button>
-              <button class="chip" onclick="triggerBotQuickCommand('AIDE')">❓ Menu Aide</button>
-            </div>
-          </div>
-
-          <!-- Mode SMS Hors-Ligne -->
-          <div class="page-card">
-            <h4 style="margin-bottom: 12px; font-size: 1rem; color: #60a5fa;">📱 Mode SMS 160 Caractères (Sans Internet)</h4>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
-              Compatible avec tous les téléphones basiques (feature phones) via le numéro court <strong>21021</strong> (Sénégal/CI).
-            </p>
-            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-              <input type="text" id="smsCommandInput" placeholder="Ex: SUNUJOB comptable Dakar" style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem;">
-              <button class="btn-secondary" onclick="simulateSMS()">Simuler SMS</button>
-            </div>
-            <div id="smsOutputBox" style="background: var(--surface-2); border: 1px dashed var(--border); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 0.82rem; color: var(--text-main); min-height: 50px;">
-              Envoyez une commande pour voir la réponse SMS GSM...
-            </div>
-          </div>
-        </div>
-      </div>
-    <!-- ==================== VUE 12 : SIMULATEUR D'ENTRETIEN IA ==================== -->
-    <div id="viewInterview" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🎭 Coaching & Immersion DRH</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Simulateur d'Entretien IA — Face aux DRH d'Afrique de l'Ouest
-        </h2>
-        <p style="color: #ede9fe; font-size: 0.95rem; max-width: 780px;">
-          Entraînez-vous face à 8 personas de recruteurs exigeants (Dakar, Abidjan, Cotonou, Lomé). Répondez par écrit ou à la voix et recevez une notation instantanée basée sur la méthode STAR et le contexte culturel local.
-        </p>
-      </div>
-
-      <!-- Configuration de la session -->
-      <div class="page-card" style="margin-bottom: 20px;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; align-items: flex-end;">
-          <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Choisissez votre Recruteur :</label>
-            <select id="interviewPersonaSelect" onchange="changePersonaInterview()" style="width: 100%; padding: 10px 12px; border-radius: 8px; font-weight: 600;">
-              <option value="drh_banque_abidjan">🇨🇮 Koffi Kouamé — DRH Banque Atlantique (Strict · BCEAO)</option>
-              <option value="manager_tech_dakar" selected>🇸🇳 Aminata Diallo — VP Tech FinTech Dakar (Factuelle · Code & Cloud)</option>
-              <option value="dg_pme_cotonou">🇧🇯 Bio Sika — DG PME Bénin Distribution (Direct · Rentabilité)</option>
-              <option value="drh_multinationale_abidjan">🇨🇮 Marie-Chantal Bamba — DRH Unilever / Nestlé (STAR Method)</option>
-              <option value="recruteur_cabinet_dakar">🇸🇳 Babacar Ndiaye — Chasseur AfricSearch (Bienveillant)</option>
-              <option value="responsable_rh_ong">🌍 Fatoumata Traoré — RH ONG Sahel (Valeurs & Terrain)</option>
-              <option value="manager_agro_sanpedro">🇨🇮 Karamoko Sanogo — Dir. Usine Cacao San Pedro (HSE)</option>
-              <option value="daf_banque_panafricaine">🇹🇬 Cheikh Oumar Ba — DAF BOAD Lomé (SYSCOHADA)</option>
-            </select>
-          </div>
-          <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Catégorie de questions :</label>
-            <select id="interviewCategorySelect" onchange="loadNewInterviewQuestion()" style="width: 100%; padding: 10px 12px; border-radius: 8px; font-weight: 600;">
-              <option value="presentation">👋 Pitch de présentation & Parcours</option>
-              <option value="competences_techniques" selected>⚡ Compétences techniques & Savoir-faire</option>
-              <option value="mise_en_situation">🎯 Mises en situation & Méthode STAR</option>
-              <option value="competences_comportementales">🤝 Soft skills & Travail en équipe</option>
-              <option value="questions_pieges">⚠️ Questions pièges & Gestion du stress</option>
-              <option value="negociation_salariale">💰 Négociation salariale FCFA</option>
-            </select>
-          </div>
-          <button class="btn-primary" onclick="loadNewInterviewQuestion()" style="padding: 10px 18px; font-weight: 700;">
-            🔄 Nouvelle Question
-          </button>
-        </div>
-      </div>
-
-      <!-- Scène d'Entretien Live -->
-      <div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 20px; flex-wrap: wrap;">
-        <!-- Profil du Recruteur Virtuel -->
-        <div class="page-card" style="height: fit-content;">
-          <div style="text-align: center; padding: 10px 0 16px; border-bottom: 1px solid var(--border);">
-            <div id="personaAvatarCircle" style="width: 72px; height: 72px; border-radius: 50%; background: var(--primary-light); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-              👩🏾‍💻
-            </div>
-            <h3 id="personaNameHeading" style="font-size: 1.15rem; margin: 0 0 4px;">Aminata Diallo</h3>
-            <div id="personaTitleSub" style="font-size: 0.82rem; color: var(--accent); font-weight: 700;">VP Tech & Produit · FinTech Dakar</div>
-            <div id="personaStyleBadge" class="badge-mini" style="margin-top: 6px; background: rgba(99, 102, 241, 0.2); color: #818cf8;">Style : Factuelle & Orientée Résultats</div>
-          </div>
-
-          <div style="padding-top: 14px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;">
-            <strong>Ce que ce recruteur recherche particulièrement :</strong>
-            <ul id="personaFocusList" style="margin: 6px 0 0 16px; padding: 0;">
-              <li>Maîtrise concrète des architectures web/cloud</li>
-              <li>Capacité à livrer sans supervision excessive</li>
-              <li>Expérience des passerelles locales (Wave, OM)</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Zone de Question & Réponse -->
-        <div class="page-card">
-          <!-- Bulle de question posée -->
-          <div style="background: rgba(109, 40, 217, 0.15); border-left: 4px solid #8b5cf6; border-radius: 0 12px 12px 0; padding: 16px; margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #a78bfa;">Question Posée par le Recruteur :</span>
-              <span id="interviewDifficultyBadge" class="badge-mini" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">Niveau Intermédiaire</span>
-            </div>
-            <div id="interviewQuestionText" style="font-size: 1.05rem; font-weight: 700; color: white; line-height: 1.5;">
-              "Comment concevez-vous une architecture haute disponibilité pour gérer les pics de transactions Mobile Money lors des fêtes de Tabaski ou Korité ?"
-            </div>
-          </div>
-
-          <!-- Zone de réponse candidat -->
-          <div style="margin-bottom: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted);">Votre réponse (tapez ou dictez à la voix) :</label>
-              <button class="chip" onclick="toggleInterviewSpeech()" id="btnInterviewMic">🎤 Dictée vocale</button>
-            </div>
-            <textarea id="interviewCandidateAnswer" rows="5" placeholder="Formulez votre réponse en utilisant la méthode STAR (Situation, Tâche, Action, Résultat chiffré)..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem; background: var(--surface-2); color: var(--text-main); line-height: 1.5;"></textarea>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;">
-            <button class="btn-primary" onclick="submitInterviewAnswer()" id="btnSubmitAnswer" style="padding: 10px 22px; font-weight: 800; background: var(--accent); color: #1e1e1e;">
-              ⚡ Faire évaluer ma réponse par l'IA
-            </button>
-            <button class="btn-secondary" onclick="insertAnswerTemplate()" style="font-size: 0.8rem;">
-              💡 Insérer une ébauche de réponse
-            </button>
-          </div>
-
-          <!-- Retour d'évaluation IA -->
-          <div id="interviewEvaluationBox" style="display: none; background: var(--surface-2); border-radius: 10px; padding: 18px; border: 1px solid var(--border);">
-            <!-- Rempli par JavaScript -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Simulateur interactif de Négociation Salariale FCFA -->
-      <div class="page-card" style="margin-top: 24px;">
-        <h3 class="section-heading" style="font-size: 1.25rem;">💰 Simulateur de Négociation Salariale en FCFA</h3>
-        <p class="section-desc">Testez vos prétentions face aux arguments typiques d'un DRH d'Afrique de l'Ouest et apprenez à négocier les avantages périphériques.</p>
-        
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 14px 0;">
-          <input type="number" id="desiredSalaryInput" placeholder="Ex: 950000" value="900000" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem; font-weight: 700; width: 220px;">
-          <span style="font-weight: 700; color: var(--text-muted);">FCFA net / mois</span>
-          <button class="btn-primary" onclick="simulateSalaryNegotiationUI()">
-            Simuler la négociation
-          </button>
-        </div>
-
-        <div id="salaryNegotiationResult"></div>
-      </div>
-    <!-- ==================== VUE 13 : FICHE DE PAIE & CONTRATS UEMOA ==================== -->
-    <div id="viewPayroll" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">💼 Droit du Travail & Fiscalité UEMOA</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Simulateur de Fiche de Paie & Contrats de Travail
-        </h2>
-        <p style="color: #a7f3d0; font-size: 0.95rem; max-width: 780px;">
-          Calcul certifié conforme aux barèmes fiscaux officiels du Sénégal (DGID / IPRES / CSS / TRIMF) et de la Côte d'Ivoire (DGI / CNPS / CMU / IS / CN / IGR).
-        </p>
-      </div>
-
-      <div class="page-card" style="margin-bottom: 24px;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: flex-end;">
-          <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Pays du contrat :</label>
-            <select id="payrollCountrySelect" onchange="runPayrollCalculation()" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
-              <option value="Sénégal" selected>🇸🇳 Sénégal (IPRES & Impôt sur Revenu)</option>
-              <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire (CNPS & CMU & IS/CN)</option>
-            </select>
-          </div>
-          <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Type de calcul :</label>
-            <select id="payrollCalcType" onchange="runPayrollCalculation()" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
-              <option value="gross_to_net" selected>Partir du BRUT ➔ Calculer le NET</option>
-              <option value="net_to_gross">Partir du NET souhaité ➔ Déduire le BRUT</option>
-            </select>
-          </div>
-          <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;" id="payrollSalaryLabel">Salaire Brut (FCFA) :</label>
-            <input type="number" id="payrollSalaryInput" value="1000000" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem; font-weight: 700;">
-          </div>
-          <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Parts Fiscales (Famille) :</label>
-            <select id="payrollPartsSelect" onchange="runPayrollCalculation()" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 600;">
-              <option value="1">1 part (Célibataire)</option>
-              <option value="1.5" selected>1.5 parts (Marié(e) sans enfant)</option>
-              <option value="2">2 parts (Marié(e) + 1 enfant)</option>
-              <option value="2.5">2.5 parts (Marié(e) + 2 enfants)</option>
-              <option value="3">3 parts (Marié(e) + 3 enfants)</option>
-            </select>
-          </div>
-          <button class="btn-primary" onclick="runPayrollCalculation()" style="padding: 10px 18px; font-weight: 700;">
-            ⚡ Calculer la Fiche
-          </button>
-        </div>
-      </div>
-
-      <!-- Résultat Bulletin de Paie -->
-      <div id="payrollResultContainer"></div>
-
-      <!-- Générateur de Contrat de Travail Légal -->
-      <div class="page-card" style="margin-top: 24px;">
-        <h3 class="section-heading" style="font-size: 1.2rem;">📜 Générateur de Modèle de Contrat Légal UEMOA</h3>
-        <p class="section-desc">Générez un contrat de travail type prêt à être signé et conforme au Code du Travail sénégalais ou ivoirien.</p>
-        <div style="display: flex; gap: 10px; margin: 12px 0;">
-          <button class="btn-secondary" onclick="generateWorkContractUI('CDI')">📝 Générer Contrat CDI</button>
-          <button class="btn-secondary" onclick="generateWorkContractUI('CDD')">📝 Générer Contrat CDD</button>
-        </div>
-        <div id="contractPreviewContainer"></div>
-      </div>
-    </div>
-
-    <!-- ==================== VUE 14 : MATCHING INVERSÉ & TALENT POOL ==================== -->
-    <div id="viewTalentpool" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🎯 Reverse Recruiting & Chasseurs</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Talent Pool — Les "Cartes d'Or" SunuJob AI
-        </h2>
-        <p style="color: #c7d2fe; font-size: 0.95rem; max-width: 780px;">
-          Les candidats ne postulent plus dans le vide : les entreprises et cabinets de chasse parcourent les profils d'élite anonymisés et envoient des invitations directes d'entretien.
-        </p>
-      </div>
-
-      <div class="page-card" style="margin-bottom: 20px;">
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <select id="filterTalentSector" onchange="loadTalentPoolUI()" style="padding: 10px 14px; border-radius: 8px; font-weight: 600;">
-            <option value="Tous">Tous secteurs</option>
-            <option value="Tech & Digital">Tech & Digital</option>
-            <option value="Commerce & Ventes">Commerce & Ventes</option>
-            <option value="Finance & Banque">Finance & Banque</option>
-          </select>
-          <select id="filterTalentCountry" onchange="loadTalentPoolUI()" style="padding: 10px 14px; border-radius: 8px; font-weight: 600;">
-            <option value="Tous">Tous pays</option>
-            <option value="Sénégal">🇸🇳 Sénégal</option>
-            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-            <option value="Bénin / Togo">🇧🇯 Bénin / 🇹🇬 Togo</option>
-          </select>
-        </div>
-      </div>
-
-      <div id="talentPoolGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px;">
-        <!-- Rempli par JavaScript -->
-      </div>
-    </div>
-
-    <!-- ==================== VUE 15 : TÉLÉTRAVAIL INTERNATIONAL & PIGE ==================== -->
-    <div id="viewRemote" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(16, 185, 129, 0.25); color: #86efac;">🌍 Devises ➔ Wave & Mobile Money</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Télétravail International & Facturation Export
-        </h2>
-        <p style="color: #cbd5e1; font-size: 0.95rem; max-width: 780px;">
-          Travaillez depuis Dakar ou Abidjan pour des clients en France, Belgique ou Canada. Rémunérations en Euros ou Dollars avec conversion automatique et factures export conformes OHADA.
-        </p>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; flex-wrap: wrap;">
-        <!-- Offres Full Remote -->
-        <div>
-          <h3 class="section-heading" style="font-size: 1.2rem; margin-bottom: 14px;">📡 Opportunités 100% Télétravail Ouvertes à l'AOF</h3>
-          <div id="remoteJobsContainer" style="display: flex; flex-direction: column; gap: 14px;">
-            <!-- Rempli par JavaScript -->
-          </div>
-        </div>
-
-        <!-- Générateur de Facture Internationale -->
-        <div class="page-card" style="height: fit-content;">
-          <h4 style="color: var(--accent); margin-bottom: 12px; font-size: 1.05rem;">📄 Générateur de Facture Export Conforme OHADA</h4>
-          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem;">
-            <input type="text" id="invClientName" placeholder="Nom du Client (ex: Studio Web Paris)" value="Studio Web Paris SAS" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);">
-            <input type="text" id="invService" placeholder="Prestation (ex: Développement Next.js)" value="Développement Frontend Next.js & Intégration API" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);">
-            <div style="display: flex; gap: 8px;">
-              <input type="number" id="invAmount" value="2800" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); font-weight: 700;">
-              <select id="invCurrency" style="padding: 8px 12px; border-radius: 6px; font-weight: 700;">
-                <option value="EUR">€ EUR</option>
-                <option value="USD">$ USD</option>
-              </select>
-            </div>
-            <button class="btn-primary" onclick="generateInternationalInvoiceUI()" style="margin-top: 6px;">
-              ⚡ Générer la Facture Export
-            </button>
-          </div>
-          <div id="invoiceOutputBox" style="margin-top: 14px;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== VUE 16 : MENTOR CARRIÈRE & TRAJECTOIRE 3 ANS ==================== -->
-    <div id="viewRoadmap" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🧭 Trajectoire & Accélération Salariale</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Mentor Carrière IA — Plan d'Action 36 Mois
-        </h2>
-        <p style="color: #bfdbfe; font-size: 0.95rem; max-width: 780px;">
-          Définissez votre salaire cible (ex: passer de 400 000 FCFA à 1 500 000 FCFA). L'IA calcule votre feuille de route Année par Année : compétences manquantes, certifications à obtenir et entreprises cibles.
-        </p>
-      </div>
-
-      <div class="page-card" style="margin-bottom: 24px;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: flex-end;">
-          <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Poste actuel :</label>
-            <input type="text" id="roadmapCurRole" value="Développeur Web Confirmé" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-          </div>
-          <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Salaire actuel net (FCFA) :</label>
-            <input type="number" id="roadmapCurSalary" value="550000" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-weight: 700;">
-          </div>
-          <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Poste visé à 3 ans :</label>
-            <input type="text" id="roadmapTargetRole" value="Lead Architecte Cloud / CTO" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
-          </div>
-          <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Salaire cible net (FCFA) :</label>
-            <input type="number" id="roadmapTargetSalary" value="1600000" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-weight: 700;">
-          </div>
-          <button class="btn-primary" onclick="generateCareerRoadmapUI()" style="padding: 10px 18px; font-weight: 700;">
-            🚀 Générer mon Plan 3 Ans
-          </button>
-        </div>
-      </div>
-
-      <div id="roadmapResultContainer"></div>
-    </div>
-
-    <!-- ==================== VUE 17 : ESPACE DRH & SHORTLIST IA 10S ==================== -->
-    <div id="viewB2b" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(59, 130, 246, 0.25); color: #93c5fd;">👔 Solution Entreprises & Cabinets</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Portail Recruteur B2B — Shortlist IA en 10 Secondes
-        </h2>
-        <p style="color: #cbd5e1; font-size: 0.95rem; max-width: 780px;">
-          Vous avez 300 CVs reçus en vrac ? Décrivez votre besoin ou collez une offre : l'algorithme classe immédiatement les 5 profils les plus compatibles avec rapport d'adéquation et convocation WhatsApp groupée.
-        </p>
-      </div>
-
-      <div class="page-card" style="margin-bottom: 24px;">
         <div style="display: flex; gap: 14px; flex-wrap: wrap;">
-          <input type="text" id="b2bJobTitle" placeholder="Intitulé du poste recherché (ex: Lead DevOps, Commercial B2B, Comptable)..." value="Développeur Cloud DevOps" style="flex: 1; min-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.95rem;">
-          <button class="btn-primary" onclick="runB2BShortlistUI()" style="padding: 12px 22px; font-weight: 800; background: var(--accent); color: #1e1e1e;">
-            ⚡ Filtrer & Générer la Shortlist IA
-          </button>
+          <a href="#signup" class="btn-primary" style="font-size: 1.05rem; padding: 14px 28px; text-decoration: none;">
+            🎁 Commencer l'essai gratuit (3 crédits)
+          </a>
+          <a href="/app" class="btn-secondary" style="font-size: 1.05rem; padding: 14px 24px; text-decoration: none;">
+            👁️ Tester la plateforme sans inscription
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hero-stat-item">
+            <strong>16</strong>
+            <span>Sites d'offres scannés</span>
+          </div>
+          <div class="hero-stat-item">
+            <strong>94%</strong>
+            <span>Score ATS moyen</span>
+          </div>
+          <div class="hero-stat-item">
+            <strong>1 000 F</strong>
+            <span>Paiement Wave direct</span>
+          </div>
         </div>
       </div>
 
-      <div id="b2bShortlistContainer"></div>
+      <!-- Inscription Essai Gratuit Card -->
+      <div class="signup-card" id="signup">
+        <div class="signup-header">
+          <span class="signup-pill">⚡ Offre Spéciale Lancement</span>
+          <h3>Essayez le produit gratuitement</h3>
+          <p>3 dossiers de candidatures complets offerts immédiatement.</p>
+        </div>
+
+        <form id="landingRegisterForm" onsubmit="handleLandingRegister(event)">
+          <div class="form-group-landing">
+            <label for="regName">Nom & Prénom</label>
+            <input type="text" id="regName" placeholder="Ex: Moussa Diop ou Aminata Koné" required>
+          </div>
+
+          <div class="form-group-landing">
+            <label for="regPhone">Numéro WhatsApp / Téléphone</label>
+            <input type="tel" id="regPhone" placeholder="Ex: +221 77 123 45 67 ou +225 07 08 09 10" required>
+          </div>
+
+          <div class="form-group-landing">
+            <label for="regCountry">Votre Pays de résidence</label>
+            <select id="regCountry" required>
+              <option value="Sénégal" selected>🇸🇳 Sénégal (Dakar, Thiès, etc.)</option>
+              <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire (Abidjan, Bouaké...)</option>
+              <option value="Diaspora">🌍 Diaspora (France, Canada, USA...)</option>
+            </select>
+          </div>
+
+          <div class="form-group-landing">
+            <label for="regRole">Métier ou poste recherché</label>
+            <input type="text" id="regRole" placeholder="Ex: Développeur, Comptable, Commercial, RH..." required>
+          </div>
+
+          <button type="submit" class="btn-signup-cta" id="btnSubmitSignup">
+            <span>Créer mon compte & Obtenir mes 3 crédits</span>
+            <span>→</span>
+          </button>
+        </form>
+
+        <p class="signup-footer-note">
+          🔒 Aucun numéro de carte bancaire requis · Accès immédiat · Conforme RGPD & CDP Sénégal
+        </p>
+      </div>
+    </section>
+
+    <!-- ==================== SOURCES AGGRÉGÉES ==================== -->
+    <div class="sources-ticker">
+      <div class="sources-title">📡 Radar IA connecté aux 16 principaux portails de recrutement</div>
+      <div class="sources-list">
+        <span class="source-tag">EmploiDakar.com</span>
+        <span class="source-tag">Emploi.sn</span>
+        <span class="source-tag">Novojob Sénégal</span>
+        <span class="source-tag">RMO Sénégal & CI</span>
+        <span class="source-tag">Senjob.com</span>
+        <span class="source-tag">AfrikIntérim</span>
+        <span class="source-tag">LinkedIn Dakar / Abidjan</span>
+        <span class="source-tag">Concours Fonction Publique</span>
+      </div>
     </div>
 
-    <!-- ==================== VUE 18 : QCM & PRÉPARATION CONCOURS ==================== -->
-    <div id="viewQuiz" class="app-view" style="display: none;">
-      <div class="page-card" style="background: linear-gradient(135deg, #701a75 0%, #86198f 100%); color: white; margin-bottom: 24px;">
-        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">👥 Entraînement Quotidien</span>
-        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
-          Cohortes de Préparation aux Concours — QCM Quotidien
-        </h2>
-        <p style="color: #f5d0fe; font-size: 0.95rem; max-width: 780px;">
-          Entraînez-vous chaque jour aux épreuves d'admissibilité (ENA, Douanes, BCEAO, Finances Publiques UEMOA) et mesurez votre progression face aux autres candidats de la promotion.
+    <!-- ==================== LES 6 PILIERS TECHNOLOGIQUES ==================== -->
+    <section class="section-container" id="features">
+      <div class="section-title-wrap">
+        <h2>Une suite complète pensée pour l'Afrique de l'Ouest</h2>
+        <p style="color: #94a3b8; font-size: 1.05rem;">
+          Fini les modèles de CV inadaptés. SunuJob AI a été conçu avec les réalités du marché ouest-africain.
         </p>
       </div>
 
-      <div class="page-card">
-        <div id="dailyQuizContainer">
-          <!-- Rempli par JavaScript -->
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-
-  <!-- ==================== MODAL CANDIDATURE MULTI-AGENTS (LE STUDIO) ==================== -->
-  <div class="modal-backdrop" id="studioModal" style="display: none;">
-    <div class="modal-window">
-      <div class="modal-bar">
-        <div>
-          <span class="modal-tag">Studio de Candidature IA</span>
-          <h2 class="modal-job-heading" id="studioJobHeading">Développeur Full-Stack</h2>
-          <p class="modal-subheading" id="studioJobSub">Baobab FinTech Solutions — Dakar, Sénégal</p>
-        </div>
-        <button class="btn-modal-close" onclick="closeStudioModal()">&times;</button>
-      </div>
-
-      <!-- VISUALISEUR DU SYSTÈME À DOUBLE AGENT -->
-      <div class="dual-agent-monitor">
-        <div class="agent-card agent-writer">
-          <div class="agent-header">
-            <div class="agent-icon-wrap">✍️</div>
-            <div>
-              <div class="agent-name">Agent 1 : Rédacteur ATS</div>
-              <div class="agent-role">Adaptation du CV & Lettre à l'offre</div>
-            </div>
-          </div>
-          <p class="agent-status-text" id="mAgent1Text">
-            Analyse des mots-clés, valorisation des réalisations probantes et élimination des éléments hors-sujet.
+      <div class="features-grid">
+        <div class="feature-box">
+          <div class="feature-icon-big">🤖</div>
+          <h3>Dual-Agent IA (Candidat vs DRH)</h3>
+          <p>
+            Deux agents travaillent pour vous : le premier rédige un CV percutant adapté à l'offre ; le second joue le rôle du DRH exigeant pour critiquer et éliminer tous les points faibles avant l'envoi.
           </p>
         </div>
 
-        <div class="agent-card agent-critic">
-          <div class="agent-header">
-            <div class="agent-icon-wrap">🧐</div>
-            <div>
-              <div class="agent-name">Agent 2 : Recruteur Critique DRH</div>
-              <div class="agent-role">Audit rigoureux Ouest-Afrique</div>
-            </div>
-            <div class="critic-score-pill" id="mCriticScorePill">
-              <span id="mCriticScore">9.2</span>/10
-            </div>
-          </div>
-          <p class="agent-status-text" id="mAgent2Text">
-            <em>« Candidature solide : les réalisations chiffrées sont en place, le statut local est validé. »</em>
+        <div class="feature-box">
+          <div class="feature-icon-big">🎙️</div>
+          <h3>Coach Vocal & Simulation d'Entretien</h3>
+          <p>
+            Entraînez-vous à l'oral face à notre simulateur interactif. Recevez une note instantanée sur votre clarté, votre concision et votre argumentation, avec tolérance au français local et wolof.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-big">🛡️</div>
+          <h3>Bouclier Anti-Arnaque</h3>
+          <p>
+            Évitez les fausses annonces d'emploi ! Notre algorithme inspecte chaque offre et bloque automatiquement celles qui réclament des frais de dossier illégaux via Mobile Money.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-big">💰</div>
+          <h3>Simulateur de Paie & Contrats UEMOA</h3>
+          <p>
+            Négociez votre salaire avec précision. Calculez votre salaire net réel à partir du brut selon les barèmes fiscaux officiels (IPRES, Caisse de Sécurité Sociale, CFCE).
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-big">🌐</div>
+          <h3>Mini-Site Portfolio Pro Personnalisé</h3>
+          <p>
+            Obtenez en 1 clic votre mini-site professionnel hébergé (ex: <code>sunujob.ai/u/votre-nom</code>) prêt à être partagé sur LinkedIn et dans vos messages WhatsApp aux recruteurs.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-big">📲</div>
+          <h3>Paiement Local Wave & Orange Money</h3>
+          <p>
+            Pas besoin de carte Visa internationale. Réglez vos packs directement en FCFA via Wave ou Orange Money à partir de 1 000 FCFA avec QR code instantané.
           </p>
         </div>
       </div>
+    </section>
 
-      <!-- Onglets Studio -->
-      <div class="studio-tabs">
-        <button class="studio-tab-btn active" id="tabBtnCv" onclick="setStudioTab('cv')">
-          📄 CV Optimisé
-        </button>
-        <button class="studio-tab-btn" id="tabBtnLetter" onclick="setStudioTab('letter')">
-          ✉️ Lettre de Motivation
-        </button>
-        <button class="studio-tab-btn" id="tabBtnCoach" onclick="setStudioTab('coach')">
-          🎯 Coach d'Entretien
-        </button>
+    <!-- ==================== DEMONSTRATION & WORKFLOW ==================== -->
+    <section class="section-container" id="demo" style="background: rgba(16, 185, 129, 0.03); border-radius: 24px; padding: 48px 24px; margin-bottom: 80px;">
+      <div class="section-title-wrap">
+        <h2>Comment fonctionne SunuJob AI en 4 étapes</h2>
       </div>
 
-      <!-- Contenu Onglet 1 : CV -->
-      <div id="studioTabCv" class="studio-tab-pane active">
-        <div class="cv-render-paper" id="cvRenderPaper"></div>
-      </div>
-
-      <!-- Contenu Onglet 2 : Lettre -->
-      <div id="studioTabLetter" class="studio-tab-pane" style="display: none;">
-        <div class="letter-render-paper" id="letterRenderPaper"></div>
-      </div>
-
-      <!-- Contenu Onglet 3 : Coach Entretien -->
-      <div id="studioTabCoach" class="studio-tab-pane" style="display: none;">
-        <div class="coach-questions-list" id="coachQuestionsList"></div>
-      </div>
-
-      <!-- Barre d'Action Postulation Human-in-the-Loop -->
-      <div class="studio-footer-actions">
-        <button class="btn-action-neutral" onclick="copyDocumentText()">
-          📋 Copier le texte
-        </button>
-        <button class="btn-action-neutral" onclick="window.print()">
-          🖨️ Télécharger PDF
-        </button>
-        <button class="btn-action-whatsapp" id="btnApplyWhatsapp" onclick="triggerWhatsAppApply()">
-          💬 Postuler par WhatsApp
-        </button>
-        <button class="btn-action-email" id="btnApplyEmail" onclick="triggerEmailApply()">
-          📧 Postuler par Email
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ==================== MODAL PAIEMENT MOBILE MONEY ==================== -->
-  <div class="modal-backdrop" id="payModal" style="display: none;">
-    <div class="modal-window max-width-500">
-      <div class="modal-bar">
-        <div>
-          <span class="modal-tag">Paiement Sécurisé en FCFA</span>
-          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">Recharger vos candidatures</h3>
+      <div style="max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px;">
+        <div style="text-align: center; padding: 20px;">
+          <div style="width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background: #10b981; color: #000; font-weight: 800; font-size: 1.3rem; margin: 0 auto 16px;">1</div>
+          <h4 style="color: #f8fafc; margin-bottom: 8px;">Profil Maître</h4>
+          <p style="font-size: 0.88rem; color: #94a3b8;">Renseignez vos diplômes et compétences une seule fois.</p>
         </div>
-        <button class="btn-modal-close" onclick="closePayModal()">&times;</button>
+        <div style="text-align: center; padding: 20px;">
+          <div style="width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background: #10b981; color: #000; font-weight: 800; font-size: 1.3rem; margin: 0 auto 16px;">2</div>
+          <h4 style="color: #f8fafc; margin-bottom: 8px;">Matching & Score ATS</h4>
+          <p style="font-size: 0.88rem; color: #94a3b8;">L'IA analyse vos affinités avec chaque offre d'emploi.</p>
+        </div>
+        <div style="text-align: center; padding: 20px;">
+          <div style="width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background: #10b981; color: #000; font-weight: 800; font-size: 1.3rem; margin: 0 auto 16px;">3</div>
+          <h4 style="color: #f8fafc; margin-bottom: 8px;">Candidature Sur-Mesure</h4>
+          <p style="font-size: 0.88rem; color: #94a3b8;">Génération du CV ciblé et de la lettre validée par le DRH IA.</p>
+        </div>
+        <div style="text-align: center; padding: 20px;">
+          <div style="width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background: #10b981; color: #000; font-weight: 800; font-size: 1.3rem; margin: 0 auto 16px;">4</div>
+          <h4 style="color: #f8fafc; margin-bottom: 8px;">Simulation & Envoi</h4>
+          <p style="font-size: 0.88rem; color: #94a3b8;">Entraînement vocal et postulation directe par email ou WhatsApp.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TARIFS ==================== -->
+    <section class="section-container" id="pricing">
+      <div class="section-title-wrap">
+        <h2>Des tarifs clairs et accessibles en FCFA</h2>
+        <p style="color: #94a3b8;">Rechargez instantanément via Wave ou Orange Money.</p>
       </div>
 
-      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">
-        Choisissez votre pack et réglez instantanément par Mobile Money :
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3 style="color: #f8fafc; font-size: 1.3rem;">Pack Découverte</h3>
+          <p style="color: #94a3b8; font-size: 0.88rem;">Pour postuler à quelques offres urgentes</p>
+          <div class="pricing-price">1 000 <span>FCFA</span></div>
+          <ul class="pricing-features">
+            <li>✅ 3 candidatures sur-mesure</li>
+            <li>✅ Révision par l'Agent DRH critique</li>
+            <li>✅ Téléchargement PDF certifié</li>
+            <li>❌ Pas d'accès au simulateur vocal</li>
+          </ul>
+          <a href="/app" class="btn-secondary" style="text-align: center; text-decoration: none;">Choisir ce pack</a>
+        </div>
+
+        <div class="pricing-card featured">
+          <span class="badge-rec">⭐ RECOMMANDÉ</span>
+          <h3 style="color: #f8fafc; font-size: 1.3rem;">Pack Candidat Pro</h3>
+          <p style="color: #94a3b8; font-size: 0.88rem;">La formule complète pour maximiser ses entretiens</p>
+          <div class="pricing-price">2 500 <span>FCFA</span></div>
+          <ul class="pricing-features">
+            <li>✅ 10 candidatures ciblées IA</li>
+            <li>✅ Révision approfondie par l'Agent 2</li>
+            <li>✅ Simulateur d'entretien vocal illimité</li>
+            <li>✅ Mini-Site Portfolio Pro offert</li>
+            <li>✅ Détecteur d'arnaques & Salaires UEMOA</li>
+          </ul>
+          <a href="/app" class="btn-primary" style="text-align: center; text-decoration: none;">Prendre le Pack Pro</a>
+        </div>
+
+        <div class="pricing-card">
+          <h3 style="color: #f8fafc; font-size: 1.3rem;">Pass Réussite 30J</h3>
+          <p style="color: #94a3b8; font-size: 0.88rem;">Pour les chercheurs d'emploi très actifs</p>
+          <div class="pricing-price">5 000 <span>FCFA</span></div>
+          <ul class="pricing-features">
+            <li>✅ Candidatures illimitées pendant 30 jours</li>
+            <li>✅ Coaching entretien vocal prioritaire</li>
+            <li>✅ Alertes WhatsApp exclusives en avant-première</li>
+            <li>✅ Mode Diaspora & Télétravail international</li>
+          </ul>
+          <a href="/app" class="btn-secondary" style="text-align: center; text-decoration: none;">Activer le Pass 30J</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TÉMOIGNAGES ==================== -->
+    <section class="section-container" id="testimonials" style="margin-bottom: 80px;">
+      <div class="section-title-wrap">
+        <h2>Ce qu'en disent nos candidats</h2>
+      </div>
+
+      <div style="max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+        <div class="feature-box">
+          <div style="color: #f59e0b; margin-bottom: 12px; font-size: 1.1rem;">★★★★★</div>
+          <p style="font-style: italic; margin-bottom: 16px;">
+            "J'avais envoyé plus de 30 CV sur Dakar sans aucune réponse. Après avoir utilisé le Dual-Agent de SunuJob AI pour cibler mon profil, j'ai décroché 3 entretiens en 10 jours !"
+          </p>
+          <strong style="color: #f8fafc; display: block;">Cheikh Oumar Ba</strong>
+          <span style="font-size: 0.85rem; color: #10b981;">Ingénieur Réseaux, Dakar</span>
+        </div>
+
+        <div class="feature-box">
+          <div style="color: #f59e0b; margin-bottom: 12px; font-size: 1.1rem;">★★★★★</div>
+          <p style="font-style: italic; margin-bottom: 16px;">
+            "Le simulateur vocal m'a permis de surmonter mon stress face aux questions pièges des DRH. Le paiement par Wave en 1 seconde est un vrai plus en Côte d'Ivoire."
+          </p>
+          <strong style="color: #f8fafc; display: block;">Christelle Brou</strong>
+          <span style="font-size: 0.85rem; color: #10b981;">Chargée de Marketing, Abidjan Cocody</span>
+        </div>
+
+        <div class="feature-box">
+          <div style="color: #f59e0b; margin-bottom: 12px; font-size: 1.1rem;">★★★★★</div>
+          <p style="font-style: italic; margin-bottom: 16px;">
+            "Le détecteur d'arnaques m'a évité de payer 15 000 FCFA de 'frais de dossier' pour une fausse annonce de transit. Rien que pour ça, cette plateforme est indispensable."
+          </p>
+          <strong style="color: #f8fafc; display: block;">Amadou Fall</strong>
+          <span style="font-size: 0.85rem; color: #10b981;">Comptable, Thiès</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== BANDEAU CTA FINAL ==================== -->
+    <section style="background: linear-gradient(135deg, #0a4c3e 0%, #063027 100%); border-top: 1px solid #10b981; border-bottom: 1px solid #10b981; padding: 60px 20px; text-align: center;">
+      <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 2.4rem; color: #f8fafc; margin-bottom: 16px;">
+        Prêt à accélérer votre carrière ?
+      </h2>
+      <p style="color: #94a3b8; font-size: 1.1rem; max-width: 650px; margin: 0 auto 32px;">
+        Inscrivez-vous en 30 secondes et recevez immédiatement 3 crédits gratuits pour tester l'IA.
       </p>
+      <a href="#signup" class="btn-primary" style="font-size: 1.1rem; padding: 16px 36px; text-decoration: none; display: inline-block;">
+        🚀 Commencer l'essai gratuit maintenant
+      </a>
+    </section>
+  </main>
 
-      <div class="mini-packs-list" id="miniPacksList"></div>
-
-      <div style="margin: 16px 0;">
-        <label style="font-size:0.85rem; font-weight:700; color:var(--text-main); display:block; margin-bottom:6px;">
-          Opérateur de paiement :
-        </label>
-        <div class="operator-selector">
-          <button class="op-btn active" id="opWave" onclick="setOperator('wave')">
-            🌊 Wave
-          </button>
-          <button class="op-btn" id="opOM" onclick="setOperator('orange_money')">
-            🟠 Orange Money
-          </button>
-          <button class="op-btn" id="opMTN" onclick="setOperator('mtn_momo')">
-            🟡 MTN MoMo
-          </button>
-        </div>
+  <!-- Footer -->
+  <footer class="footer" style="padding: 40px 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: #070e0c;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px;">
+      <div>
+        <div style="font-weight: 800; font-size: 1.1rem; color: #f8fafc;">SunuJob <span style="color: #10b981;">AI</span></div>
+        <p style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">L'assistant intelligent de recrutement en Afrique de l'Ouest</p>
       </div>
-
-      <div style="margin-bottom: 20px;">
-        <label style="font-size:0.85rem; font-weight:700; color:var(--text-main); display:block; margin-bottom:6px;">
-          Numéro de téléphone :
-        </label>
-        <input type="tel" id="payPhoneNumber" placeholder="+221 77 123 45 67 ou +225 07 12 34 56">
+      <div style="display: flex; gap: 20px; font-size: 0.9rem;">
+        <a href="/app" style="color: #cbd5e1; text-decoration: none;">Espace Candidat</a>
+        <a href="/admin" style="color: #60a5fa; text-decoration: none; font-weight: 700;">Back-Office Admin</a>
+        <a href="/u/ibrahima-ndiaye" target="_blank" style="color: #fbbf24; text-decoration: none;">Mini-Site Pro</a>
       </div>
-
-      <button class="btn-primary btn-lg" style="width: 100%;" onclick="confirmMobileMoneyPayment()">
-        Confirmer le paiement Mobile Money
-      </button>
-    </div>
-  </div>
-
-  <!-- ==================== FOOTER ==================== -->
-  <footer class="app-footer">
-    <div class="footer-container">
-      <div class="footer-col">
-        <div class="brand-logo footer-logo">
-          <div class="brand-icon">⚡</div>
-          <div class="brand-text">
-            <span class="brand-name">SunuJob <span class="highlight">AI</span></span>
-          </div>
-        </div>
-        <p class="footer-text">
-          L'intelligence artificielle au service de l'insertion et de la progression professionnelle au Sénégal, en Côte d'Ivoire et dans toute la zone UEMOA.
-        </p>
+      <div style="font-size: 0.82rem; color: #64748b;">
+        © 2026 SunuJob AI · Développé avec passion pour le Sénégal & la Côte d'Ivoire
       </div>
-      <div class="footer-col">
-        <h4>Zones Couvertes</h4>
-        <ul>
-          <li>🇸🇳 Dakar, Thiès, Saint-Louis</li>
-          <li>🇨🇮 Abidjan, Bouaké, San Pedro</li>
-          <li>Zone UEMOA / OHADA</li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Paiements Inclusifs</h4>
-        <ul>
-          <li>Wave Sénégal & Côte d'Ivoire</li>
-          <li>Orange Money SN & CI</li>
-          <li>MTN MoMo & Moov Money</li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>© 2026 SunuJob AI — Conçu pour l'excellence et la réussite professionnelle en Afrique de l'Ouest.</p>
     </div>
   </footer>
-  <!-- ==================== MODAL : AJOUT D'UN SITE AU RADAR ==================== -->
-  <div class="modal-backdrop" id="addSourceModal" style="display: none;">
-    <div class="modal-window max-width-500">
-      <div class="modal-bar">
-        <div>
-          <span class="modal-tag">Référencement Web</span>
-          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">Ajouter un Site d'Emploi au Radar</h3>
-        </div>
-        <button class="btn-modal-close" onclick="closeAddSourceModal()">&times;</button>
-      </div>
 
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
-        Indiquez l'adresse d'un portail ou d'une page carrière pour que le robot SunuJob AI le balaye automatiquement.
-      </p>
+  <!-- Toast Notification -->
+  <div id="landingToast" class="toast-popup"></div>
 
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div class="form-group">
-          <label>Nom du site / portail : *</label>
-          <input type="text" id="newSiteName" placeholder="Ex: DakarEmploi, MaliTravail, IvoireRH...">
-        </div>
-        <div class="form-group">
-          <label>URL du site : *</label>
-          <input type="url" id="newSiteUrl" placeholder="https://www.exemple-emploi.com">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Pays :</label>
-            <select id="newSiteCountry">
-              <option value="Sénégal">🇸🇳 Sénégal</option>
-              <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-              <option value="Bénin">🇧🇯 Bénin</option>
-              <option value="Togo">🇹🇬 Togo</option>
-              <option value="Mali">🇲🇱 Mali</option>
-              <option value="Burkina Faso">🇧🇫 Burkina Faso</option>
-              <option value="Guinée">🇬🇳 Guinée</option>
-              <option value="Niger">🇳🇪 Niger</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Ville principale :</label>
-            <input type="text" id="newSiteCity" placeholder="Ex: Dakar, Abidjan, Cotonou...">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Type de portail :</label>
-          <select id="newSiteType">
-            <option value="Job Board Spécialisé">Job Board Spécialisé</option>
-            <option value="Cabinet RH & Chasse">Cabinet RH & Chasse</option>
-            <option value="Portail Public / Concours">Portail Public / Concours</option>
-            <option value="Carrière Entreprise / Groupe">Carrière Entreprise / Groupe</option>
-          </select>
-        </div>
+  <script>
+    async function handleLandingRegister(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitSignup');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span>Activation en cours...</span>';
+      btn.disabled = true;
 
-        <button class="btn-primary" style="margin-top: 10px; width: 100%; justify-content: center;" onclick="submitNewSource()">
-          Ajouter et Activer la Surveillance
-        </button>
-      </div>
-    </div>
-  </div>
+      const payload = {
+        name: document.getElementById('regName').value,
+        phone: document.getElementById('regPhone').value,
+        country: document.getElementById('regCountry').value,
+        target_role: document.getElementById('regRole').value,
+        city: document.getElementById('regCountry').value === "Côte d'Ivoire" ? "Abidjan" : "Dakar"
+      };
 
-  <script src="app.js"></script>
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          // Stocker l'utilisateur dans localStorage pour pré-remplir l'espace candidat
+          localStorage.setItem('sunujob_current_user', JSON.stringify(data.user));
+          
+          showToast(`🎉 ${data.message} Redirection vers votre espace...`);
+          setTimeout(() => {
+            window.location.href = '/app?registered=1';
+          }, 1500);
+        } else {
+          showToast('❌ ' + (data.error || 'Erreur lors de l’inscription'));
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      } catch (err) {
+        showToast('❌ Erreur réseau. Veuillez réessayer.');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('landingToast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 4000);
+    }
+  </script>
 </body>
 </html>
