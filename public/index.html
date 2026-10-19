@@ -66,6 +66,9 @@
         <button class="nav-link" id="navBotBtn" onclick="switchNavView('bot')">
           <span>🟢</span> WhatsApp & SMS
         </button>
+        <button class="nav-link" id="navInterviewBtn" onclick="switchNavView('interview')">
+          <span>🎭</span> Entretien IA
+        </button>
       </nav>
 
       <!-- Actions Rapides -->
@@ -222,6 +225,38 @@
           <button class="btn-primary" onclick="saveProfileChanges()">
             💾 Enregistrer le profil
           </button>
+        </div>
+
+        <!-- BANNIÈRE VOICE-TO-CV : DICTÉE VOCALE DU PROFIL -->
+        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 78, 59, 0.25) 100%); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 18px; margin-bottom: 22px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <span class="hero-badge" style="background: rgba(16, 185, 129, 0.25); color: #86efac; border-color: rgba(16, 185, 129, 0.4);">
+                🎤 Voice-to-CV (Wolof & Français)
+              </span>
+              <h4 style="font-size: 1.15rem; margin: 6px 0 2px; color: var(--text-main);">Parlez, l'IA remplit votre profil en 60 secondes</h4>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">Dictez votre parcours ou testez un mémo vocal pré-enregistré.</p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn-primary" id="btnVoiceRecord" onclick="toggleVoiceRecording()" style="background: #10b981; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                <span id="voiceRecordIcon">🎙️</span> <span id="voiceRecordLabel">Démarrer la dictée vocale</span>
+              </button>
+              <select id="voiceSampleSelect" onchange="loadVoiceSample(this.value)" style="padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;">
+                <option value="">Charger un exemple vocal...</option>
+                <option value="tech_dakar">🎧 Audio Démo : Ingénieur Data / DevOps (Dakar)</option>
+                <option value="commercial_abidjan">🎧 Audio Démo : Responsable Commercial (Abidjan)</option>
+                <option value="comptable_cotonou">🎧 Audio Démo : Comptable SYSCOHADA (Cotonou)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="voiceTranscriptInput" placeholder="Votre dictée vocale ou transcription apparaîtra ici en temps réel..." style="flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.88rem; background: var(--surface-2); color: var(--text-main);">
+            <button class="btn-secondary" onclick="applyVoiceProfile()" style="font-weight: 700;">
+              ⚡ Extraire & Injecter
+            </button>
+          </div>
+          <div id="voiceStatusMsg" style="font-size: 0.78rem; color: #86efac; margin-top: 6px; display: none;"></div>
         </div>
 
         <div class="profile-form-grid">
@@ -400,7 +435,31 @@
     <div id="viewCustom" class="app-view" style="display: none;">
       <div class="page-card max-width-700">
         <h2 class="section-heading">Coller une offre libre (WhatsApp, LinkedIn, Facebook)</h2>
-        <p class="section-desc">Vous avez repéré une offre dans un groupe de discussion ou sur les réseaux sociaux ? Collez-la ici et notre double agent IA rédigera un dossier percutant adapté.</p>
+        <!-- EXTRACTEUR IA D'OFFRE INFORMELLE (WHATSAPP / FACEBOOK) -->
+        <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(180, 83, 9, 0.2) 100%); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px; padding: 18px; margin-bottom: 22px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+            <div>
+              <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);">
+                🕵️ Scraper & Parser IA Informel
+              </span>
+              <h4 style="font-size: 1.1rem; margin: 6px 0 2px; color: var(--text-main);">Coller un post brut de groupe WhatsApp ou Facebook</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">L'IA détecte automatiquement l'intitulé, la ville, le salaire, les compétences et les contacts.</p>
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button class="chip" onclick="loadInformalSample('comptable_dakar')">📋 Post WhatsApp : Comptable</button>
+              <button class="chip" onclick="loadInformalSample('dev_abidjan')">📋 Post Facebook : Dev Flutter</button>
+            </div>
+          </div>
+
+          <textarea id="informalRawPostInput" rows="3" placeholder="Collez ici le message WhatsApp brut sans mise en forme (ex: 'Urgent cherche comptable sur Dakar salaire 600k contact whatsapp 771234567...')" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; background: var(--surface-2); color: var(--text-main); margin-bottom: 10px;"></textarea>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <button class="btn-primary" onclick="parseAndFillInformalJob()" style="font-size: 0.88rem; padding: 10px 18px; background: var(--accent); color: #1e1e1e; font-weight: 800;">
+              ⚡ Analyser & Auto-Remplir le Formulaire
+            </button>
+            <span id="informalParseStatus" style="font-size: 0.8rem; color: #34d399; font-weight: 600; display: none;"></span>
+          </div>
+        </div>
 
         <div class="custom-job-form">
           <div class="form-group">
@@ -971,6 +1030,127 @@
             </div>
           </div>
         </div>
+      </div>
+    <!-- ==================== VUE 12 : SIMULATEUR D'ENTRETIEN IA ==================== -->
+    <div id="viewInterview" class="app-view" style="display: none;">
+      <div class="page-card" style="background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%); color: white; margin-bottom: 24px;">
+        <span class="hero-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24;">🎭 Coaching & Immersion DRH</span>
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 800; margin: 8px 0;">
+          Simulateur d'Entretien IA — Face aux DRH d'Afrique de l'Ouest
+        </h2>
+        <p style="color: #ede9fe; font-size: 0.95rem; max-width: 780px;">
+          Entraînez-vous face à 8 personas de recruteurs exigeants (Dakar, Abidjan, Cotonou, Lomé). Répondez par écrit ou à la voix et recevez une notation instantanée basée sur la méthode STAR et le contexte culturel local.
+        </p>
+      </div>
+
+      <!-- Configuration de la session -->
+      <div class="page-card" style="margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; align-items: flex-end;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Choisissez votre Recruteur :</label>
+            <select id="interviewPersonaSelect" onchange="changePersonaInterview()" style="width: 100%; padding: 10px 12px; border-radius: 8px; font-weight: 600;">
+              <option value="drh_banque_abidjan">🇨🇮 Koffi Kouamé — DRH Banque Atlantique (Strict · BCEAO)</option>
+              <option value="manager_tech_dakar" selected>🇸🇳 Aminata Diallo — VP Tech FinTech Dakar (Factuelle · Code & Cloud)</option>
+              <option value="dg_pme_cotonou">🇧🇯 Bio Sika — DG PME Bénin Distribution (Direct · Rentabilité)</option>
+              <option value="drh_multinationale_abidjan">🇨🇮 Marie-Chantal Bamba — DRH Unilever / Nestlé (STAR Method)</option>
+              <option value="recruteur_cabinet_dakar">🇸🇳 Babacar Ndiaye — Chasseur AfricSearch (Bienveillant)</option>
+              <option value="responsable_rh_ong">🌍 Fatoumata Traoré — RH ONG Sahel (Valeurs & Terrain)</option>
+              <option value="manager_agro_sanpedro">🇨🇮 Karamoko Sanogo — Dir. Usine Cacao San Pedro (HSE)</option>
+              <option value="daf_banque_panafricaine">🇹🇬 Cheikh Oumar Ba — DAF BOAD Lomé (SYSCOHADA)</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px;">Catégorie de questions :</label>
+            <select id="interviewCategorySelect" onchange="loadNewInterviewQuestion()" style="width: 100%; padding: 10px 12px; border-radius: 8px; font-weight: 600;">
+              <option value="presentation">👋 Pitch de présentation & Parcours</option>
+              <option value="competences_techniques" selected>⚡ Compétences techniques & Savoir-faire</option>
+              <option value="mise_en_situation">🎯 Mises en situation & Méthode STAR</option>
+              <option value="competences_comportementales">🤝 Soft skills & Travail en équipe</option>
+              <option value="questions_pieges">⚠️ Questions pièges & Gestion du stress</option>
+              <option value="negociation_salariale">💰 Négociation salariale FCFA</option>
+            </select>
+          </div>
+          <button class="btn-primary" onclick="loadNewInterviewQuestion()" style="padding: 10px 18px; font-weight: 700;">
+            🔄 Nouvelle Question
+          </button>
+        </div>
+      </div>
+
+      <!-- Scène d'Entretien Live -->
+      <div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 20px; flex-wrap: wrap;">
+        <!-- Profil du Recruteur Virtuel -->
+        <div class="page-card" style="height: fit-content;">
+          <div style="text-align: center; padding: 10px 0 16px; border-bottom: 1px solid var(--border);">
+            <div id="personaAvatarCircle" style="width: 72px; height: 72px; border-radius: 50%; background: var(--primary-light); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+              👩🏾‍💻
+            </div>
+            <h3 id="personaNameHeading" style="font-size: 1.15rem; margin: 0 0 4px;">Aminata Diallo</h3>
+            <div id="personaTitleSub" style="font-size: 0.82rem; color: var(--accent); font-weight: 700;">VP Tech & Produit · FinTech Dakar</div>
+            <div id="personaStyleBadge" class="badge-mini" style="margin-top: 6px; background: rgba(99, 102, 241, 0.2); color: #818cf8;">Style : Factuelle & Orientée Résultats</div>
+          </div>
+
+          <div style="padding-top: 14px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;">
+            <strong>Ce que ce recruteur recherche particulièrement :</strong>
+            <ul id="personaFocusList" style="margin: 6px 0 0 16px; padding: 0;">
+              <li>Maîtrise concrète des architectures web/cloud</li>
+              <li>Capacité à livrer sans supervision excessive</li>
+              <li>Expérience des passerelles locales (Wave, OM)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Zone de Question & Réponse -->
+        <div class="page-card">
+          <!-- Bulle de question posée -->
+          <div style="background: rgba(109, 40, 217, 0.15); border-left: 4px solid #8b5cf6; border-radius: 0 12px 12px 0; padding: 16px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #a78bfa;">Question Posée par le Recruteur :</span>
+              <span id="interviewDifficultyBadge" class="badge-mini" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">Niveau Intermédiaire</span>
+            </div>
+            <div id="interviewQuestionText" style="font-size: 1.05rem; font-weight: 700; color: white; line-height: 1.5;">
+              "Comment concevez-vous une architecture haute disponibilité pour gérer les pics de transactions Mobile Money lors des fêtes de Tabaski ou Korité ?"
+            </div>
+          </div>
+
+          <!-- Zone de réponse candidat -->
+          <div style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted);">Votre réponse (tapez ou dictez à la voix) :</label>
+              <button class="chip" onclick="toggleInterviewSpeech()" id="btnInterviewMic">🎤 Dictée vocale</button>
+            </div>
+            <textarea id="interviewCandidateAnswer" rows="5" placeholder="Formulez votre réponse en utilisant la méthode STAR (Situation, Tâche, Action, Résultat chiffré)..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem; background: var(--surface-2); color: var(--text-main); line-height: 1.5;"></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;">
+            <button class="btn-primary" onclick="submitInterviewAnswer()" id="btnSubmitAnswer" style="padding: 10px 22px; font-weight: 800; background: var(--accent); color: #1e1e1e;">
+              ⚡ Faire évaluer ma réponse par l'IA
+            </button>
+            <button class="btn-secondary" onclick="insertAnswerTemplate()" style="font-size: 0.8rem;">
+              💡 Insérer une ébauche de réponse
+            </button>
+          </div>
+
+          <!-- Retour d'évaluation IA -->
+          <div id="interviewEvaluationBox" style="display: none; background: var(--surface-2); border-radius: 10px; padding: 18px; border: 1px solid var(--border);">
+            <!-- Rempli par JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulateur interactif de Négociation Salariale FCFA -->
+      <div class="page-card" style="margin-top: 24px;">
+        <h3 class="section-heading" style="font-size: 1.25rem;">💰 Simulateur de Négociation Salariale en FCFA</h3>
+        <p class="section-desc">Testez vos prétentions face aux arguments typiques d'un DRH d'Afrique de l'Ouest et apprenez à négocier les avantages périphériques.</p>
+        
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 14px 0;">
+          <input type="number" id="desiredSalaryInput" placeholder="Ex: 950000" value="900000" style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem; font-weight: 700; width: 220px;">
+          <span style="font-weight: 700; color: var(--text-muted);">FCFA net / mois</span>
+          <button class="btn-primary" onclick="simulateSalaryNegotiationUI()">
+            Simuler la négociation
+          </button>
+        </div>
+
+        <div id="salaryNegotiationResult"></div>
       </div>
     </div>
 

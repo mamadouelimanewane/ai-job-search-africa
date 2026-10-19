@@ -38,7 +38,7 @@ async function initApp() {
 // ==================== NAVIGATION ENTRE LES VUES ==================== //
 
 function switchNavView(view) {
-  const views = ['feed', 'profile', 'custom', 'pricing', 'aggregator', 'salary', 'concours', 'companies', 'diaspora', 'network', 'bot'];
+  const views = ['feed', 'profile', 'custom', 'pricing', 'aggregator', 'salary', 'concours', 'companies', 'diaspora', 'network', 'bot', 'interview'];
   
   views.forEach(v => {
     const elId = 'view' + v.charAt(0).toUpperCase() + v.slice(1);
@@ -61,6 +61,7 @@ function switchNavView(view) {
   if (view === 'diaspora') convertDiasporaSalary();
   if (view === 'network') loadReferralsNetwork();
   if (view === 'bot') initWhatsAppChat();
+  if (view === 'interview') initInterviewView();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1713,5 +1714,511 @@ async function simulateSMS() {
     }
   } catch (err) {
     output.textContent = 'Erreur simulation SMS : ' + err.message;
+  }
+}
+
+// ==================== 7. VOICE-TO-CV (DICTÉE VOCALE DU PROFIL) ==================== //
+
+let voiceRecognitionInstance = null;
+let isVoiceRecording = false;
+
+function toggleVoiceRecording() {
+  const btn = document.getElementById('btnVoiceRecord');
+  const icon = document.getElementById('voiceRecordIcon');
+  const label = document.getElementById('voiceRecordLabel');
+  const transcriptInput = document.getElementById('voiceTranscriptInput');
+  const statusMsg = document.getElementById('voiceStatusMsg');
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    if (statusMsg) {
+      statusMsg.style.display = 'block';
+      statusMsg.style.color = '#fbbf24';
+      statusMsg.textContent = "ℹ️ Dictée vocale directe non supportée par ce navigateur. Utilisez les exemples audio ci-dessus ou saisissez votre texte.";
+    }
+    loadVoiceSample('tech_dakar');
+    return;
+  }
+
+  if (isVoiceRecording) {
+    if (voiceRecognitionInstance) voiceRecognitionInstance.stop();
+    isVoiceRecording = false;
+    if (icon) icon.textContent = '🎙️';
+    if (label) label.textContent = 'Démarrer la dictée vocale';
+    if (btn) btn.style.background = '#10b981';
+    if (statusMsg) {
+      statusMsg.style.display = 'block';
+      statusMsg.textContent = "✅ Enregistrement terminé. Cliquez sur 'Extraire & Injecter'.";
+    }
+    return;
+  }
+
+  try {
+    voiceRecognitionInstance = new SpeechRecognition();
+    voiceRecognitionInstance.lang = 'fr-FR';
+    voiceRecognitionInstance.continuous = true;
+    voiceRecognitionInstance.interimResults = true;
+
+    voiceRecognitionInstance.onstart = () => {
+      isVoiceRecording = true;
+      if (icon) icon.textContent = '🔴';
+      if (label) label.textContent = 'En écoute... Parlez distinctement';
+      if (btn) btn.style.background = '#ef4444';
+      if (statusMsg) {
+        statusMsg.style.display = 'block';
+        statusMsg.textContent = "Microphone actif. Parlez en français de votre métier, expérience, ville et prétentions...";
+      }
+    };
+
+    voiceRecognitionInstance.onresult = (event) => {
+      let current = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        current += event.results[i][0].transcript;
+      }
+      if (transcriptInput) transcriptInput.value = current;
+    };
+
+    voiceRecognitionInstance.onerror = (e) => {
+      console.warn('Voice recognition error', e);
+      isVoiceRecording = false;
+      if (icon) icon.textContent = '🎙️';
+      if (label) label.textContent = 'Démarrer la dictée vocale';
+      if (btn) btn.style.background = '#10b981';
+    };
+
+    voiceRecognitionInstance.onend = () => {
+      isVoiceRecording = false;
+      if (icon) icon.textContent = '🎙️';
+      if (label) label.textContent = 'Démarrer la dictée vocale';
+      if (btn) btn.style.background = '#10b981';
+    };
+
+    voiceRecognitionInstance.start();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function loadVoiceSample(sampleKey) {
+  const input = document.getElementById('voiceTranscriptInput');
+  const statusMsg = document.getElementById('voiceStatusMsg');
+  if (!input) return;
+
+  const samples = {
+    tech_dakar: "Moi c'est Cheikh Tidiane Sall, ingénieur Cloud et DevOps avec 4 ans d'expérience à Dakar. J'ai un Master 2 de l'ESP Dakar. Je maîtrise Docker, Kubernetes, AWS, Terraform, Python et les APIs de paiement comme Wave. Je cherche un poste à 1 100 000 FCFA net par mois.",
+    commercial_abidjan: "Je m'appelle Awa Koné, responsable commerciale B2B basée à Abidjan Marcory. J'ai 5 ans d'expérience dans la grande distribution et les biens de consommation. Maîtrise de Salesforce, CRM, négociation grands comptes. Prétentions salariales 950 000 FCFA.",
+    comptable_cotonou: "Je m'appelle Bio Gado, auditeur et comptable senior avec 6 ans d'expérience à Cotonou. Diplôme DESCOGEF, parfaite maîtrise du SYSCOHADA révisé, Sage 100, fiscalité et audit bancaire. Prétentions 750 000 FCFA net."
+  };
+
+  if (samples[sampleKey]) {
+    input.value = samples[sampleKey];
+    if (statusMsg) {
+      statusMsg.style.display = 'block';
+      statusMsg.style.color = '#86efac';
+      statusMsg.textContent = "🎧 Mémo vocal chargé avec succès. Cliquez sur 'Extraire & Injecter' pour pré-remplir le profil.";
+    }
+  }
+}
+
+async function applyVoiceProfile() {
+  const input = document.getElementById('voiceTranscriptInput');
+  const statusMsg = document.getElementById('voiceStatusMsg');
+  const transcript = (input?.value || '').trim();
+
+  if (!transcript) {
+    alert("Veuillez d'abord dicter ou choisir un extrait vocal.");
+    return;
+  }
+
+  if (statusMsg) {
+    statusMsg.style.display = 'block';
+    statusMsg.style.color = '#fbbf24';
+    statusMsg.textContent = "⏳ Analyse IA du mémo vocal et extraction des entités...";
+  }
+
+  try {
+    const res = await fetch('/api/ai/parse-voice-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcript })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const p = data.extracted_profile;
+
+    // Remplissage animé des champs du formulaire
+    if (p.name && document.getElementById('formName')) document.getElementById('formName').value = p.name;
+    if (p.title && document.getElementById('formTitle')) document.getElementById('formTitle').value = p.title;
+    if (p.city && document.getElementById('formCity')) document.getElementById('formCity').value = p.city;
+    if (p.country && document.getElementById('formCountry')) document.getElementById('formCountry').value = p.country;
+    if (p.education && document.getElementById('formEducation')) document.getElementById('formEducation').value = p.education;
+    if (p.years_of_experience && document.getElementById('formYearsExp')) document.getElementById('formYearsExp').value = p.years_of_experience;
+    if (p.salary_expectation && document.getElementById('formSalary')) document.getElementById('formSalary').value = p.salary_expectation;
+    if (p.skills && p.skills.length > 0 && document.getElementById('formSkills')) {
+      document.getElementById('formSkills').value = p.skills.join(', ');
+    }
+    if (p.summary && document.getElementById('formSummary')) document.getElementById('formSummary').value = p.summary;
+
+    if (statusMsg) {
+      statusMsg.style.color = '#34d399';
+      statusMsg.textContent = "✅ Profil pré-rempli avec succès depuis la voix ! Vérifiez et cliquez sur 'Enregistrer le profil'.";
+    }
+
+    // Scroll doux vers le formulaire
+    document.querySelector('.profile-form-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (err) {
+    if (statusMsg) {
+      statusMsg.style.color = '#f87171';
+      statusMsg.textContent = "Erreur lors de l'analyse vocale : " + err.message;
+    }
+  }
+}
+
+// ==================== 8. PARSER D'OFFRES INFORMELLES (FACEBOOK / WHATSAPP) ==================== //
+
+function loadInformalSample(sampleKey) {
+  const input = document.getElementById('informalRawPostInput');
+  if (!input) return;
+
+  const samples = {
+    comptable_dakar: "URGENT RECRUTEMENT !! Cabinet d'expertise comptable recherche un comptable confirmé sur Dakar Plateau. Titulaire BAC+4/5 en comptabilité, minimum 3 ans d'expérience en cabinet, maîtrise du SYSCOHADA et logiciel Sage. Salaire net 650 000 FCFA + IPM. Envoyez votre CV par WhatsApp au +221 77 456 78 90 ou par email à recrutement@audit-dakar.sn avant le 30 novembre.",
+    dev_abidjan: "Avis de recrutement Abidjan Cocody : Startup FinTech en forte croissance recrute un Lead Développeur Flutter & Node.js. CDI, salaire attractif 950 000 - 1 400 000 FCFA selon expérience. Intégration API Mobile Money requise. Contactez vite la DRH par whatsapp au +225 07 89 01 23 45 ou candidature@ivoirepay.ci"
+  };
+
+  if (samples[sampleKey]) {
+    input.value = samples[sampleKey];
+  }
+}
+
+async function parseAndFillInformalJob() {
+  const input = document.getElementById('informalRawPostInput');
+  const statusMsg = document.getElementById('informalParseStatus');
+  const rawText = (input?.value || '').trim();
+
+  if (!rawText) {
+    alert("Veuillez d'abord coller le texte brut du post.");
+    return;
+  }
+
+  if (statusMsg) {
+    statusMsg.style.display = 'inline';
+    statusMsg.style.color = '#fbbf24';
+    statusMsg.textContent = "⏳ Extraction IA des entités en cours...";
+  }
+
+  try {
+    const res = await fetch('/api/ai/parse-informal-job', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rawText })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const j = data.extracted_job;
+
+    if (j.title && document.getElementById('cJobTitle')) document.getElementById('cJobTitle').value = j.title;
+    if (j.company && document.getElementById('cJobCompany')) document.getElementById('cJobCompany').value = j.company;
+    if (j.country && document.getElementById('cJobCountry')) document.getElementById('cJobCountry').value = j.country;
+    if (j.city && document.getElementById('cJobCity')) document.getElementById('cJobCity').value = j.city;
+    if (j.description && document.getElementById('cJobDescription')) document.getElementById('cJobDescription').value = j.description;
+    if (j.email && document.getElementById('cJobEmail')) document.getElementById('cJobEmail').value = j.email;
+    if (j.whatsapp && document.getElementById('cJobWhatsapp')) document.getElementById('cJobWhatsapp').value = j.whatsapp;
+
+    if (statusMsg) {
+      statusMsg.style.color = '#34d399';
+      statusMsg.textContent = `✅ Offre extraite avec ${data.confidence_score}% de confiance ! Formulaire pré-rempli.`;
+    }
+
+    document.getElementById('cJobTitle')?.focus();
+  } catch (err) {
+    if (statusMsg) {
+      statusMsg.style.color = '#f87171';
+      statusMsg.textContent = "Erreur parsing : " + err.message;
+    }
+  }
+}
+
+// ==================== 9. SIMULATEUR D'ENTRETIEN IA ==================== //
+
+const INTERVIEW_PERSONAS_DETAILS = {
+  drh_banque_abidjan: {
+    name: "Koffi Kouamé",
+    title: "DRH Banque Atlantique · Abidjan",
+    avatar: "👨🏾‍💼",
+    style: "Strict & Procédurier (BCEAO)",
+    focus: ["Respect scrupuleux des normes bancaires", "Stabilité émotionnelle et rigueur éthique", "Expérience des audits et du contrôle interne"]
+  },
+  manager_tech_dakar: {
+    name: "Aminata Diallo",
+    title: "VP Tech & Produit · FinTech Dakar",
+    avatar: "👩🏾‍💻",
+    style: "Factuelle & Orientée Résultats",
+    focus: ["Maîtrise concrète des architectures web/cloud", "Capacité à livrer sans supervision excessive", "Expérience des passerelles locales (Wave, OM)"]
+  },
+  dg_pme_cotonou: {
+    name: "Bio Sika",
+    title: "DG · Bénin Distribution & Logistique",
+    avatar: "👨🏾",
+    style: "Direct & Pragmatique",
+    focus: ["Polyvalence terrain et sens commercial", "Résolution rapide des blocages opérationnels", "Rentabilité immédiate du poste"]
+  },
+  drh_multinationale_abidjan: {
+    name: "Marie-Chantal Bamba",
+    title: "Directrice RH Régionale · Unilever / Nestlé",
+    avatar: "👩🏾‍💼",
+    style: "Méthode STAR & Compétences Comportementales",
+    focus: ["Leadership inclusif et intelligence émotionnelle", "Capacité d'adaptation aux standards mondiaux", "Résultats chiffrés vérifiables"]
+  },
+  recruteur_cabinet_dakar: {
+    name: "Babacar Ndiaye",
+    title: "Consultant Chasseur de Têtes · AfricSearch",
+    avatar: "👨🏾‍🏫",
+    style: "Bienveillant & Analytique",
+    focus: ["Cohérence du plan de carrière", "Capacité de synthèse et storytelling", "Motivation profonde pour le poste"]
+  },
+  responsable_rh_ong: {
+    name: "Fatoumata Traoré",
+    title: "Responsable RH Régionale · ONG Sahel",
+    avatar: "🧕🏾",
+    style: "Humaniste & Orientée Valeurs",
+    focus: ["Sens de l'engagement communautaire", "Résilience dans les contextes difficiles", "Respect de la diversité culturelle"]
+  },
+  manager_agro_sanpedro: {
+    name: "Karamoko Sanogo",
+    title: "Directeur Usine Cacao · San Pedro",
+    avatar: "👨🏾‍🔧",
+    style: "Opérationnel & Sécurité (HSE)",
+    focus: ["Gestion rigoureuse des équipes de production", "Culture zéro accident et conformité qualité", "Disponibilité industrielle"]
+  },
+  daf_banque_panafricaine: {
+    name: "Cheikh Oumar Ba",
+    title: "Directeur Financier · BOAD Lomé",
+    avatar: "👨🏾‍💼",
+    style: "Analytique & Financement International",
+    focus: ["Maîtrise du SYSCOHADA et des normes IFRS", "Négociation avec bailleurs de fonds internationaux", "Modélisation financière avancée"]
+  }
+};
+
+const INTERVIEW_QUESTIONS_POOL = {
+  presentation: [
+    "Présentez-vous en 2 minutes en mettant en avant les étapes clés qui font de vous le candidat idéal pour notre structure en Afrique de l'Ouest.",
+    "Qu'est-ce qui vous motive particulièrement à rejoindre notre entreprise plutôt qu'un concurrent sur le marché local ?"
+  ],
+  competences_techniques: [
+    "Comment concevez-vous une architecture haute disponibilité pour gérer les pics de transactions Mobile Money lors des fêtes de Tabaski ou Korité ?",
+    "Pouvez-vous me décrire le projet le plus complexe que vous avez mené à bien et les choix technologiques ou méthodologiques que vous avez arbitrés ?"
+  ],
+  mise_en_situation: [
+    "Décrivez une situation où vous avez fait face à un retard critique d'un fournisseur ou partenaire local. Quelle action concrète avez-vous entreprise (Méthode STAR) ?",
+    "Si un membre clé de votre équipe est en désaccord public avec vous sur un livrable urgent, comment gérez-vous la situation ?"
+  ],
+  competences_comportementales: [
+    "Comment entretenez-vous la cohésion et la motivation au sein d'une équipe multiculturelle répartie entre Dakar, Abidjan et Paris ?",
+    "Parlez-moi d'une erreur professionnelle que vous avez commise, et de la leçon pratique que vous en avez tirée pour la suite."
+  ],
+  questions_pieges: [
+    "Quels sont vos 2 principaux points d'amélioration, et que faites-vous actuellement pour y remédier ?",
+    "Si notre direction vous demande de travailler exceptionnellement tout le week-end pour sauver un projet critique, comment réagissez-vous ?"
+  ],
+  negociation_salariale: [
+    "Quelles sont vos prétentions salariales nettes mensuelles en FCFA, et sur quels éléments concrets de votre parcours fondez-vous ce montant ?",
+    "Si nous ne pouvons pas atteindre votre prétention fixe de base, quels avantages périphériques (13e mois, IPM 100%, véhicule) seriez-vous prêt à négocier ?"
+  ]
+};
+
+function initInterviewView() {
+  changePersonaInterview();
+}
+
+function changePersonaInterview() {
+  const select = document.getElementById('interviewPersonaSelect');
+  const personaKey = select?.value || 'manager_tech_dakar';
+  const p = INTERVIEW_PERSONAS_DETAILS[personaKey] || INTERVIEW_PERSONAS_DETAILS.manager_tech_dakar;
+
+  const avatarEl = document.getElementById('personaAvatarCircle');
+  const nameEl = document.getElementById('personaNameHeading');
+  const titleEl = document.getElementById('personaTitleSub');
+  const styleEl = document.getElementById('personaStyleBadge');
+  const focusList = document.getElementById('personaFocusList');
+
+  if (avatarEl) avatarEl.textContent = p.avatar;
+  if (nameEl) nameEl.textContent = p.name;
+  if (titleEl) titleEl.textContent = p.title;
+  if (styleEl) styleEl.textContent = `Style : ${p.style}`;
+
+  if (focusList) {
+    focusList.innerHTML = p.focus.map(f => `<li>${f}</li>`).join('');
+  }
+
+  loadNewInterviewQuestion();
+}
+
+function loadNewInterviewQuestion() {
+  const cat = document.getElementById('interviewCategorySelect')?.value || 'competences_techniques';
+  const pool = INTERVIEW_QUESTIONS_POOL[cat] || INTERVIEW_QUESTIONS_POOL.competences_techniques;
+  const q = pool[Math.floor(Math.random() * pool.length)];
+
+  const qText = document.getElementById('interviewQuestionText');
+  if (qText) qText.textContent = `« ${q} »`;
+
+  const answerInput = document.getElementById('interviewCandidateAnswer');
+  if (answerInput) answerInput.value = '';
+
+  const evalBox = document.getElementById('interviewEvaluationBox');
+  if (evalBox) evalBox.style.display = 'none';
+}
+
+function insertAnswerTemplate() {
+  const answerInput = document.getElementById('interviewCandidateAnswer');
+  if (!answerInput) return;
+
+  answerInput.value = `Situation : Lors de mon expérience récente chez...\nTâche : Notre objectif était de déployer une solution capable de...\nAction : J'ai personnellement pris en charge la coordination technique et mis en place...\nRésultat : Cela nous a permis d'augmenter le taux de succès de 35% et de réduire les coûts opérationnels.`;
+  answerInput.focus();
+}
+
+function toggleInterviewSpeech() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const input = document.getElementById('interviewCandidateAnswer');
+  const btn = document.getElementById('btnInterviewMic');
+
+  if (!SpeechRecognition) {
+    alert("Dictée vocale directe non disponible. Vous pouvez taper votre réponse ou utiliser le modèle proposé.");
+    insertAnswerTemplate();
+    return;
+  }
+
+  const rec = new SpeechRecognition();
+  rec.lang = 'fr-FR';
+  rec.start();
+
+  if (btn) btn.textContent = '🔴 En écoute...';
+
+  rec.onresult = (e) => {
+    let text = '';
+    for (let i = 0; i < e.results.length; i++) {
+      text += e.results[i][0].transcript + ' ';
+    }
+    if (input) input.value = text.trim();
+  };
+
+  rec.onend = () => {
+    if (btn) btn.textContent = '🎤 Dictée vocale';
+  };
+}
+
+async function submitInterviewAnswer() {
+  const qText = document.getElementById('interviewQuestionText')?.textContent || '';
+  const answer = document.getElementById('interviewCandidateAnswer')?.value.trim();
+  const evalBox = document.getElementById('interviewEvaluationBox');
+  const btn = document.getElementById('btnSubmitAnswer');
+
+  if (!answer || answer.length < 15) {
+    alert("Veuillez développer votre réponse avant de demander l'évaluation.");
+    return;
+  }
+
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ Évaluation par le DRH IA..."; }
+
+  try {
+    const res = await fetch('/api/interview/evaluate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: qText, answer })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const ev = data.evaluation;
+    if (evalBox) {
+      evalBox.style.display = 'block';
+      const scoreColor = ev.score >= 80 ? '#34d399' : ev.score >= 60 ? '#fbbf24' : '#f87171';
+
+      evalBox.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px;">
+          <div>
+            <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Note Globale du Recruteur :</span>
+            <div style="font-size: 2rem; font-weight: 800; color: ${scoreColor};">${ev.score}/100</div>
+          </div>
+          <div class="badge-mini" style="background: rgba(99, 102, 241, 0.2); color: #818cf8; font-size: 0.82rem;">
+            ${ev.method_star_detected ? '✅ Méthode STAR validée' : '⚠️ Structuration STAR à perfectionner'}
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div style="background: rgba(16, 185, 129, 0.1); border-radius: 8px; padding: 12px;">
+            <strong style="color: #34d399; font-size: 0.85rem; display: block; margin-bottom: 6px;">💪 Ce qui a plu au jury :</strong>
+            <ul style="margin: 0 0 0 16px; font-size: 0.82rem; color: var(--text-main); line-height: 1.5;">
+              ${(ev.strengths || ['Bonne clarté d\'expression', 'Contexte professionnel adapté']).map(s => `<li>${s}</li>`).join('')}
+            </ul>
+          </div>
+          <div style="background: rgba(239, 68, 68, 0.08); border-radius: 8px; padding: 12px;">
+            <strong style="color: #f87171; font-size: 0.85rem; display: block; margin-bottom: 6px;">🎯 Points à améliorer :</strong>
+            <ul style="margin: 0 0 0 16px; font-size: 0.82rem; color: var(--text-main); line-height: 1.5;">
+              ${(ev.weaknesses || ['Ajouter des chiffres ou métriques de réussite']).map(w => `<li>${w}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+
+        <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 4px; font-size: 0.85rem; color: var(--text-main);">
+          <strong>💡 Conseil du DRH :</strong> ${ev.advice || 'Précisez toujours le ROI et l\'impact chiffré de votre travail pour marquer des points décisifs.'}
+        </div>
+      `;
+    }
+  } catch (err) {
+    alert("Erreur lors de l'évaluation : " + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "⚡ Faire évaluer ma réponse par l'IA"; }
+  }
+}
+
+async function simulateSalaryNegotiationUI() {
+  const desired = document.getElementById('desiredSalaryInput')?.value || 900000;
+  const container = document.getElementById('salaryNegotiationResult');
+  if (!container) return;
+
+  container.innerHTML = '<div style="padding: 16px; color: var(--text-muted);">⏳ Simulation de la négociation en cours...</div>';
+
+  try {
+    const res = await fetch('/api/interview/salary-negotiation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ desiredSalary: parseInt(desired) })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    const neg = data.negotiation;
+    container.innerHTML = `
+      <div style="background: var(--surface-2); border-radius: 12px; padding: 18px; margin-top: 14px; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+          <div>
+            <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">Verdict Recruteur :</span>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent);">${neg.verdict || 'Prétention Réaliste & Négociable'}</div>
+          </div>
+          <div class="badge-mini" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">
+            Proposition employeur : ${neg.counter_offer_fcfa ? neg.counter_offer_fcfa.toLocaleString('fr-FR') + ' FCFA' : '850 000 FCFA'}
+          </div>
+        </div>
+
+        <p style="font-size: 0.88rem; line-height: 1.6; color: var(--text-main); margin-bottom: 14px;">
+          ${neg.recruiter_pitch || 'Le recruteur trouve votre prétention cohérente mais proposera un fixe légèrement ajusté avec prime de fin d\'année.'}
+        </p>
+
+        <div style="background: rgba(245, 158, 11, 0.1); border-radius: 8px; padding: 12px;">
+          <strong style="color: var(--accent); font-size: 0.85rem; display: block; margin-bottom: 6px;">🎁 Leviers de négociation recommandés en Afrique de l'Ouest :</strong>
+          <ul style="margin: 0 0 0 16px; font-size: 0.82rem; color: var(--text-main); line-height: 1.6;">
+            <li>13e mois automatique versé en décembre (standard bancaire/télécoms)</li>
+            <li>Prise en charge à 100% de l'IPM (Institut de Prévoyance Médicale) familiale</li>
+            <li>Indemnité mensuelle de carburant / transport (75 000 - 150 000 FCFA)</li>
+            <li>Forfait communication & abonnement data 4G/5G</li>
+          </ul>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color: #f87171; padding: 12px;">Erreur : ${err.message}</div>`;
   }
 }

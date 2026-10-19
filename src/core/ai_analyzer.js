@@ -368,7 +368,10 @@ module.exports = {
   generateProfessionalSummary,
   detectSkillGaps,
   scoreProfileATS,
-  suggestNextActions
+  suggestNextActions,
+  // ── IA Informelle & Voix-to-CV ──
+  parseInformalJobPost,
+  parseVoiceProfile
 };
 
 // ==================== IA PROFIL & DOSSIER DE CANDIDATURE ==================== //
@@ -615,5 +618,267 @@ function suggestNextActions(profile) {
     completion_score: analysis.completion_score,
     ats_score:        analysis.ats_score.score,
     total_actions:    actions.length
+  };
+}
+
+// ==================== PARSER D'OFFRES INFORMELLES (FACEBOOK / WHATSAPP) ==================== //
+
+// ==================== PARSER D'OFFRES INFORMELLES (FACEBOOK / WHATSAPP) ==================== //
+
+/**
+ * Analyse et structure un texte brut d'offre d'emploi non formalisé
+ * (groupes WhatsApp, posts Facebook, messages de réseau)
+ */
+function parseInformalJobPost(rawText) {
+  if (!rawText || !rawText.trim()) {
+    return { error: "Texte vide" };
+  }
+
+  const text = rawText.trim();
+  const lower = text.toLowerCase();
+
+  // 1. Détection Téléphone / WhatsApp
+  let detectedPhone = "";
+  const phoneRegex = /(?:\+?22[158936]\s?)?[079][0-9](?:[\s.-]?[0-9]{2,3}){3,4}/gi;
+  const phoneMatch = text.match(phoneRegex);
+  if (phoneMatch && phoneMatch.length > 0) {
+    detectedPhone = phoneMatch[0].trim();
+  }
+
+  // 2. Détection Email
+  let detectedEmail = "";
+  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
+  const emailMatch = text.match(emailRegex);
+  if (emailMatch && emailMatch.length > 0) {
+    detectedEmail = emailMatch[0].trim();
+  }
+
+  // 3. Détection de Ville et Pays
+  let detectedCity = "Dakar";
+  let detectedCountry = "Sénégal";
+
+  if (lower.includes("abidjan") || lower.includes("cocody") || lower.includes("plateau abidjan") || lower.includes("marcory") || lower.includes("yopougon") || lower.includes("san pedro") || lower.includes("bouaké") || lower.includes("+225")) {
+    detectedCity = "Abidjan";
+    detectedCountry = "Côte d'Ivoire";
+  } else if (lower.includes("cotonou") || lower.includes("porto-novo") || lower.includes("parakou") || lower.includes("+229")) {
+    detectedCity = "Cotonou";
+    detectedCountry = "Bénin";
+  } else if (lower.includes("lomé") || lower.includes("lome") || lower.includes("+228")) {
+    detectedCity = "Lomé";
+    detectedCountry = "Togo";
+  } else if (lower.includes("bamako") || lower.includes("+223")) {
+    detectedCity = "Bamako";
+    detectedCountry = "Mali";
+  } else if (lower.includes("ouagadougou") || lower.includes("ouaga") || lower.includes("bobo") || lower.includes("+226")) {
+    detectedCity = "Ouagadougou";
+    detectedCountry = "Burkina Faso";
+  } else if (lower.includes("thiès") || lower.includes("thies") || lower.includes("saint-louis") || lower.includes("mbour")) {
+    detectedCity = "Thiès";
+    detectedCountry = "Sénégal";
+  }
+
+  // 4. Détection du type de Contrat
+  let detectedContract = "CDI";
+  if (lower.includes("stage") || lower.includes("stagiaire")) detectedContract = "Stage";
+  else if (lower.includes("cdd") || lower.includes("temporaire") || lower.includes("intérim")) detectedContract = "CDD";
+  else if (lower.includes("freelance") || lower.includes("consultant") || lower.includes("prestation")) detectedContract = "Freelance / Prestation";
+
+  // 5. Détection du Salaire
+  let detectedSalary = "À négocier";
+  const salaryRegex = /([0-9]{1,3}(?:\s?[0-9]{3})+|\b[0-9]{2,3}k\b|\b[0-9]{1,2}(?:[.,][0-9])?\s?m(?:illion)?\b)\s?(?:fcfa|cfa|f|net)?/gi;
+  const salaryMatch = text.match(salaryRegex);
+  if (salaryMatch && salaryMatch.length > 0) {
+    detectedSalary = salaryMatch[0].trim() + (salaryMatch[0].toLowerCase().includes("cfa") ? "" : " FCFA net");
+  } else if (lower.includes("rémunération motivante") || lower.includes("selon profil")) {
+    detectedSalary = "Selon profil & grille locale";
+  }
+
+  // 6. Extraction du Titre
+  let detectedTitle = "Poste Spécialisé";
+  const commonJobPatterns = [
+    /comptable(?:\s+confirmé|\s+junior|\s+senior|\s+unique)?/i,
+    /développeur(?:\s+full-stack|\s+mobile|\s+frontend|\s+backend|\s+flutter|\s+web)?/i,
+    /lead\s+développeur(?:\s+flutter|\s+mobile|\s+full-stack)?/i,
+    /auditeur(?:\s+interne|\s+financier|\s+senior|\s+junior)?/i,
+    /responsable(?:\s+commercial|\s+des\s+ventes|\s+rh|\s+logistique|\s+marketing)?/i,
+    /commercial(?:\s+terrain|\s+b2b|\s+sédentaire)?/i,
+    /ingénieur(?:\s+cloud|\s+devops|\s+logiciel|\s+système|\s+data|\s+réseau)?/i,
+    /chef\s+de\s+projet(?:\s+digital|\s+it|\s+organisation)?/i,
+    /community\s+manager/i,
+    /assistant(?:e)?(?:\s+de\s+direction|\s+rh|\s+commerciale)?/i
+  ];
+
+  for (const cjp of commonJobPatterns) {
+    const match = text.match(cjp);
+    if (match) {
+      detectedTitle = match[0].charAt(0).toUpperCase() + match[0].slice(1);
+      break;
+    }
+  }
+
+  if (detectedTitle === "Poste Spécialisé") {
+    const titlePatterns = [
+      /(?:cherche|recrute|recrutement)\s*(?:d['’]un|d['’]une)?\s*:?\s*([a-zA-Zà-ÿ\s&/-]{3,35})/i,
+      /(?:avis de recrutement|offre d['’]emploi|poste)\s*:?\s*([a-zA-Zà-ÿ\s&/-]{3,35})/i
+    ];
+
+    for (const pat of titlePatterns) {
+      const m = text.match(pat);
+      if (m && m[1]) {
+        const cleanTitle = m[1].replace(/\b(urgent|recrutement|recrute|cherche|poste|pour|dans|un|une|le|la|à|sur)\b/gi, '').trim();
+        if (cleanTitle.length > 3 && cleanTitle.length < 40) {
+          detectedTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
+          break;
+        }
+      }
+    }
+  }
+
+  // 7. Détection de l'Entreprise
+  let detectedCompany = "Recrutement Direct (Groupe Privé)";
+  const compMatch = text.match(/(?:cabinet|entreprise|société|structure|groupe)\s+([A-Z][a-zA-Z0-9\s&'-]{2,25})/);
+  if (compMatch && compMatch[1]) {
+    detectedCompany = compMatch[1].trim();
+  }
+
+  // 8. Extraction des compétences
+  const detectedSkills = SKILL_PATTERNS.filter(sk => lower.includes(sk.toLowerCase()));
+
+  // 9. Score de confiance du parsing (0 à 100)
+  let confidence = 40;
+  if (detectedPhone || detectedEmail) confidence += 20;
+  if (detectedTitle !== "Poste Spécialisé") confidence += 20;
+  if (detectedSalary !== "À négocier") confidence += 10;
+  if (detectedSkills.length > 0) confidence += 10;
+
+  return {
+    raw_text: text,
+    extracted_job: {
+      title: detectedTitle,
+      company: detectedCompany,
+      country: detectedCountry,
+      city: detectedCity,
+      contract: detectedContract,
+      salary_range: detectedSalary,
+      email: detectedEmail,
+      whatsapp: detectedPhone,
+      skills: detectedSkills,
+      description: text
+    },
+    confidence_score: Math.min(100, confidence),
+    parsed_at: new Date().toISOString()
+  };
+}
+
+// ==================== VOICE-TO-CV (DICTÉE VOCALE DU PROFIL) ==================== //
+
+/**
+ * Analyse la transcription vocale d'un candidat pour construire ou mettre à jour
+ * automatiquement son profil professionnel
+ */
+function parseVoiceProfile(voiceTranscript) {
+  if (!voiceTranscript || !voiceTranscript.trim()) {
+    return { error: "Transcription vide" };
+  }
+
+  const text = voiceTranscript.trim();
+  const lower = text.toLowerCase();
+
+  // Extraction du Nom
+  let detectedName = "";
+  const namePatterns = [
+    /je m['’]appelle\s+([a-zA-Zà-ÿ\s]{3,30})/i,
+    /mon nom est\s+([a-zA-Zà-ÿ\s]{3,30})/i,
+    /moi c['’]est\s+([a-zA-Zà-ÿ\s]{3,30})/i
+  ];
+  for (const pat of namePatterns) {
+    const m = text.match(pat);
+    if (m && m[1]) {
+      detectedName = m[1].replace(/et|je|suis|depuis|actuellement/gi, '').split(',')[0].trim();
+      break;
+    }
+  }
+
+  // Extraction Années d'expérience
+  let detectedExp = 3;
+  const expMatch = text.match(/([0-9]{1,2})\s*(?:ans|années?)\s*(?:d['’]expérience|d['’]exp)?/i);
+  if (expMatch && expMatch[1]) {
+    detectedExp = parseInt(expMatch[1]);
+  } else if (lower.includes("débutant") || lower.includes("jeune diplômé") || lower.includes("sortant")) {
+    detectedExp = 0;
+  }
+
+  // Extraction Métier / Titre
+  let detectedTitle = "Professionnel(le) Qualifié(e)";
+  const directTitleMatch = text.match(/(?:ing[eéè]nieur|d[eéè]veloppeur|responsable|comptable|auditeur|chef\s+de\s+projet|directeur|consultant|technicien|assistant)(?:\s+[a-zA-Z\u00C0-\u017F&/-]+){0,4}/i);
+  if (directTitleMatch) {
+    detectedTitle = directTitleMatch[0].split(/(?:avec|depuis|à|dans|,)/i)[0].trim();
+    detectedTitle = detectedTitle.charAt(0).toUpperCase() + detectedTitle.slice(1);
+  } else {
+    const jobPatterns = [
+      /je suis\s+([a-zA-Zà-ÿ\s&/-]{3,35})/i,
+      /en tant que\s+([a-zA-Zà-ÿ\s&/-]{3,35})/i,
+      /cherche un poste de\s+([a-zA-Zà-ÿ\s&/-]{3,35})/i
+    ];
+    for (const pat of jobPatterns) {
+      const m = text.match(pat);
+      if (m && m[1]) {
+        const t = m[1].replace(/depuis|avec|qui|dans|à|sur|et/gi, '').trim();
+        if (t.length > 3 && t.length < 40) {
+          detectedTitle = t.charAt(0).toUpperCase() + t.slice(1);
+          break;
+        }
+      }
+    }
+  }
+
+  // Extraction Ville / Pays
+  let detectedCity = "Dakar";
+  let detectedCountry = "Sénégal";
+  if (lower.includes("abidjan") || lower.includes("côte d'ivoire") || lower.includes("cocody")) {
+    detectedCity = "Abidjan";
+    detectedCountry = "Côte d'Ivoire";
+  } else if (lower.includes("cotonou") || lower.includes("bénin")) {
+    detectedCity = "Cotonou";
+    detectedCountry = "Bénin";
+  } else if (lower.includes("lomé") || lower.includes("togo")) {
+    detectedCity = "Lomé";
+    detectedCountry = "Togo";
+  } else if (lower.includes("bamako") || lower.includes("mali")) {
+    detectedCity = "Bamako";
+    detectedCountry = "Mali";
+  }
+
+  // Extraction Prétentions Salariales
+  let detectedSalary = "750 000 FCFA net / mois";
+  const salMatch = text.match(/([0-9]{1,3}(?:\s?[0-9]{3})+|\b[0-9]{2,3}k\b|\b[0-9]{1,2}(?:[.,][0-9])?\s?m(?:illion)?\b)\s?(?:fcfa|cfa|f)?/i);
+  if (salMatch && salMatch[1]) {
+    detectedSalary = salMatch[1].trim() + " FCFA net / mois";
+  }
+
+  // Extraction Compétences
+  const detectedSkills = SKILL_PATTERNS.filter(sk => lower.includes(sk.toLowerCase()));
+
+  // Formation
+  let detectedEducation = "Formation Supérieure / Diplôme d'État";
+  if (lower.includes("master") || lower.includes("bac+5") || lower.includes("ingénieur")) detectedEducation = "Master 2 / Diplôme d'Ingénieur";
+  else if (lower.includes("licence") || lower.includes("bac+3") || lower.includes("bachelor")) detectedEducation = "Licence / BAC+3";
+  else if (lower.includes("bts") || lower.includes("dut") || lower.includes("bac+2")) detectedEducation = "BTS / DUT (BAC+2)";
+  else if (lower.includes("bac") || lower.includes("baccalauréat")) detectedEducation = "Baccalauréat";
+
+  return {
+    voice_transcript: text,
+    extracted_profile: {
+      name: detectedName,
+      title: detectedTitle,
+      city: detectedCity,
+      country: detectedCountry,
+      years_of_experience: detectedExp,
+      education: detectedEducation,
+      salary_expectation: detectedSalary,
+      skills: detectedSkills,
+      summary: `Professionnel(le) dynamique basé(e) à ${detectedCity}, fort(e) de ${detectedExp} ans d'expérience. Spécialisé(e) en ${detectedTitle}, avec des compétences éprouvées en ${detectedSkills.length > 0 ? detectedSkills.slice(0, 4).join(', ') : 'gestion de projets et relation client'}.`
+    },
+    analyzed_at: new Date().toISOString()
   };
 }

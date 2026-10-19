@@ -414,6 +414,22 @@ app.get('/api/sms/help', (req, res) => {
   res.json({ success: true, ...smsHandler.getHelpText() });
 });
 
+// --- 9. PARSING D'OFFRES INFORMELLES (FACEBOOK / WHATSAPP) ---
+app.post('/api/ai/parse-informal-job', (req, res) => {
+  const { rawText } = req.body;
+  if (!rawText) return res.status(400).json({ success: false, error: 'Texte d\'offre manquant' });
+  const parsed = aiAnalyzer.parseInformalJobPost(rawText);
+  res.json({ success: true, ...parsed });
+});
+
+// --- 10. VOICE-TO-CV (DICTÉE VOCALE DU PROFIL) ---
+app.post('/api/ai/parse-voice-profile', (req, res) => {
+  const { transcript } = req.body;
+  if (!transcript) return res.status(400).json({ success: false, error: 'Transcription manquante' });
+  const parsed = aiAnalyzer.parseVoiceProfile(transcript);
+  res.json({ success: true, ...parsed });
+});
+
 // Lancement du serveur
 app.listen(PORT, () => {
   console.log(`=======================================================`);
